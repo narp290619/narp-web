@@ -1,4 +1,4 @@
-import { BookingDraft } from "../types/JobRequestDraft";
+import { JobRequestDraft } from "../types/JobRequestDraft";
 
 export interface ValidationResult {
 
@@ -9,7 +9,7 @@ export interface ValidationResult {
 }
 
 export function validateSchedule(
-    booking: BookingDraft,
+    booking: JobRequestDraft,
 ): ValidationResult {
 
     if (!booking.schedule.date) {
@@ -45,7 +45,7 @@ export function validateSchedule(
 }
 
 export function validateLocation(
-    booking: BookingDraft,
+    booking: JobRequestDraft,
 ): ValidationResult {
 
     if (!booking.location.address?.trim()) {
@@ -69,7 +69,7 @@ export function validateLocation(
 }
 
 export function validateDescription(
-    booking: BookingDraft,
+    booking: JobRequestDraft,
 ): ValidationResult {
 
     if (
@@ -97,7 +97,7 @@ export function validateDescription(
 
 export function validateStep(
     step: number,
-    booking: BookingDraft,
+    booking: JobRequestDraft,
 ): ValidationResult {
 
     switch (step) {
