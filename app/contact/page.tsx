@@ -1,3 +1,5 @@
+import ContactForm from "@/components/contact/ContactForm";
+
 export const metadata = {
   title: "Contact NARP",
   description:
@@ -66,9 +68,9 @@ export default function ContactPage() {
 
           <p className="mt-3 text-gray-600">
             We'll get back to you as soon as possible.
-          </p>
+          </p><br/>
 
-          <form className="mt-8 space-y-6">
+          {/* <form className="mt-8 space-y-6">
 
             <input
               type="text"
@@ -101,7 +103,9 @@ export default function ContactPage() {
               Send Message
             </button>
 
-          </form>
+          </form> */}
+
+          <ContactForm />
 
         </section>
 

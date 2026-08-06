@@ -1,6 +1,26 @@
 import Container from "@/components/shared/Container";
 import PageContainer from "@/components/shared/PageContainer";
 
+function Section({
+    title,
+    children,
+}: {
+    title: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <section className="rounded-3xl bg-white p-8 shadow-sm">
+            <h2 className="mb-4 text-2xl font-bold text-green-700">
+                {title}
+            </h2>
+
+            <div className="space-y-4 text-slate-700 leading-8">
+                {children}
+            </div>
+        </section>
+    );
+}
+
 export default function TermsPage() {
     return (
         <PageContainer>
@@ -9,6 +29,11 @@ export default function TermsPage() {
                 <section className="mb-12 overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-16 text-center text-white">
 
                     <div className="mx-auto max-w-4xl text-center">
+
+                        <div className="mb-5 text-6xl">
+                            📜
+                        </div>
+
                         <h1 className="text-5xl font-extrabold">
                             Terms of Use
                         </h1>
@@ -392,25 +417,5 @@ export default function TermsPage() {
                 </div>
             </Container>
         </PageContainer>
-    );
-}
-
-function Section({
-    title,
-    children,
-}: {
-    title: string;
-    children: React.ReactNode;
-}) {
-    return (
-        <section className="rounded-3xl bg-white p-8 shadow-sm">
-            <h2 className="mb-4 text-2xl font-bold text-green-700">
-                {title}
-            </h2>
-
-            <div className="space-y-4 text-slate-700 leading-8">
-                {children}
-            </div>
-        </section>
     );
 }

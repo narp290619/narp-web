@@ -9,7 +9,7 @@ function Section({
     children: React.ReactNode;
 }) {
     return (
-        <section className="rounded-2xl border bg-white p-8 shadow-sm">
+        <section className="rounded-3xl bg-white p-8 shadow-sm">
             <h2 className="mb-5 text-2xl font-bold text-green-700">
                 {title}
             </h2>
@@ -25,11 +25,11 @@ export default function CookiePolicyPage() {
     return (
         <PageContainer>
 
-            {/* Hero */}
+            <Container className="max-w-5xl py-16">
 
-            <section className="bg-gradient-to-r from-blue-700 to-blue-500 py-20 text-white">
+                {/* Hero */}
 
-                <Container>
+                <section className="mb-12 overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 to-blue-500 px-8 py-16 text-center text-white">
 
                     <div className="mx-auto max-w-4xl text-center">
 
@@ -47,17 +47,13 @@ export default function CookiePolicyPage() {
                             technologies when you visit our website.
                         </p>
 
-                        <p className="mt-8 text-blue-200">
-                            Effective Date: May 9, 2026
-                        </p>
+                        <div className="mt-6 inline-flex rounded-full bg-white/20 px-5 py-2 text-sm font-semibold">
+                            Effective Date: August 6, 2026
+                        </div>
 
                     </div>
 
-                </Container>
-
-            </section>
-
-            <Container className="py-16">
+                </section>
 
                 <div className="mx-auto max-w-5xl space-y-6">
 
@@ -248,7 +244,7 @@ export default function CookiePolicyPage() {
                             </h3>
 
                             <p className="mt-3">
-                                📧 support@narp.app
+                                📧 support@narp-svc.site
                             </p>
 
                         </div>
