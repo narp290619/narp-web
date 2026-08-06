@@ -1,17 +1,17 @@
 export const navigation = [
   {
+    title: "Home",
+    href: "/",
+  },
+
+  {
     title: "Services",
     href: "/services",
   },
 
   {
-    title: "Find Freelancers",
-    href: "/freelancers",
-  },
-
-  {
-    title: "Become a Freelancer",
-    href: "/become-a-freelancer",
+    title: "How It Works",
+    href: "/how-narp-works",
   },
 
   {
@@ -20,7 +20,7 @@ export const navigation = [
   },
 
   {
-    title: "Help",
-    href: "/help",
+    title: "Contact",
+    href: "/contact",
   },
 ];

@@ -110,6 +110,7 @@ import FooterColumn from "./FooterColumn";
 import { footerColumns } from "./footerData";
 import SocialIcon from "./SocialIcon";
 import { socialLinks } from "./socialLinks";
+import Link from "next/link";
 
 export default function Footer() {
     return (
@@ -174,8 +175,8 @@ export default function Footer() {
 
                         <p className="mt-8 max-w-md leading-8 text-slate-400">
 
-                            Connecting customers with trusted freelancers across the 
-                            Philippines through AI-powered matching, secure bookings, 
+                            Connecting customers with trusted freelancers across the
+                            Philippines through AI-powered matching, secure bookings,
                             and verified professionals.
 
                         </p>
@@ -186,7 +187,12 @@ export default function Footer() {
 
                                 <Mail className="h-5 w-5 text-orange-400" />
 
-                                support@narp.app
+                                <a
+                                    href="mailto:support@narp-svc.site"
+                                    className="hover:text-orange-400 transition"
+                                >
+                                    support@narp-svc.site
+                                </a>
 
                             </div>
 
@@ -202,13 +208,37 @@ export default function Footer() {
 
                         <div className="mt-10 flex gap-5">
 
-                            <FaFacebook className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            <Link
+                                href="https://facebook.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FaFacebook className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            </Link>
 
-                            <FaInstagram className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            <Link
+                                href="https://instagram.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FaInstagram className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            </Link>
 
-                            <FaLinkedin className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            <Link
+                                href="https://linkedin.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FaLinkedin className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            </Link>
 
-                            <FaYoutube className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            <Link
+                                href="https://youtube.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <FaYoutube className="cursor-pointer text-slate-400 transition hover:text-orange-400" />
+                            </Link>
 
                         </div>
 
@@ -283,7 +313,7 @@ export default function Footer() {
 
                 </div>
 
-                <div className="flex flex-col items-center justify-between gap-5 border-t border-slate-800 py-8 text-sm text-slate-500 lg:flex-row">
+                {/* <div className="flex flex-col items-center justify-between gap-5 border-t border-slate-800 py-8 text-sm text-slate-500 lg:flex-row">
 
                     <p>
 
@@ -299,11 +329,27 @@ export default function Footer() {
 
                     <div className="flex gap-6">
 
-                        <a href="#">Privacy Policy</a>
+                        <Link href="/privacy">
+                            Privacy Policy
+                        </Link>
 
-                        <a href="#">Terms of Service</a>
+                        <Link href="/terms">
+                            Terms & Conditions
+                        </Link>
 
                     </div>
+
+                </div> */}
+
+                <div className="flex flex-col items-center justify-between gap-5 border-t border-slate-800 py-8 text-sm text-slate-500 lg:flex-row">
+
+                    <p>
+                        © {new Date().getFullYear()} NARP. All rights reserved.
+                    </p>
+
+                    <p>
+                        🇵🇭 Proudly Made in the Philippines
+                    </p>
 
                 </div>
 

@@ -26,7 +26,7 @@ export default function AIServiceFinder() {
 
                 <h2 className="text-4xl font-bold">
 
-                    🤖 AI Service Finder
+                    🤖 AI Service Assistant
 
                 </h2>
 

@@ -134,21 +134,6 @@ export default function ServicesPage() {
         ];
     }, [skills]);
 
-    // const filteredSkills = useMemo(() => {
-    //     if (selectedCategory === "All") {
-    //         return skills;
-    //     }
-
-    //     return skills.filter(
-    //         (skill) =>
-    //             skill.category.trim().toLowerCase() ===
-    //             selectedCategory.trim().toLowerCase()
-    //     );
-    // }, [skills, selectedCategory]);
-
-    // console.log("Selected category:", selectedCategory);
-
-
     const filteredSkills =
         selectedCategory === "All"
             ? skills
