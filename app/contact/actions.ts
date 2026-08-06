@@ -17,6 +17,10 @@ export async function sendContactEmail(
 
     try {
 
+        //---------------------------------
+        // Validate Form
+        //---------------------------------
+
         const parsed = ContactSchema.safeParse({
             name: formData.get("name"),
             email: formData.get("email"),
@@ -34,6 +38,46 @@ export async function sendContactEmail(
         }
 
         const { name, email, subject, message } = parsed.data;
+
+        //---------------------------------
+        // Verify Cloudflare Turnstile
+        //---------------------------------
+
+        const turnstileToken = String(
+            formData.get("turnstileToken") ?? ""
+        );
+
+        if (!turnstileToken) {
+            return {
+                success: false,
+                message: "Please complete the security verification.",
+            };
+        }
+
+        const response = await fetch(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    secret: process.env.TURNSTILE_SECRET_KEY!,
+                    response: turnstileToken,
+                }),
+            }
+        );
+
+        const result = await response.json();
+
+        if (!result.success) {
+            return {
+                success: false,
+                message:
+                    "Security verification failed. Please try again.",
+            };
+        }
 
         //---------------------------------
         // Send Email
@@ -65,23 +109,20 @@ export async function sendContactEmail(
 
                 <p><strong>Message</strong></p>
 
-                <p style="white-space:pre-line;">
+                <p style="white-space: pre-line;">
                     ${message}
                 </p>
 
                 <hr/>
 
                 <p>
-                    Submitted from
-                    narp-svc.site
+                    Submitted from narp-svc.site
                 </p>
             `,
         });
 
         return {
-
             success: true,
-
             message:
                 "Thank you! We've received your message and will respond within 1–2 business days.",
         };
@@ -91,12 +132,9 @@ export async function sendContactEmail(
         console.error(error);
 
         return {
-
             success: false,
-
             message:
                 "Unable to send your message right now. Please try again later.",
-
         };
     }
 }

@@ -3,7 +3,13 @@
 import { Loader2 } from "lucide-react";
 import { useFormStatus } from "react-dom";
 
-export default function SubmitButton() {
+type SubmitButtonProps = {
+    disabled?: boolean;
+};
+
+export default function SubmitButton({
+    disabled = false,
+}: SubmitButtonProps) {
 
     const { pending } = useFormStatus();
 
@@ -11,7 +17,7 @@ export default function SubmitButton() {
 
         <button
             type="submit"
-            disabled={pending}
+            disabled={pending || disabled}
             className="
                 flex
                 w-full
@@ -31,21 +37,14 @@ export default function SubmitButton() {
         >
 
             {pending ? (
-
                 <>
-
-                    <Loader2
-                        className="mr-2 h-5 w-5 animate-spin"
-                    />
-
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Sending...
-
                 </>
-
+            ) : disabled ? (
+                "Complete Security Check"
             ) : (
-
                 "Send Message"
-
             )}
 
         </button>

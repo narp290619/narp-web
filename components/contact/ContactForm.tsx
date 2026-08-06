@@ -1,6 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import {
+    useActionState,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 
 import {
     sendContactEmail,
@@ -11,6 +16,7 @@ import { ContactSchema } from "@/lib/validation/contact";
 
 import SubmitButton from "./SubmitButton";
 import FormFields from "./FormFields";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 const initialState: ContactFormState = {
     success: false,
@@ -26,7 +32,13 @@ export default function ContactForm() {
         initialState,
     );
 
+    const turnstileRef = useRef<any>(null);
+
+    const nameInputRef = useRef<HTMLInputElement | null>(null);
+
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const [token, setToken] = useState("");
 
     useEffect(() => {
 
@@ -34,7 +46,13 @@ export default function ContactForm() {
 
             formRef.current?.reset();
 
+            turnstileRef.current?.reset();
+
+            setToken("");
+
             setErrors({});
+
+            nameInputRef.current?.focus();
 
         }
 
@@ -126,7 +144,19 @@ export default function ContactForm() {
 
             )}
 
-            <SubmitButton />
+            <Turnstile
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={setToken}
+            />
+
+            <input
+                type="hidden"
+                name="turnstileToken"
+                value={token}
+            />
+
+            <SubmitButton disabled={!token} />
 
         </form>
 

@@ -11,6 +11,7 @@
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@googlemaps/polyline-codec": "^1.0.28",
+    "@marsidev/react-turnstile": "^1.5.5",
     "@vis.gl/react-google-maps": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
