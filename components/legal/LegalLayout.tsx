@@ -14,7 +14,7 @@ export default function LegalLayout({
     description,
     effectiveDate,
     lastUpdated,
-    icon = "⚖️",
+    icon,
     children,
 }: LegalLayoutProps) {
 
