@@ -133,7 +133,7 @@ export default function CookiePolicyPage() {
       <LegalSection title="7. Contact Us">
         <LegalContactBox
           title="Cookie Policy Support"
-          email="narp290619@gmail.com"
+          email="support@narp-svc.site"
           website="https://www.narp-svc.site"
           responseTime="We typically respond within 1–2 business days."
           contactPage="/contact"

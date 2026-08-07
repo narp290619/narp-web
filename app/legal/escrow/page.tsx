@@ -188,7 +188,10 @@ export default function EscrowPolicyPage() {
 
                 <LegalContactBox
                     title="Escrow Support"
-                    email="narp290619@gmail.com"
+                    email="support@narp-svc.site"
+                    website="https://www.narp-svc.site"
+                    responseTime="We typically respond within 1–2 business days."
+                    contactPage="/contact"
                 />
 
             </LegalSection>

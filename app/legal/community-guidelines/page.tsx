@@ -137,7 +137,7 @@ export default function CommunityGuidelinesPage() {
       <LegalSection title="10. Contact Us">
         <LegalContactBox
           title="Community Support"
-          email="narp290619@gmail.com"
+          email="support@narp-svc.site"
           website="https://www.narp-svc.site"
           responseTime="We typically respond within 1–2 business days."
           contactPage="/contact"

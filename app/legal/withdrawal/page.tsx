@@ -230,7 +230,10 @@ export default function WithdrawalPolicyPage() {
 
                 <LegalContactBox
                     title="Withdrawal Support"
-                    email="narp290619@gmail.com"
+                    email="support@narp-svc.site"
+                    website="https://www.narp-svc.site"
+                    responseTime="We typically respond within 1–2 business days."
+                    contactPage="/contact"
                 />
 
             </LegalSection>

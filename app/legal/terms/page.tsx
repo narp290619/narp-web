@@ -635,9 +635,10 @@ export default function TermsPage() {
             <LegalSection title="21. Contact Us">
                 <LegalContactBox
                     title="Legal Support"
-                    email="narp290619@gmail.com"
+                    email="support@narp-svc.site"
                     website="https://narp-svc.site"
                     responseTime="We typically respond within 1–2 business days."
+                    contactPage="/contact"
                 />
             </LegalSection>
 

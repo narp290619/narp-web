@@ -111,6 +111,7 @@ import { footerColumns } from "./footerData";
 import SocialIcon from "./SocialIcon";
 import { socialLinks } from "./socialLinks";
 import Link from "next/link";
+import AppStoreButtons from "@/components/footer/AppStoreButtons";
 
 export default function Footer() {
     return (
@@ -287,7 +288,7 @@ export default function Footer() {
 
                             </h3>
 
-                            <div className="space-y-4">
+                            {/* <div className="space-y-4">
 
                                 <Image
                                     src="/images/store/google-play.svg"
@@ -305,7 +306,9 @@ export default function Footer() {
                                     className="h-auto w-40"
                                 />
 
-                            </div>
+                            </div> */}
+
+                            <AppStoreButtons />
 
                         </div>
 
@@ -341,7 +344,7 @@ export default function Footer() {
 
                 </div> */}
 
-                <div className="flex flex-col items-center justify-between gap-5 border-t border-slate-800 py-8 text-sm text-slate-500 lg:flex-row">
+                <div className="flex flex-col items-center justify-between gap-6 border-t border-slate-800 py-8 text-sm text-slate-500 lg:flex-row">
 
                     <p>
                         © {new Date().getFullYear()} NARP. All rights reserved.
@@ -351,8 +354,21 @@ export default function Footer() {
                         🇵🇭 Proudly Made in the Philippines
                     </p>
 
-                </div>
+                    <div className="flex flex-wrap items-center gap-5">
+                        <Link href="/legal" className="hover:text-orange-400 transition">
+                            Legal Center
+                        </Link>
 
+                        <Link href="/legal/privacy" className="hover:text-orange-400 transition">
+                            Privacy
+                        </Link>
+
+                        <Link href="/legal/terms" className="hover:text-orange-400 transition">
+                            Terms
+                        </Link>
+                    </div>
+
+                </div>
             </Container>
 
         </footer>

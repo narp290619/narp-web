@@ -10,6 +10,14 @@ interface Props {
     links: FooterLink[];
 }
 
+export interface FooterColumnProps {
+  title: string;
+  links: {
+    label: string;
+    href: string;
+  }[];
+}
+
 export default function FooterColumn({
     title,
     links,

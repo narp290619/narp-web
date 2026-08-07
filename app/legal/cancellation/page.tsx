@@ -132,9 +132,17 @@ export default function CancellationPolicyPage() {
             </LegalSection>
 
             <LegalSection title="9. Contact Us">
+                <p>
+
+                    For cancellation request concerns,
+                    or any questions, please
+                    contact our support team.
+
+                </p>
+
                 <LegalContactBox
                     title="Cancellation Support"
-                    email="narp290619@gmail.com"
+                    email="support@narp-svc.site"
                     website="https://www.narp-svc.site"
                     contactPage="/contact"
                     responseTime="We typically respond within 1–2 business days."

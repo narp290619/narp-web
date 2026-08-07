@@ -244,6 +244,9 @@ export default function RefundPolicyPage() {
                 <LegalContactBox
                     title="Refund Support"
                     email="support@narp-svc.site"
+                    website="https://www.narp-svc.site"
+                    responseTime="We typically respond within 1–2 business days."
+                    contactPage="/contact"
                 />
 
             </LegalSection>
