@@ -1,29 +1,40 @@
-import FAQSection from "@/components/help/FAQSection";
+import Container from "@/components/shared/Container";
+import PageContainer from "@/components/shared/PageContainer";
+
 import HelpHero from "@/components/help/HelpHero";
+import HelpSearch from "@/components/help/HelpSearch";
 import PopularTopics from "@/components/help/PopularTopics";
+import FAQSection from "@/components/help/FAQSection";
+import ContactSupportCard from "@/components/help/ContactSupportCard";
 
 export const metadata = {
     title: "Help Center | NARP",
     description:
-        "Find answers to common questions about bookings, payments, accounts, and using NARP.",
+        "Find answers to common questions about bookings, payments, accounts, reviews, and using NARP.",
 };
 
-export default function HelpPage() {
+export default function HelpCenterPage() {
     return (
-        <main className="min-h-screen bg-gray-100">
+        <PageContainer>
 
             <HelpHero />
 
-            <section className="mx-auto max-w-7xl px-6 py-16 space-y-16">
+            <Container className="max-w-5xl pb-20">
 
-                <PopularTopics />
+                <div className="space-y-16">
 
-                <FAQSection />
+                    <HelpSearch />
 
-                {/* <ContactSupportCard /> */}
+                    <PopularTopics />
 
-            </section>
+                    <FAQSection />
 
-        </main>
+                    <ContactSupportCard />
+
+                </div>
+
+            </Container>
+
+        </PageContainer>
     );
 }

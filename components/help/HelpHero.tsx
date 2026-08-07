@@ -1,155 +1,139 @@
 "use client";
 
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { HelpCircle } from "lucide-react";
+
+const quickLinks = [
+    {
+        label: "Bookings",
+        href: "/help/bookings",
+    },
+    {
+        label: "Payments",
+        href: "/help/payments",
+    },
+    {
+        label: "Account",
+        href: "/help/account",
+    },
+    {
+        label: "Safety",
+        href: "/help/safety",
+    },
+    {
+        label: "Reviews",
+        href: "/help/reviews",
+    },
+];
 
 export default function HelpHero() {
     return (
-        <section
-            className="
-                relative
-                overflow-hidden
-                bg-gradient-to-br
-                from-blue-700
-                via-blue-600
-                to-sky-500
-                text-white
-            "
-        >
-            {/* Background Glow */}
+        <section className="py-16">
 
-            <div className="absolute inset-0 overflow-hidden">
+            <div className="mx-auto max-w-5xl px-6">
 
                 <div
                     className="
-                        absolute
-                        -top-32
-                        left-1/2
-                        h-[420px]
-                        w-[420px]
-                        -translate-x-1/2
-                        rounded-full
-                        bg-white/10
-                        blur-3xl
-                    "
-                />
-
-                <div
-                    className="
-                        absolute
-                        bottom-0
-                        right-0
-                        h-72
-                        w-72
-                        rounded-full
-                        bg-cyan-400/10
-                        blur-3xl
-                    "
-                />
-
-            </div>
-
-            <div
-                className="
-                    relative
-                    mx-auto
-                    flex
-                    max-w-6xl
-                    flex-col
-                    items-center
-                    px-6
-                    py-28
-                    text-center
-                "
-            >
-                <div
-                    className="
-                        flex
-                        h-24
-                        w-24
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-white/15
-                        text-5xl
-                        shadow-lg
-                        backdrop-blur
+                        overflow-hidden
+                        rounded-3xl
+                        bg-gradient-to-br
+                        from-blue-700
+                        via-blue-600
+                        to-sky-500
+                        px-8
+                        py-20
+                        text-center
+                        text-white
+                        shadow-xl
+                        lg:px-16
                     "
                 >
-                    ❓
-                </div>
 
-                <h1 className="mt-8 text-5xl font-extrabold tracking-tight">
-                    Help Center
-                </h1>
+                    {/* Background Glow */}
 
-                <p
-                    className="
-                        mt-6
-                        max-w-3xl
-                        text-lg
-                        leading-8
-                        text-blue-100
-                    "
-                >
-                    Find answers to common questions about bookings,
-                    payments, escrow, accounts, and using the NARP
-                    platform.
-                </p>
+                    <div className="absolute" />
 
-                {/* Search */}
+                    <div className="relative">
 
-                <div className="mt-12 w-full max-w-2xl">
-
-                    <div
-                        className="
-                            flex
-                            items-center
-                            rounded-2xl
-                            bg-white
-                            px-5
-                            py-4
-                            shadow-xl
-                        "
-                    >
-                        <Search className="h-5 w-5 text-slate-400" />
-
-                        <input
-                            type="text"
-                            placeholder="Search help articles..."
+                        <div
                             className="
-                                ml-4
-                                w-full
-                                border-none
-                                bg-transparent
-                                text-slate-700
-                                placeholder:text-slate-400
-                                focus:outline-none
+                                mx-auto
+                                flex
+                                h-24
+                                w-24
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-white/15
+                                backdrop-blur
                             "
-                        />
+                        >
+                            <HelpCircle className="h-12 w-12" />
+                        </div>
+
+                        <h1 className="mt-8 text-5xl font-extrabold lg:text-6xl">
+                            Help Center
+                        </h1>
+
+                        <p
+                            className="
+                                mx-auto
+                                mt-6
+                                max-w-3xl
+                                text-lg
+                                leading-8
+                                text-blue-100
+                            "
+                        >
+                            Find answers to common questions about bookings,
+                            payments, escrow, freelancer accounts, reviews,
+                            and everything you need to get the most out of
+                            NARP.
+                        </p>
+
+                        <div
+                            className="
+                                mt-12
+                                flex
+                                flex-wrap
+                                justify-center
+                                gap-4
+                            "
+                        >
+
+                            {quickLinks.map((link) => (
+
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="
+                                        rounded-full
+                                        bg-white/15
+                                        px-6
+                                        py-3
+                                        text-sm
+                                        font-semibold
+                                        backdrop-blur
+                                        transition-all
+                                        duration-200
+                                        hover:-translate-y-1
+                                        hover:bg-white
+                                        hover:text-blue-700
+                                    "
+                                >
+                                    {link.label}
+                                </Link>
+
+                            ))}
+
+                        </div>
+
                     </div>
 
-                    <p className="mt-4 text-sm text-blue-100">
-                        Try searching for{" "}
-                        <span className="font-semibold">
-                            bookings
-                        </span>
-                        ,{" "}
-                        <span className="font-semibold">
-                            refunds
-                        </span>
-                        ,{" "}
-                        <span className="font-semibold">
-                            escrow
-                        </span>
-                        , or{" "}
-                        <span className="font-semibold">
-                            withdrawals
-                        </span>
-                        .
-                    </p>
-
                 </div>
+
             </div>
+
         </section>
     );
 }
