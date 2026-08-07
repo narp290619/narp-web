@@ -16,7 +16,11 @@ export async function sendContactEmail(
     formData: FormData,
 ): Promise<ContactFormState> {
 
+    console.log("===== CONTACT FORM =====");
+
     try {
+
+        console.log("Server Action started");
 
         //---------------------------------
         // Validate Form
@@ -48,6 +52,8 @@ export async function sendContactEmail(
             formData.get("turnstileToken") ?? ""
         );
 
+        console.log("Turnstile token:", turnstileToken);
+
         if (!turnstileToken) {
             return {
                 success: false,
@@ -76,6 +82,8 @@ export async function sendContactEmail(
 
         const result = await response.json();
 
+        console.log("Turnstile result:", result);
+
         const allowedHosts = [
             "narp-svc.site",
             "www.narp-svc.site",
@@ -94,6 +102,8 @@ export async function sendContactEmail(
         //---------------------------------
         // Send Email
         //---------------------------------
+
+        console.log("Sending email...");
 
         await resend.emails.send({
 
@@ -132,6 +142,8 @@ export async function sendContactEmail(
                 </p>
             `,
         });
+
+        console.log("Email sent successfully");
 
         return {
             success: true,
