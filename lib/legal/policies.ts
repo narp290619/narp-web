@@ -16,14 +16,19 @@ export const policies: Policy[] = [
         icon: "📜",
     },
     {
-        title: "Refund Policy",
-        href: "/legal/refund",
-        icon: "💰",
-    },
-    {
         title: "Escrow Policy",
         href: "/legal/escrow",
         icon: "🛡️",
+    },
+    {
+        title: "Withdrawal Policy",
+        href: "/legal/withdrawal",
+        icon: "💳",
+    },
+    {
+        title: "Refund Policy",
+        href: "/legal/refund",
+        icon: "💰",
     },
     {
         title: "Cancellation Policy",
@@ -54,13 +59,6 @@ export const policies: Policy[] = [
 
 export const relatedPolicies: Record<string, string[]> = {
 
-    "/legal/refund": [
-        "/legal/escrow",
-        "/legal/cancellation",
-        "/legal/dispute-resolution",
-        "/legal/terms",
-    ],
-
     "/legal/privacy": [
         "/legal/cookies",
         "/legal/terms",
@@ -76,6 +74,19 @@ export const relatedPolicies: Record<string, string[]> = {
 
     "/legal/escrow": [
         "/legal/refund",
+        "/legal/dispute-resolution",
+        "/legal/terms",
+    ],
+
+    "/legal/withdrawal": [
+        "/legal/escrow",
+        "/legal/refund",
+        "/legal/terms",
+    ],
+
+    "/legal/refund": [
+        "/legal/escrow",
+        "/legal/cancellation",
         "/legal/dispute-resolution",
         "/legal/terms",
     ],

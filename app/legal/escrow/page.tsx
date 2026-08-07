@@ -84,6 +84,7 @@ export default function EscrowPolicyPage() {
                 </ul>
 
                 <LegalNotice
+                    type="success"
                     title="Escrow Protection"
                 >
 
@@ -120,6 +121,7 @@ export default function EscrowPolicyPage() {
                 </ul>
 
                 <LegalNotice
+                    type="warning"
                     title="Important Notice"
                 >
 
