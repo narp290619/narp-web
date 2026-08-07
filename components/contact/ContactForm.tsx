@@ -1,73 +1,73 @@
 "use client";
 
 import {
-    useActionState,
     useEffect,
     useRef,
     useState,
+    useTransition,
 } from "react";
+
+import { Turnstile } from "@marsidev/react-turnstile";
+
+import { ContactSchema } from "@/lib/validation/contact";
 
 import {
     sendContactEmail,
     ContactFormState,
 } from "@/app/contact/actions";
 
-import { ContactSchema } from "@/lib/validation/contact";
-
-import SubmitButton from "./SubmitButton";
 import FormFields from "./FormFields";
-import { Turnstile } from "@marsidev/react-turnstile";
-
-const initialState: ContactFormState = {
-    success: false,
-    message: "",
-};
+import SubmitButton from "./SubmitButton";
 
 export default function ContactForm() {
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const [state, formAction] = useActionState(
-        sendContactEmail,
-        initialState,
-    );
-
     const turnstileRef = useRef<any>(null);
 
-    const nameInputRef = useRef<HTMLInputElement | null>(null);
+    const nameInputRef = useRef<HTMLInputElement>(null);
 
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isPending, startTransition] = useTransition();
 
     const [token, setToken] = useState("");
 
+    const [errors, setErrors] =
+        useState<Record<string, string>>({});
+
+    const [serverState, setServerState] =
+        useState<ContactFormState>({
+            success: false,
+            message: "",
+        });
+
+    //----------------------------------------------------------
+    // Reset after successful submit
+    //----------------------------------------------------------
+
     useEffect(() => {
 
-        if (state.success) {
+        if (!serverState.success) return;
 
-            formRef.current?.reset();
+        formRef.current?.reset();
 
-            turnstileRef.current?.reset();
+        turnstileRef.current?.reset();
 
-            setToken("");
+        setToken("");
 
-            setErrors({});
+        setErrors({});
 
-            nameInputRef.current?.focus();
+        nameInputRef.current?.focus();
 
-        }
+    }, [serverState.success]);
 
-    }, [state.success]);
+    //----------------------------------------------------------
+    // Validate one field
+    //----------------------------------------------------------
 
-    function validateField(field: string, value: string) {
-
-        const values = {
-            name: "",
-            email: "",
-            subject: "",
-            message: "",
-        };
-
-        values[field as keyof typeof values] = value;
+    function validateField(
+        field: string,
+        value: string,
+    ) {
 
         const result = ContactSchema.pick({
             [field]: true,
@@ -86,7 +86,19 @@ export default function ContactForm() {
         }));
     }
 
-    function validateAndSubmit(formData: FormData) {
+    //----------------------------------------------------------
+    // Submit
+    //----------------------------------------------------------
+
+    function handleSubmit(
+        event: React.FormEvent<HTMLFormElement>,
+    ) {
+
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        formData.set("turnstileToken", token);
 
         const values = {
             name: String(formData.get("name") ?? ""),
@@ -103,9 +115,9 @@ export default function ContactForm() {
 
             result.error.issues.forEach((issue) => {
 
-                const field = issue.path[0] as string;
-
-                fieldErrors[field] = issue.message;
+                fieldErrors[
+                    issue.path[0] as string
+                ] = issue.message;
 
             });
 
@@ -114,45 +126,79 @@ export default function ContactForm() {
             return;
         }
 
+        if (!token) {
+
+            setServerState({
+
+                success: false,
+
+                message:
+                    "Please complete the security verification.",
+
+            });
+
+            return;
+        }
+
         setErrors({});
 
-        formAction(formData);
+        setServerState({
+            success: false,
+            message: "",
+        });
+
+        startTransition(async () => {
+
+            const response =
+                await sendContactEmail(formData);
+
+            setServerState(response);
+
+        });
+
     }
+
+    //----------------------------------------------------------
+    // Render
+    //----------------------------------------------------------
 
     return (
 
         <form
             ref={formRef}
-            action={validateAndSubmit}
+            onSubmit={handleSubmit}
             className="space-y-6"
         >
 
-            <FormFields />
+            <FormFields
+                errors={errors}
+                validateField={validateField}
+                nameInputRef={nameInputRef}
+                disabled={isPending}
+            />
 
-            {/* Server Message */}
-
-            {state.message && (
+            {serverState.message && (
 
                 <div
-                    className={`rounded-xl p-4 ${state.success
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                    className={`rounded-xl p-4 ${serverState.success
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
                         }`}
                 >
-                    {state.message}
+                    {serverState.message}
                 </div>
 
             )}
 
             <Turnstile
                 ref={turnstileRef}
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                siteKey={
+                    process.env
+                        .NEXT_PUBLIC_TURNSTILE_SITE_KEY!
+                }
                 onSuccess={setToken}
                 onExpire={() => setToken("")}
                 onError={() => setToken("")}
-                onWidgetLoad={() => {
-                    console.log("Turnstile loaded");
-                }}
                 options={{
                     refreshExpired: "auto",
                     refreshTimeout: "auto",
@@ -165,9 +211,13 @@ export default function ContactForm() {
                 value={token}
             />
 
-            <SubmitButton disabled={!token} />
+            <SubmitButton
+                pending={isPending}
+                disabled={!token}
+            />
 
         </form>
 
     );
+
 }

@@ -1,17 +1,16 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useFormStatus } from "react-dom";
 
 type SubmitButtonProps = {
+    pending: boolean;
     disabled?: boolean;
 };
 
 export default function SubmitButton({
-    disabled = false,
+    pending,
+    disabled,
 }: SubmitButtonProps) {
-
-    const { pending } = useFormStatus();
 
     return (
 
@@ -37,14 +36,21 @@ export default function SubmitButton({
         >
 
             {pending ? (
+
                 <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+
+                    <Loader2
+                        className="mr-2 h-5 w-5 animate-spin"
+                    />
+
                     Sending...
+
                 </>
-            ) : disabled ? (
-                "Complete Security Check"
+
             ) : (
+
                 "Send Message"
+
             )}
 
         </button>
