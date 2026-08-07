@@ -148,6 +148,15 @@ export default function ContactForm() {
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={setToken}
+                onExpire={() => setToken("")}
+                onError={() => setToken("")}
+                onWidgetLoad={() => {
+                    console.log("Turnstile loaded");
+                }}
+                options={{
+                    refreshExpired: "auto",
+                    refreshTimeout: "auto",
+                }}
             />
 
             <input
