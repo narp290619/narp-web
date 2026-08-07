@@ -18,7 +18,6 @@ export default function RefundPolicyPage() {
     return (
 
         <LegalLayout
-            icon="💰"
             title="Refund Policy"
             description="
                 This Refund Policy explains how refunds are
@@ -27,6 +26,7 @@ export default function RefundPolicyPage() {
             "
             effectiveDate="May 9, 2026"
             lastUpdated="August 2026"
+            icon="💰"
         >
 
             <LegalSection title="1. Purpose">

@@ -18,6 +18,7 @@ export default function CancellationPolicyPage() {
             description="This Cancellation Policy explains how booking cancellations are handled for clients and freelancers using NARP."
             effectiveDate="May 9, 2026"
             lastUpdated="May 9, 2026"
+            icon="❌"
         >
             <LegalSection title="1. Purpose">
                 <p>

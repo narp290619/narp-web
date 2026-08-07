@@ -18,6 +18,7 @@ export default function AcceptableUsePolicyPage() {
       description="This Acceptable Use Policy explains the activities and behaviors that are prohibited when using NARP."
       effectiveDate="May 9, 2026"
       lastUpdated="May 9, 2026"
+      icon="🚫"
     >
       <LegalSection title="1. Purpose">
         <p>

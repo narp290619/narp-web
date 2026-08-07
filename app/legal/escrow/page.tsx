@@ -20,6 +20,7 @@ export default function EscrowPolicyPage() {
             description="NARP uses an escrow system to protect both clients and freelancers by securely holding funds until services are completed and approved."
             effectiveDate="May 9, 2026"
             lastUpdated="May 9, 2026"
+            icon="🛡️"
         >
 
             <LegalSection title="1. Purpose">

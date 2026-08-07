@@ -18,6 +18,7 @@ export default function CommunityGuidelinesPage() {
       description="These Community Guidelines help create a safe, respectful, and trustworthy marketplace for clients and freelancers."
       effectiveDate="May 9, 2026"
       lastUpdated="May 9, 2026"
+      icon="🤝"
     >
       <LegalSection title="1. Our Commitment">
         <p>

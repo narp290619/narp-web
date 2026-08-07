@@ -19,6 +19,7 @@ export default function WithdrawalPolicyPage() {
             description="This Withdrawal Policy explains how freelancers can withdraw earnings from their NARP Wallet, including eligibility, processing requirements, and security measures."
             effectiveDate="May 9, 2026"
             lastUpdated="May 9, 2026"
+            icon="💳"
         >
 
             <LegalSection title="1. Eligibility">

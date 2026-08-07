@@ -18,6 +18,7 @@ export default function DisputeResolutionPolicyPage() {
       description="This policy explains how disputes between clients and freelancers are investigated and resolved through the NARP platform."
       effectiveDate="May 9, 2026"
       lastUpdated="May 9, 2026"
+      icon="⚖️"
     >
       <LegalSection title="1. Purpose">
         <p>

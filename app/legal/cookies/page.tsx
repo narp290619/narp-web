@@ -18,6 +18,7 @@ export default function CookiePolicyPage() {
       description="This Cookie Policy explains how NARP (Nearby App for Reliable Professionals) uses cookies and similar technologies when you visit our website."
       effectiveDate="May 9, 2026"
       lastUpdated="August 6, 2026"
+      icon="🍪"
     >
       <LegalSection title="1. What Are Cookies?">
         <p>
