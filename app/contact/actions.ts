@@ -1,6 +1,7 @@
 "use server";
 
 import { ContactSchema } from "@/lib/validation/contact";
+import { headers } from "next/headers";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -54,6 +55,8 @@ export async function sendContactEmail(
             };
         }
 
+        const forwarded = (await headers()).get("x-forwarded-for") ?? "";
+
         const response = await fetch(
             "https://challenges.cloudflare.com/turnstile/v0/siteverify",
             {
@@ -62,20 +65,29 @@ export async function sendContactEmail(
                     "Content-Type":
                         "application/x-www-form-urlencoded",
                 },
+
                 body: new URLSearchParams({
                     secret: process.env.TURNSTILE_SECRET_KEY!,
                     response: turnstileToken,
+                    remoteip: forwarded.split(",")[0].trim(),
                 }),
             }
         );
 
         const result = await response.json();
 
-        if (!result.success) {
+        const allowedHosts = [
+            "narp-svc.site",
+            "www.narp-svc.site",
+        ];
+
+        if (
+            !result.success ||
+            !allowedHosts.includes(result.hostname)
+        ) {
             return {
                 success: false,
-                message:
-                    "Security verification failed. Please try again.",
+                message: "Security verification failed. Please try again.",
             };
         }
 
