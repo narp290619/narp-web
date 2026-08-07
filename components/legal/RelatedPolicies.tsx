@@ -1,70 +1,27 @@
 import Link from "next/link";
 
-type Policy = {
-    title: string;
-    href: string;
-    icon: string;
-};
+import {
+    policies,
+    relatedPolicies,
+} from "@/lib/legal/policies";
 
-type RelatedPoliciesProps = {
-    current?: string;
+type Props = {
+    current: string;
 };
-
-const policies: Policy[] = [
-    {
-        title: "Privacy Policy",
-        href: "/legal/privacy",
-        icon: "🔒",
-    },
-    {
-        title: "Terms of Service",
-        href: "/legal/terms",
-        icon: "📜",
-    },
-    {
-        title: "Refund Policy",
-        href: "/legal/refund",
-        icon: "💰",
-    },
-    {
-        title: "Escrow Policy",
-        href: "/legal/escrow",
-        icon: "🛡️",
-    },
-    {
-        title: "Cancellation Policy",
-        href: "/legal/cancellation",
-        icon: "❌",
-    },
-    {
-        title: "Dispute Resolution",
-        href: "/legal/dispute-resolution",
-        icon: "⚖️",
-    },
-    {
-        title: "Cookie Policy",
-        href: "/legal/cookies",
-        icon: "🍪",
-    },
-    {
-        title: "Community Guidelines",
-        href: "/legal/community-guidelines",
-        icon: "🤝",
-    },
-    {
-        title: "Acceptable Use Policy",
-        href: "/legal/acceptable-use",
-        icon: "🚫",
-    },
-];
 
 export default function RelatedPolicies({
     current,
-}: RelatedPoliciesProps) {
+}: Props) {
 
-    const related = policies.filter(
-        (policy) => policy.href !== current,
-    );
+    const related = (relatedPolicies[current] ?? [])
+        .map((href) =>
+            policies.find((policy) => policy.href === href)
+        )
+        .filter(Boolean);
+
+    if (related.length === 0) {
+        return null;
+    }
 
     return (
 
@@ -78,18 +35,18 @@ export default function RelatedPolicies({
 
             <p className="mt-3 text-gray-600">
 
-                Looking for more information? These documents may
-                also be helpful.
+                These documents may also help answer your
+                questions.
 
             </p>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
 
                 {related.map((policy) => (
 
                     <Link
-                        key={policy.href}
-                        href={policy.href}
+                        key={policy!.href}
+                        href={policy!.href}
                         className="
                             rounded-2xl
                             border
@@ -98,19 +55,18 @@ export default function RelatedPolicies({
                             transition
                             hover:border-blue-500
                             hover:bg-blue-50
-                            hover:shadow
                         "
                     >
 
                         <div className="text-3xl">
 
-                            {policy.icon}
+                            {policy!.icon}
 
                         </div>
 
                         <h3 className="mt-4 font-bold">
 
-                            {policy.title}
+                            {policy!.title}
 
                         </h3>
 
