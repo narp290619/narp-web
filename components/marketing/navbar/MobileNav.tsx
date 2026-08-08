@@ -25,7 +25,7 @@ export default function MobileNav() {
         }
       />
 
-      <SheetContent side="right">
+      <SheetContent side="right" className="h-16 bg-white/70 shadow-[0_10px_40px_rgba(15,23,42,.12)] backdrop-blur-2xl border border-white/60 px-6">
         <SheetHeader>
           <SheetTitle>NARP</SheetTitle>
         </SheetHeader>

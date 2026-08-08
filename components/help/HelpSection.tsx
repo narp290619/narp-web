@@ -1,33 +1,28 @@
 import { ReactNode } from "react";
 
 type HelpSectionProps = {
+    id?: string;
     title: string;
     children: ReactNode;
 };
 
 export default function HelpSection({
+    id,
     title,
     children,
 }: HelpSectionProps) {
     return (
         <section
+            id={id}
             className="
+                scroll-mt-32
                 rounded-3xl
-                border
-                border-slate-200
                 bg-white
                 p-8
                 shadow-sm
             "
         >
-            <h2
-                className="
-                    mb-6
-                    text-2xl
-                    font-bold
-                    text-slate-900
-                "
-            >
+            <h2 className="mb-5 text-2xl font-bold text-green-700">
                 {title}
             </h2>
 
@@ -45,10 +40,10 @@ export default function HelpSection({
                     [&>ol]:space-y-2
                     [&>ol]:pl-6
 
+                    [&>h3]:mt-6
                     [&>h3]:text-lg
                     [&>h3]:font-semibold
                     [&>h3]:text-slate-900
-                    [&>h3]:mt-6
 
                     [&>strong]:font-semibold
                 "

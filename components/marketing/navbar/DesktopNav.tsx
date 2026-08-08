@@ -51,19 +51,19 @@ export default function DesktopNav() {
             <Link
               href={item.href}
               className={`
-            relative
-            z-10
-            rounded-full
-            px-5
-            py-2
-            text-sm
-            font-medium
-            transition-colors
-            ${active
-                  ? "text-orange-600"
-                  : "text-slate-600 hover:text-orange-500"
-                }
-        `}
+                  relative
+                  z-10
+                  rounded-full
+                  px-5
+                  py-2
+                  text-sm
+                  font-medium
+                  transition-colors
+                  ${active
+                        ? "text-orange-600"
+                        : "text-slate-600 hover:text-orange-500"
+                      }
+              `}
             >
               {item.title}
             </Link>

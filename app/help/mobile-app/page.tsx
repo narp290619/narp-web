@@ -1,154 +1,162 @@
 import HelpArticleLayout from "@/components/help/HelpArticleLayout";
-import HelpNotice from "@/components/help/HelpNotice";
 import HelpSection from "@/components/help/HelpSection";
+import HelpNotice from "@/components/help/HelpNotice";
 
 export const metadata = {
-    title: "Using the Mobile App | Help Center | NARP",
+    title: "Mobile App | NARP Help Center",
     description:
-        "Learn how to install, use, and get the most out of the NARP mobile application.",
+        "Learn how to install, update, and troubleshoot the NARP mobile application.",
 };
+
+const tocItems = [
+    {
+        id: "getting-app",
+        title: "Getting the NARP App",
+    },
+    {
+        id: "installation",
+        title: "Installing the App",
+    },
+    {
+        id: "updates",
+        title: "App Updates",
+    },
+    {
+        id: "permissions",
+        title: "App Permissions",
+    },
+    {
+        id: "troubleshooting",
+        title: "Troubleshooting",
+    },
+    {
+        id: "support",
+        title: "Getting Support",
+    },
+];
 
 export default function MobileAppHelpPage() {
     return (
         <HelpArticleLayout
-            title="Using the Mobile App"
-            description="Everything you need to know about installing, navigating, and using the NARP mobile application."
-            currentArticle="/help/mobile-app"
+            title="Mobile App"
+            description="Learn how to install and use the NARP mobile application and troubleshoot common app issues."
+            currentArticle="mobile-app"
+            tocItems={tocItems}
         >
-            <HelpSection title="Getting Started">
-                <p>
-                    The NARP mobile app allows clients and freelancers to
-                    connect anytime, anywhere.
-                </p>
+            <div className="space-y-10">
 
-                <ol>
-                    <li>Download the NARP app.</li>
-                    <li>Create or sign in to your account.</li>
-                    <li>Complete your profile.</li>
-                    <li>Enable location services.</li>
-                    <li>Start booking services or offering your skills.</li>
-                </ol>
-            </HelpSection>
+                <HelpSection
+                    id="getting-app"
+                    title="Getting the NARP App"
+                >
+                    <p>
+                        The NARP mobile application provides access to
+                        platform features such as service discovery,
+                        bookings, messaging, account management, and other
+                        available functionality.
+                    </p>
 
-            <HelpSection title="Main Features">
-                <p>
-                    The NARP app is designed to make finding and providing
-                    services simple and secure.
-                </p>
+                    <p>
+                        Download NARP only through official app distribution
+                        channels provided by NARP.
+                    </p>
+                </HelpSection>
 
-                <ul>
-                    <li>Browse available services.</li>
-                    <li>Find nearby freelancers.</li>
-                    <li>Book trusted professionals.</li>
-                    <li>Secure escrow payments.</li>
-                    <li>Real-time messaging.</li>
-                    <li>Booking history.</li>
-                    <li>Wallet and withdrawals.</li>
-                    <li>Ratings and reviews.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="installation"
+                    title="Installing the App"
+                >
+                    <p>
+                        To install NARP, open the official app store available
+                        on your device and search for NARP.
+                    </p>
 
-            <HelpNotice
-                type="success"
-                title="Enable Notifications"
-            >
-                Push notifications help you stay updated with booking requests,
-                payments, messages, cancellations, and important account
-                activity.
-            </HelpNotice>
+                    <p>
+                        Follow the store's installation instructions and open
+                        the application after installation is complete.
+                    </p>
 
-            <HelpSection title="Location Services">
-                <p>
-                    NARP uses your location to help you discover nearby
-                    freelancers and improve search results.
-                </p>
+                    <HelpNotice type="warning">
+                        Avoid downloading NARP from unofficial websites or
+                        third-party APK sources.
+                    </HelpNotice>
+                </HelpSection>
 
-                <ul>
-                    <li>Location access is optional.</li>
-                    <li>You can update location permissions anytime.</li>
-                    <li>Your location is handled according to our Privacy Policy.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="updates"
+                    title="App Updates"
+                >
+                    <p>
+                        Keeping the NARP application updated helps ensure that
+                        you have access to the latest features, security
+                        improvements, and bug fixes.
+                    </p>
 
-            <HelpSection title="Managing Your Profile">
-                <p>
-                    You can update your account information from the Profile
-                    section of the app.
-                </p>
+                    <p>
+                        Enable automatic updates where supported by your
+                        device, or periodically check the applicable app
+                        store for updates.
+                    </p>
+                </HelpSection>
 
-                <ul>
-                    <li>Edit your profile photo.</li>
-                    <li>Update personal information.</li>
-                    <li>Manage skills and services.</li>
-                    <li>Configure notification preferences.</li>
-                    <li>View verification status.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="permissions"
+                    title="App Permissions"
+                >
+                    <p>
+                        Some NARP features may require access to device
+                        permissions such as location, camera, notifications,
+                        or other device functionality.
+                    </p>
 
-            <HelpSection title="Keeping the App Updated">
-                <p>
-                    We recommend installing the latest version of NARP to enjoy
-                    new features, security improvements, and bug fixes.
-                </p>
+                    <p>
+                        Permissions are requested when required by a feature.
+                        You can manage application permissions through your
+                        device settings.
+                    </p>
+                </HelpSection>
 
-                <ul>
-                    <li>Enable automatic updates.</li>
-                    <li>Download updates from the official app store.</li>
-                    <li>Restart the app after major updates if needed.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="troubleshooting"
+                    title="Troubleshooting"
+                >
+                    <p>
+                        If the NARP app is not working correctly, try the
+                        following:
+                    </p>
 
-            <HelpNotice
-                type="info"
-                title="Supported Devices"
-            >
-                NARP supports modern Android and iOS devices. Some features may
-                require newer operating system versions or device capabilities.
-            </HelpNotice>
+                    <ol>
+                        <li>Check your internet connection.</li>
+                        <li>Close and reopen the application.</li>
+                        <li>Restart your device.</li>
+                        <li>Check for available app updates.</li>
+                        <li>Make sure your device has sufficient storage.</li>
+                    </ol>
 
-            <HelpSection title="Troubleshooting">
-                <p>
-                    If you encounter issues while using the app, try the
-                    following:
-                </p>
+                    <HelpNotice type="info">
+                        If the problem continues after basic troubleshooting,
+                        contact NARP Support with details about the issue and
+                        your device.
+                    </HelpNotice>
+                </HelpSection>
 
-                <ul>
-                    <li>Check your internet connection.</li>
-                    <li>Restart the app.</li>
-                    <li>Update to the latest version.</li>
-                    <li>Restart your device.</li>
-                    <li>Ensure required permissions are enabled.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="support"
+                    title="Getting Support"
+                >
+                    <p>
+                        If you continue experiencing problems with the NARP
+                        application, contact NARP Support.
+                    </p>
 
-            <HelpSection title="Common Questions">
-                <ul>
-                    <li>How do I update my profile?</li>
-                    <li>How do I change my password?</li>
-                    <li>Why can't I receive notifications?</li>
-                    <li>Why can't I see nearby freelancers?</li>
-                    <li>How do I contact a freelancer?</li>
-                </ul>
-            </HelpSection>
+                    <p>
+                        When contacting support, include the relevant error
+                        message, the feature you were using, and any other
+                        information that may help us understand the issue.
+                    </p>
+                </HelpSection>
 
-            <HelpNotice
-                type="warning"
-                title="Download Only from Official Sources"
-            >
-                For your security, install NARP only from the official Google
-                Play Store or Apple App Store. Avoid downloading APK files or
-                modified versions from third-party websites.
-            </HelpNotice>
-
-            <HelpSection title="Need More Help?">
-                <p>
-                    If you're experiencing technical issues that aren't resolved
-                    by the steps above, please contact NARP Support. Include
-                    your device model, operating system version, app version,
-                    and screenshots whenever possible to help us diagnose the
-                    issue more quickly.
-                </p>
-            </HelpSection>
+            </div>
         </HelpArticleLayout>
     );
 }

@@ -20,6 +20,11 @@ export const navigation = [
   },
 
   {
+    title: "Help",
+    href: "/help",
+  },
+
+  {
     title: "Contact",
     href: "/contact",
   },

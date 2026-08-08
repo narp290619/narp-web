@@ -1,36 +1,75 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-
-import { helpArticles } from "@/lib/helpArticles";
 
 type ArticleNavigationProps = {
     currentArticle: string;
 };
 
+const articles = [
+    {
+        slug: "bookings",
+        title: "Bookings",
+    },
+    {
+        slug: "payments",
+        title: "Payments",
+    },
+    {
+        slug: "account",
+        title: "Account",
+    },
+    {
+        slug: "safety",
+        title: "Safety",
+    },
+    {
+        slug: "reviews",
+        title: "Reviews",
+    },
+    {
+        slug: "mobile-app",
+        title: "Mobile App",
+    },
+];
+
 export default function ArticleNavigation({
     currentArticle,
 }: ArticleNavigationProps) {
-    const currentIndex = helpArticles.findIndex(
-        (article) => article.href === currentArticle
+    const currentIndex = articles.findIndex(
+        (article) => article.slug === currentArticle
     );
 
-    if (currentIndex === -1) return null;
+    if (currentIndex === -1) {
+        return null;
+    }
 
-    const previous =
+    const previousArticle =
         currentIndex > 0
-            ? helpArticles[currentIndex - 1]
+            ? articles[currentIndex - 1]
             : null;
 
-    const next =
-        currentIndex < helpArticles.length - 1
-            ? helpArticles[currentIndex + 1]
+    const nextArticle =
+        currentIndex < articles.length - 1
+            ? articles[currentIndex + 1]
             : null;
 
     return (
-        <section className="mt-12 grid gap-4 md:grid-cols-2">
-            {previous ? (
+        <nav
+            className="
+                grid
+                gap-4
+                sm:grid-cols-2
+            "
+            aria-label="Article navigation"
+        >
+
+            {/* Previous */}
+
+            {previousArticle ? (
                 <Link
-                    href={previous.href}
+                    href={`/help/${previousArticle.slug}`}
                     className="
                         group
                         rounded-2xl
@@ -40,26 +79,59 @@ export default function ArticleNavigation({
                         p-6
                         shadow-sm
                         transition
-                        hover:border-blue-500
-                        hover:bg-blue-50
+                        hover:-translate-y-0.5
+                        hover:border-blue-200
+                        hover:shadow-md
                     "
                 >
-                    <div className="flex items-center gap-3 text-sm text-slate-500">
-                        <ArrowLeft className="h-4 w-4" />
-                        Previous Article
+                    <div className="flex items-center gap-3">
+
+                        <ArrowLeft
+                            className="
+                                h-5
+                                w-5
+                                text-slate-400
+                                transition
+                                group-hover:-translate-x-1
+                                group-hover:text-blue-600
+                            "
+                        />
+
+                        <span
+                            className="
+                                text-sm
+                                font-medium
+                                text-slate-500
+                            "
+                        >
+                            Previous Article
+                        </span>
+
                     </div>
 
-                    <h3 className="mt-3 font-semibold text-slate-900 group-hover:text-blue-700">
-                        {previous.title}
-                    </h3>
+                    <p
+                        className="
+                            mt-3
+                            text-lg
+                            font-bold
+                            text-slate-900
+                            transition
+                            group-hover:text-blue-700
+                        "
+                    >
+                        {previousArticle.title}
+                    </p>
+
                 </Link>
             ) : (
                 <div />
             )}
 
-            {next ? (
+            {/* Next */}
+
+            {nextArticle ? (
                 <Link
-                    href={next.href}
+                    href={`/help/${nextArticle.slug}`}
                     className="
                         group
                         rounded-2xl
@@ -70,22 +142,54 @@ export default function ArticleNavigation({
                         text-right
                         shadow-sm
                         transition
-                        hover:border-blue-500
-                        hover:bg-blue-50
+                        hover:-translate-y-0.5
+                        hover:border-blue-200
+                        hover:shadow-md
                     "
                 >
-                    <div className="flex items-center justify-end gap-3 text-sm text-slate-500">
-                        Next Article
-                        <ArrowRight className="h-4 w-4" />
+                    <div className="flex items-center justify-end gap-3">
+
+                        <span
+                            className="
+                                text-sm
+                                font-medium
+                                text-slate-500
+                            "
+                        >
+                            Next Article
+                        </span>
+
+                        <ArrowRight
+                            className="
+                                h-5
+                                w-5
+                                text-slate-400
+                                transition
+                                group-hover:translate-x-1
+                                group-hover:text-blue-600
+                            "
+                        />
+
                     </div>
 
-                    <h3 className="mt-3 font-semibold text-slate-900 group-hover:text-blue-700">
-                        {next.title}
-                    </h3>
+                    <p
+                        className="
+                            mt-3
+                            text-lg
+                            font-bold
+                            text-slate-900
+                            transition
+                            group-hover:text-blue-700
+                        "
+                    >
+                        {nextArticle.title}
+                    </p>
+
                 </Link>
             ) : (
                 <div />
             )}
-        </section>
+
+        </nav>
     );
 }

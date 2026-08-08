@@ -26,6 +26,7 @@ const styles = {
         iconColor: "text-blue-600",
         titleColor: "text-blue-700",
     },
+
     success: {
         icon: CheckCircle2,
         border: "border-green-500",
@@ -33,6 +34,7 @@ const styles = {
         iconColor: "text-green-600",
         titleColor: "text-green-700",
     },
+
     warning: {
         icon: TriangleAlert,
         border: "border-orange-500",
@@ -40,6 +42,7 @@ const styles = {
         iconColor: "text-orange-600",
         titleColor: "text-orange-700",
     },
+
     error: {
         icon: XCircle,
         border: "border-red-500",
@@ -70,14 +73,25 @@ export default function HelpNotice({
             <div className="flex items-start gap-4">
 
                 <Icon
-                    className={`mt-1 h-6 w-6 flex-shrink-0 ${style.iconColor}`}
+                    className={`
+                        mt-1
+                        h-6
+                        w-6
+                        flex-shrink-0
+                        ${style.iconColor}
+                    `}
                 />
 
                 <div className="flex-1">
 
                     {title && (
                         <h3
-                            className={`mb-2 text-lg font-semibold ${style.titleColor}`}
+                            className={`
+                                mb-2
+                                text-lg
+                                font-semibold
+                                ${style.titleColor}
+                            `}
                         >
                             {title}
                         </h3>

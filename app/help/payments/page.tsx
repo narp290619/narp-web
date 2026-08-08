@@ -1,140 +1,343 @@
 import HelpArticleLayout from "@/components/help/HelpArticleLayout";
-import HelpNotice from "@/components/help/HelpNotice";
 import HelpSection from "@/components/help/HelpSection";
+import HelpNotice from "@/components/help/HelpNotice";
 
 export const metadata = {
-    title: "Payments & Escrow | Help Center | NARP",
+    title: "Payments | NARP Help Center",
     description:
-        "Learn how payments, escrow, refunds, and withdrawals work on NARP.",
+        "Learn how payments work on NARP, including payment methods, booking payments, payment status, refunds, and common payment issues.",
 };
+
+const tocItems = [
+    {
+        id: "how-payments-work",
+        title: "How Payments Work",
+    },
+    {
+        id: "payment-methods",
+        title: "Payment Methods",
+    },
+    {
+        id: "making-payment",
+        title: "Making a Payment",
+    },
+    {
+        id: "payment-status",
+        title: "Payment Status",
+    },
+    {
+        id: "escrow",
+        title: "Escrow and Payment Release",
+    },
+    {
+        id: "refunds",
+        title: "Refunds",
+    },
+    {
+        id: "payment-problems",
+        title: "Payment Problems",
+    },
+    {
+        id: "payment-security",
+        title: "Payment Security",
+    },
+];
 
 export default function PaymentsHelpPage() {
     return (
         <HelpArticleLayout
-            title="Payments & Escrow"
-            description="Everything you need to know about payments, escrow protection, refunds, and freelancer payouts."
-            currentArticle="/help/payments"
+            title="Payments"
+            description="Learn how payments work on NARP, from booking a service to payment release, refunds, and resolving payment issues."
+            currentArticle="payments"
+            tocItems={tocItems}
         >
-            <HelpSection title="How Payments Work">
-                <p>
-                    NARP provides a secure payment process designed to protect
-                    both clients and freelancers.
-                </p>
+            <div className="space-y-10">
 
-                <ol>
-                    <li>Book a service.</li>
-                    <li>The freelancer accepts your request.</li>
-                    <li>The client completes the payment.</li>
-                    <li>Funds are securely held in escrow.</li>
-                    <li>The freelancer completes the service.</li>
-                    <li>The client confirms completion.</li>
-                    <li>The payment is released to the freelancer's wallet.</li>
-                </ol>
-            </HelpSection>
+                {/* How Payments Work */}
 
-            <HelpNotice
-                type="success"
-                title="Your Payment Is Protected"
-            >
-                Client payments are not immediately released to freelancers.
-                Funds remain securely held in escrow until the service has been
-                completed and approved or otherwise resolved under NARP's
-                policies.
-            </HelpNotice>
+                <HelpSection
+                    id="how-payments-work"
+                    title="How Payments Work"
+                >
+                    <p>
+                        NARP allows clients to pay for services through
+                        supported payment methods available on the platform.
+                        Payments are associated with a specific booking and
+                        are processed through approved payment providers.
+                    </p>
 
-            <HelpSection title="What Is Escrow?">
-                <p>
-                    Escrow is a secure holding system that protects both parties
-                    during a transaction.
-                </p>
+                    <p>
+                        Depending on the transaction, funds may be temporarily
+                        held while the service is being completed. This helps
+                        provide protection for both clients and freelancers.
+                    </p>
 
-                <ul>
-                    <li>Clients know their payment is protected.</li>
-                    <li>Freelancers know funds have been secured.</li>
-                    <li>Payments are released only after service completion.</li>
-                    <li>Disputed funds remain protected while under review.</li>
-                </ul>
-            </HelpSection>
+                    <p>
+                        Once the applicable conditions are satisfied, funds
+                        may be released to the freelancer according to NARP's
+                        payment and escrow policies.
+                    </p>
+                </HelpSection>
 
-            <HelpSection title="Supported Payment Methods">
-                <p>
-                    Payment options may change as NARP continues to expand.
-                    Available payment methods are displayed during checkout.
-                </p>
+                {/* Payment Methods */}
 
-                <ul>
-                    <li>Supported digital payment providers.</li>
-                    <li>Additional payment methods may be added in future updates.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="payment-methods"
+                    title="Payment Methods"
+                >
+                    <p>
+                        NARP may support one or more payment methods depending
+                        on availability, location, and the payment providers
+                        integrated with the platform.
+                    </p>
 
-            <HelpSection title="Refunds">
-                <p>
-                    Refund eligibility depends on the booking status and the
-                    circumstances surrounding the request.
-                </p>
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>Online card payments</li>
+                        <li>Supported digital payment methods</li>
+                        <li>Other payment methods made available by NARP</li>
+                    </ul>
 
-                <ul>
-                    <li>Cancelled bookings may qualify for a refund.</li>
-                    <li>Disputed bookings are reviewed individually.</li>
-                    <li>Approved refunds are processed according to the Refund Policy.</li>
-                </ul>
-            </HelpSection>
+                    <p>
+                        Available payment methods are displayed during the
+                        booking or checkout process.
+                    </p>
 
-            <HelpNotice
-                type="warning"
-                title="Refund Requests"
-            >
-                Not every cancellation automatically qualifies for a refund.
-                Eligibility depends on the timing of the cancellation, service
-                status, and the outcome of any investigation.
-            </HelpNotice>
+                    <HelpNotice type="info">
+                        Payment methods may change over time as NARP adds,
+                        removes, or updates payment providers.
+                    </HelpNotice>
+                </HelpSection>
 
-            <HelpSection title="Freelancer Wallet">
-                <p>
-                    Once escrow funds are released, the approved amount is
-                    credited to the freelancer's NARP Wallet.
-                </p>
+                {/* Making a Payment */}
 
-                <ul>
-                    <li>View your available wallet balance.</li>
-                    <li>Track completed payouts.</li>
-                    <li>Submit withdrawal requests.</li>
-                    <li>Review your transaction history.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="making-payment"
+                    title="Making a Payment"
+                >
+                    <p>
+                        To pay for a booking:
+                    </p>
 
-            <HelpSection title="Withdrawals">
-                <p>
-                    Freelancers may withdraw available wallet balances once they
-                    meet the requirements outlined in the Withdrawal Policy.
-                </p>
+                    <ol className="list-decimal space-y-3 pl-6">
+                        <li>Select the service you want to book.</li>
+                        <li>Review the freelancer and booking details.</li>
+                        <li>Confirm the service amount and applicable fees.</li>
+                        <li>Select an available payment method.</li>
+                        <li>Complete the payment through the secure checkout process.</li>
+                        <li>Wait for the payment confirmation.</li>
+                    </ol>
 
-                <ul>
-                    <li>Only available wallet balances can be withdrawn.</li>
-                    <li>Funds still in escrow cannot be withdrawn.</li>
-                    <li>Identity verification may be required.</li>
-                    <li>Processing times vary depending on the payment provider.</li>
-                </ul>
-            </HelpSection>
+                    <p>
+                        Do not send payment directly to a freelancer when the
+                        transaction is intended to be completed through NARP.
+                    </p>
 
-            <HelpNotice
-                type="info"
-                title="Security Reviews"
-            >
-                To protect the platform and its users, NARP may temporarily
-                delay payouts or request additional verification if suspicious
-                activity is detected.
-            </HelpNotice>
+                    <HelpNotice type="warning">
+                        Payments made outside the NARP platform may not be
+                        protected by NARP's booking, escrow, dispute, or refund
+                        processes.
+                    </HelpNotice>
+                </HelpSection>
 
-            <HelpSection title="Need More Help?">
-                <p>
-                    If you're experiencing payment issues, refund concerns, or
-                    withdrawal problems, please contact NARP Support. Be sure to
-                    include your booking reference and any relevant screenshots
-                    to help us investigate more quickly.
-                </p>
-            </HelpSection>
+                {/* Payment Status */}
+
+                <HelpSection
+                    id="payment-status"
+                    title="Payment Status"
+                >
+                    <p>
+                        Your booking may display different payment statuses
+                        depending on the current stage of the transaction.
+                    </p>
+
+                    <div className="space-y-4">
+
+                        <div>
+                            <h3 className="font-semibold text-slate-900">
+                                Pending
+                            </h3>
+
+                            <p>
+                                The payment has been initiated but has not yet
+                                been fully confirmed.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold text-slate-900">
+                                Paid
+                            </h3>
+
+                            <p>
+                                The payment has been successfully confirmed by
+                                the payment provider.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold text-slate-900">
+                                Refunded
+                            </h3>
+
+                            <p>
+                                The applicable amount has been returned to the
+                                client according to the refund process.
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold text-slate-900">
+                                Failed
+                            </h3>
+
+                            <p>
+                                The payment could not be completed. You may
+                                need to try again using an available payment
+                                method.
+                            </p>
+                        </div>
+
+                    </div>
+                </HelpSection>
+
+                {/* Escrow */}
+
+                <HelpSection
+                    id="escrow"
+                    title="Escrow and Payment Release"
+                >
+                    <p>
+                        For eligible bookings, NARP may temporarily hold
+                        payment funds while the agreed service is being
+                        completed.
+                    </p>
+
+                    <p>
+                        This arrangement is intended to help protect both
+                        parties and provide a mechanism for handling disputes
+                        before funds are released.
+                    </p>
+
+                    <p>
+                        Depending on the applicable booking and platform
+                        policies, funds may be released after:
+                    </p>
+
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>The freelancer completes the service.</li>
+                        <li>The client confirms completion.</li>
+                        <li>The applicable release period expires.</li>
+                        <li>A dispute is resolved.</li>
+                    </ul>
+
+                    <HelpNotice type="info">
+                        Escrow availability, release conditions, and processing
+                        times are subject to NARP's current Escrow Policy.
+                    </HelpNotice>
+                </HelpSection>
+
+                {/* Refunds */}
+
+                <HelpSection
+                    id="refunds"
+                    title="Refunds"
+                >
+                    <p>
+                        A client may be eligible for a full or partial refund
+                        depending on the circumstances of the booking and the
+                        applicable NARP policies.
+                    </p>
+
+                    <p>
+                        Refunds may be considered when, for example:
+                    </p>
+
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>A booking is cancelled under eligible conditions.</li>
+                        <li>A service is not provided as agreed.</li>
+                        <li>A payment was incorrectly processed.</li>
+                        <li>A dispute results in a refund decision.</li>
+                    </ul>
+
+                    <p>
+                        Refund processing times may depend on the payment
+                        provider and the payment method originally used.
+                    </p>
+
+                    <HelpNotice type="info">
+                        For detailed refund rules, please review the NARP
+                        Refund Policy.
+                    </HelpNotice>
+                </HelpSection>
+
+                {/* Payment Problems */}
+
+                <HelpSection
+                    id="payment-problems"
+                    title="Payment Problems"
+                >
+                    <p>
+                        If your payment does not appear to have completed,
+                        first check the payment status associated with your
+                        booking.
+                    </p>
+
+                    <p>
+                        You can also try:
+                    </p>
+
+                    <ul className="list-disc space-y-2 pl-6">
+                        <li>Checking your internet connection.</li>
+                        <li>Confirming that your payment details are correct.</li>
+                        <li>Trying another supported payment method.</li>
+                        <li>Checking whether your bank or payment provider declined the transaction.</li>
+                        <li>Waiting a short time if the payment is still processing.</li>
+                    </ul>
+
+                    <p>
+                        If your account was charged but the NARP booking does
+                        not show the expected payment status, contact NARP
+                        Support and provide the relevant booking information.
+                    </p>
+
+                    <HelpNotice type="warning">
+                        Do not repeatedly submit a payment if your bank or
+                        payment provider already shows a successful charge.
+                        This may result in duplicate charges.
+                    </HelpNotice>
+                </HelpSection>
+
+                {/* Payment Security */}
+
+                <HelpSection
+                    id="payment-security"
+                    title="Payment Security"
+                >
+                    <p>
+                        NARP uses third-party payment providers and security
+                        measures designed to help protect payment transactions.
+                    </p>
+
+                    <p>
+                        NARP does not intentionally store complete credit or
+                        debit card details when those details are handled
+                        directly by the payment provider.
+                    </p>
+
+                    <p>
+                        Never share your password, authentication codes, card
+                        details, or other sensitive payment information with
+                        another user through NARP messaging.
+                    </p>
+
+                    <HelpNotice type="warning">
+                        NARP Support will not ask you to provide your password
+                        or authentication codes through a freelancer or another
+                        user.
+                    </HelpNotice>
+                </HelpSection>
+
+            </div>
         </HelpArticleLayout>
     );
 }

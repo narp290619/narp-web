@@ -1,143 +1,165 @@
 import HelpArticleLayout from "@/components/help/HelpArticleLayout";
-import HelpNotice from "@/components/help/HelpNotice";
 import HelpSection from "@/components/help/HelpSection";
+import HelpNotice from "@/components/help/HelpNotice";
 
 export const metadata = {
-    title: "Account & Profile | Help Center | NARP",
+    title: "Account | NARP Help Center",
     description:
-        "Learn how to create, manage, verify, and secure your NARP account.",
+        "Learn how to create, manage, verify, secure, and delete your NARP account.",
 };
+
+const tocItems = [
+    {
+        id: "creating-account",
+        title: "Creating an Account",
+    },
+    {
+        id: "profile",
+        title: "Managing Your Profile",
+    },
+    {
+        id: "verification",
+        title: "Identity Verification",
+    },
+    {
+        id: "security",
+        title: "Account Security",
+    },
+    {
+        id: "password",
+        title: "Password and Login",
+    },
+    {
+        id: "deletion",
+        title: "Deleting Your Account",
+    },
+];
 
 export default function AccountHelpPage() {
     return (
         <HelpArticleLayout
-            title="Account & Profile"
-            description="Everything you need to know about creating, managing, and securing your NARP account."
-            currentArticle="/help/account"
+            title="Account"
+            description="Learn how to create and manage your NARP account, complete verification, protect your account, and update your profile."
+            currentArticle="account"
+            tocItems={tocItems}
         >
-            <HelpSection title="Creating an Account">
-                <p>
-                    Creating a NARP account only takes a few minutes.
-                </p>
+            <div className="space-y-10">
 
-                <ol>
-                    <li>Download the NARP app.</li>
-                    <li>Create a new account.</li>
-                    <li>Verify your email address.</li>
-                    <li>Complete your profile information.</li>
-                    <li>Start booking services or offering your skills.</li>
-                </ol>
-            </HelpSection>
+                <HelpSection
+                    id="creating-account"
+                    title="Creating an Account"
+                >
+                    <p>
+                        To use NARP, you may need to create an account using
+                        the registration options provided in the application
+                        or website.
+                    </p>
 
-            <HelpSection title="Keeping Your Profile Updated">
-                <p>
-                    Keeping your profile accurate helps improve trust and makes
-                    it easier for other users to interact with you.
-                </p>
+                    <p>
+                        Provide accurate information when creating your
+                        account. Some features may require additional
+                        verification.
+                    </p>
+                </HelpSection>
 
-                <ul>
-                    <li>Update your profile photo.</li>
-                    <li>Edit your contact information.</li>
-                    <li>Change your address or service location.</li>
-                    <li>Manage your notification preferences.</li>
-                    <li>Keep your personal details current.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="profile"
+                    title="Managing Your Profile"
+                >
+                    <p>
+                        Your profile contains information that helps other
+                        users understand who you are and, where applicable,
+                        what services you provide.
+                    </p>
 
-            <HelpNotice
-                type="info"
-                title="Verified Profiles"
-            >
-                Verified freelancers are generally more trusted by clients.
-                Completing identity verification may unlock additional platform
-                features and improve credibility.
-            </HelpNotice>
+                    <p>
+                        Depending on your account type, you may be able to
+                        update information such as:
+                    </p>
 
-            <HelpSection title="Identity Verification">
-                <p>
-                    Some features require identity verification to help keep
-                    the NARP community safe.
-                </p>
+                    <ul>
+                        <li>Name and profile information</li>
+                        <li>Profile photo</li>
+                        <li>Contact information</li>
+                        <li>Service-related information</li>
+                        <li>Other account preferences</li>
+                    </ul>
+                </HelpSection>
 
-                <ul>
-                    <li>Government-issued ID.</li>
-                    <li>Profile photo verification.</li>
-                    <li>Additional verification when required.</li>
-                </ul>
+                <HelpSection
+                    id="verification"
+                    title="Identity Verification"
+                >
+                    <p>
+                        NARP may require users, particularly freelancers, to
+                        complete identity verification before accessing
+                        certain features.
+                    </p>
 
-                <p>
-                    Verification requests are reviewed by the NARP team before
-                    approval.
-                </p>
-            </HelpSection>
+                    <p>
+                        Verification may involve submitting information or
+                        documents necessary to confirm your identity.
+                    </p>
 
-            <HelpSection title="Changing Your Password">
-                <p>
-                    If you know your current password, you can change it from
-                    your account settings.
-                </p>
+                    <HelpNotice type="warning">
+                        Never submit identity documents through unofficial
+                        NARP channels or directly to another user.
+                    </HelpNotice>
+                </HelpSection>
 
-                <p>
-                    If you've forgotten your password, use the "Forgot Password"
-                    option on the sign-in screen to receive a password reset
-                    email.
-                </p>
-            </HelpSection>
+                <HelpSection
+                    id="security"
+                    title="Account Security"
+                >
+                    <p>
+                        You are responsible for keeping your account
+                        credentials secure.
+                    </p>
 
-            <HelpSection title="Managing Notifications">
-                <p>
-                    You can control which notifications you receive from NARP.
-                </p>
+                    <ul>
+                        <li>Use a strong and unique password.</li>
+                        <li>Do not share your login credentials.</li>
+                        <li>Do not share authentication codes.</li>
+                        <li>Be cautious of suspicious messages or links.</li>
+                        <li>Contact NARP if you suspect unauthorized access.</li>
+                    </ul>
+                </HelpSection>
 
-                <ul>
-                    <li>Booking updates.</li>
-                    <li>Messages.</li>
-                    <li>Payment notifications.</li>
-                    <li>Promotions and announcements.</li>
-                </ul>
-            </HelpSection>
+                <HelpSection
+                    id="password"
+                    title="Password and Login"
+                >
+                    <p>
+                        If you cannot access your account, use the available
+                        password recovery or authentication options provided
+                        by NARP.
+                    </p>
 
-            <HelpNotice
-                type="success"
-                title="Protect Your Account"
-            >
-                Always use a strong password and never share your login
-                credentials with anyone. NARP Support will never ask for your
-                password.
-            </HelpNotice>
+                    <HelpNotice type="info">
+                        If you believe someone has accessed your account
+                        without authorization, contact NARP Support as soon
+                        as possible.
+                    </HelpNotice>
+                </HelpSection>
 
-            <HelpSection title="Deleting Your Account">
-                <p>
-                    If you no longer wish to use NARP, you may request account
-                    deletion through your account settings or by contacting
-                    NARP Support.
-                </p>
+                <HelpSection
+                    id="deletion"
+                    title="Deleting Your Account"
+                >
+                    <p>
+                        You may request deletion of your NARP account through
+                        the available account settings or support channels.
+                    </p>
 
-                <ul>
-                    <li>Your account may be permanently deleted.</li>
-                    <li>Certain information may be retained as required by law.</li>
-                    <li>Completed transaction records may remain for compliance purposes.</li>
-                </ul>
-            </HelpSection>
+                    <p>
+                        Certain information may need to be retained when
+                        required by law, legitimate business requirements,
+                        fraud prevention, dispute resolution, or other
+                        applicable obligations.
+                    </p>
+                </HelpSection>
 
-            <HelpNotice
-                type="warning"
-                title="Before Deleting Your Account"
-            >
-                Please ensure you have completed all active bookings,
-                withdrawals, and ongoing disputes before requesting account
-                deletion. Requests may be delayed until outstanding
-                transactions are resolved.
-            </HelpNotice>
-
-            <HelpSection title="Need More Help?">
-                <p>
-                    If you're unable to sign in, verify your account, or update
-                    your profile, please contact NARP Support. Include your
-                    registered email address and any relevant screenshots to
-                    help us assist you more quickly.
-                </p>
-            </HelpSection>
+            </div>
         </HelpArticleLayout>
     );
 }
