@@ -52,8 +52,8 @@ const navigation = [
         icon: ArrowUpRight,
     },
     {
-        label: "Verification",
-        href: "/admin/verification",
+        label: "Verifications",
+        href: "/admin/verifications",
         icon: ShieldCheck,
     },
     {

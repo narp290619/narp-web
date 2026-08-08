@@ -1,8 +1,24 @@
 "use client";
 
 import type { ReactNode } from "react";
+
 import { Menu } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import {
+    doc,
+    getDoc,
+} from "firebase/firestore";
+
+import {
+    onAuthStateChanged,
+} from "firebase/auth";
+
+import {
+    db,
+    auth,
+} from "@/lib/firebase";
 
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
@@ -11,12 +27,231 @@ export default function AdminLayout({
 }: {
     children: ReactNode;
 }) {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const router =
+        useRouter();
+
+    const [
+        sidebarOpen,
+        setSidebarOpen,
+    ] = useState(false);
+
+    const [
+        checkingAdmin,
+        setCheckingAdmin,
+    ] = useState(true);
+
+    const [
+        isAdmin,
+        setIsAdmin,
+    ] = useState(false);
+
+    useEffect(() => {
+
+        const unsubscribe =
+            onAuthStateChanged(
+                auth,
+                async (currentUser) => {
+
+                    /*
+                     * =====================================================
+                     * USER NOT LOGGED IN
+                     * =====================================================
+                     */
+
+                    if (!currentUser) {
+
+                        setIsAdmin(false);
+
+                        setCheckingAdmin(false);
+
+                        router.replace("/");
+
+                        return;
+                    }
+
+                    try {
+
+                        /*
+                         * =================================================
+                         * LOAD USER DOCUMENT
+                         * =================================================
+                         */
+
+                        const userRef =
+                            doc(
+                                db,
+                                "Users",
+                                currentUser.uid
+                            );
+
+                        const userSnapshot =
+                            await getDoc(
+                                userRef
+                            );
+
+                        /*
+                         * =================================================
+                         * USER DOCUMENT DOES NOT EXIST
+                         * =================================================
+                         */
+
+                        if (
+                            !userSnapshot.exists()
+                        ) {
+
+                            setIsAdmin(false);
+
+                            setCheckingAdmin(false);
+
+                            router.replace("/");
+
+                            return;
+                        }
+
+                        const userData =
+                            userSnapshot.data();
+
+                        /*
+                         * =================================================
+                         * CHECK ADMIN FLAG
+                         * =================================================
+                         */
+
+                        const admin =
+                            userData.isAdmin === true;
+
+                        setIsAdmin(admin);
+
+                        /*
+                         * =================================================
+                         * NOT AN ADMIN
+                         * =================================================
+                         */
+
+                        if (!admin) {
+
+                            setCheckingAdmin(false);
+
+                            router.replace("/");
+
+                            return;
+                        }
+
+                        /*
+                         * =================================================
+                         * ADMIN
+                         * =================================================
+                         */
+
+                        setCheckingAdmin(false);
+
+                    } catch (error) {
+
+                        console.error(
+                            "Failed to verify admin access:",
+                            error
+                        );
+
+                        setIsAdmin(false);
+
+                        setCheckingAdmin(false);
+
+                        router.replace("/");
+                    }
+                }
+            );
+
+        return () => {
+            unsubscribe();
+        };
+
+    }, [
+        router,
+    ]);
+
+    /*
+     * =====================================================
+     * CHECKING ADMIN ACCESS
+     * =====================================================
+     */
+
+    if (checkingAdmin) {
+
+        return (
+            <main
+                className="
+                    flex
+                    min-h-screen
+                    items-center
+                    justify-center
+                    bg-slate-50
+                    pt-28
+                "
+            >
+
+                <div className="text-center">
+
+                    <div
+                        className="
+                            mx-auto
+                            h-10
+                            w-10
+                            animate-spin
+                            rounded-full
+                            border-4
+                            border-slate-200
+                            border-t-blue-600
+                        "
+                    />
+
+                    <p
+                        className="
+                            mt-4
+                            text-sm
+                            font-medium
+                            text-slate-500
+                        "
+                    >
+                        Checking administrator access...
+                    </p>
+
+                </div>
+
+            </main>
+        );
+    }
+
+    /*
+     * =====================================================
+     * NOT ADMIN
+     * =====================================================
+     *
+     * The redirect is already being performed above.
+     * Do not render the admin interface while redirecting.
+     */
+
+    if (!isAdmin) {
+        return null;
+    }
+
+    /*
+     * =====================================================
+     * ADMIN LAYOUT
+     * =====================================================
+     */
 
     return (
-        <main className="min-h-screen pt-28">
+        <main
+            className="
+                min-h-screen
+                pt-28
+            "
+        >
 
-            {/* Mobile Admin Header */}
+            {/* =====================================================
+                MOBILE ADMIN HEADER
+            ====================================================== */}
 
             <div
                 className="
@@ -33,9 +268,12 @@ export default function AdminLayout({
                     lg:hidden
                 "
             >
+
                 <button
                     type="button"
-                    onClick={() => setSidebarOpen(true)}
+                    onClick={() =>
+                        setSidebarOpen(true)
+                    }
                     className="
                         rounded-lg
                         p-2
@@ -45,24 +283,48 @@ export default function AdminLayout({
                     "
                     aria-label="Open admin menu"
                 >
-                    <Menu className="h-5 w-5" />
+
+                    <Menu
+                        className="h-5 w-5"
+                    />
+
                 </button>
 
-                <span className="ml-3 text-sm font-semibold text-slate-900">
+                <span
+                    className="
+                        ml-3
+                        text-sm
+                        font-semibold
+                        text-slate-900
+                    "
+                >
                     NARP Administration
                 </span>
+
             </div>
 
-            {/* Sidebar */}
+            {/* =====================================================
+                ADMIN SIDEBAR
+            ====================================================== */}
 
             <AdminSidebar
-                mobileOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
+                mobileOpen={
+                    sidebarOpen
+                }
+                onClose={() =>
+                    setSidebarOpen(false)
+                }
             />
 
-            {/* Main Content */}
+            {/* =====================================================
+                MAIN CONTENT
+            ====================================================== */}
 
-            <div className="lg:pl-72">
+            <div
+                className="
+                    lg:pl-72
+                "
+            >
                 {children}
             </div>
 
