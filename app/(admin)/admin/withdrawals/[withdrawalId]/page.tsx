@@ -1069,7 +1069,7 @@ export default function
 
                     </div>
 
-                    {withdrawal.completedAt && (
+                    {withdrawal.completedAt && status === "completed" && (
                         <div className="flex gap-4">
 
                             <div
@@ -1087,6 +1087,37 @@ export default function
 
                                 <p className="font-semibold text-slate-900">
                                     Withdrawal completed
+                                </p>
+
+                                <p className="mt-1 text-sm text-slate-500">
+                                    {formatDate(
+                                        withdrawal.completedAt
+                                    )}
+                                </p>
+
+                            </div>
+
+                        </div>
+                    )}
+
+                    {withdrawal.completedAt && status === "rejected" && (
+                        <div className="flex gap-4">
+
+                            <div
+                                className="
+                                    mt-1
+                                    h-3
+                                    w-3
+                                    flex-shrink-0
+                                    rounded-full
+                                    bg-red-500
+                                "
+                            />
+
+                            <div>
+
+                                <p className="font-semibold text-slate-900">
+                                    Withdrawal rejected
                                 </p>
 
                                 <p className="mt-1 text-sm text-slate-500">
@@ -1189,7 +1220,9 @@ export default function
                             >
 
                                 <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                                    Completed At
+                                    {status === "rejected"
+                                        ? "Rejected At"
+                                        : "Completed At"}
                                 </p>
 
                                 <p className="mt-2 text-sm font-medium text-slate-800">
@@ -1209,14 +1242,16 @@ export default function
                 ADMIN ACTIONS
             ===================================================== */}
 
-            <WithdrawalActions
-                withdrawalId={withdrawal.id}
-                status={withdrawal.status ?? ""}
-                amount={withdrawal.amount ?? 0}
-                freelancerName={getUserDisplayName(
-                    user ?? undefined
-                )}
-            />
+            {status === "pending" && withdrawal.userId && (
+                <WithdrawalActions
+                    withdrawalId={withdrawal.id}
+                    status={withdrawal.status ?? ""}
+                    amount={withdrawal.amount ?? 0}
+                    freelancerName={getUserDisplayName(
+                        user ?? undefined
+                    )}
+                />
+            )}
 
         </div>
     );

@@ -479,14 +479,25 @@ export default function AdminWithdrawalsPage() {
         useMemo(() => {
             return withdrawals.filter(
                 (withdrawal) =>
-                    [
-                        "approved",
-                        "completed",
-                    ].includes(
-                        normalizeStatus(
-                            withdrawal.status
-                        )
-                    )
+                    normalizeStatus(
+                        withdrawal.status
+                    ) === "completed"
+            );
+        }, [withdrawals]);
+
+    /*
+     * =====================================================
+     * REJECTED
+     * =====================================================
+     */
+
+    const rejectedWithdrawals =
+        useMemo(() => {
+            return withdrawals.filter(
+                (withdrawal) =>
+                    normalizeStatus(
+                        withdrawal.status
+                    ) === "rejected"
             );
         }, [withdrawals]);
 
@@ -605,8 +616,8 @@ export default function AdminWithdrawalsPage() {
                 >
                     <RefreshCw
                         className={`h-4 w-4 ${loading
-                                ? "animate-spin"
-                                : ""
+                            ? "animate-spin"
+                            : ""
                             }`}
                     />
 
@@ -624,7 +635,7 @@ export default function AdminWithdrawalsPage() {
                     grid
                     gap-4
                     sm:grid-cols-2
-                    lg:grid-cols-3
+                    lg:grid-cols-4
                 "
             >
 
@@ -673,6 +684,49 @@ export default function AdminWithdrawalsPage() {
 
                     </div>
 
+                </div>
+
+                {/* Rejected */}
+
+                <div
+                    className="
+                        rounded-2xl
+                        border
+                        border-slate-200
+                        bg-white
+                        p-5
+                        shadow-sm
+                    "
+                >
+                    <div className="flex items-center gap-3">
+
+                        <div
+                            className="
+                                flex
+                                h-11
+                                w-11
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-red-50
+                            "
+                        >
+                            <XCircle className="h-5 w-5 text-red-600" />
+                        </div>
+
+                        <div>
+
+                            <p className="text-sm text-slate-500">
+                                Rejected
+                            </p>
+
+                            <p className="text-2xl font-bold text-slate-900">
+                                {rejectedWithdrawals.length}
+                            </p>
+
+                        </div>
+
+                    </div>
                 </div>
 
                 {/* Completed */}
@@ -1040,6 +1094,468 @@ export default function AdminWithdrawalsPage() {
                         )}
 
                     </div>
+                )}
+
+            </section>
+
+            {/* =====================================================
+                COMPLETED WITHDRAWALS
+            ====================================================== */}
+
+            <section
+                className="
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    shadow-sm
+                "
+            >
+
+                <div
+                    className="
+                        border-b
+                        border-slate-200
+                        px-6
+                        py-5
+                    "
+                >
+
+                    <div className="flex items-center gap-3">
+
+                        <div
+                            className="
+                                flex
+                                h-10
+                                w-10
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-green-50
+                            "
+                        >
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        </div>
+
+                        <div>
+
+                            <h2 className="font-semibold text-slate-900">
+                                Completed Withdrawals
+                            </h2>
+
+                            <p className="text-sm text-slate-500">
+                                Withdrawals that have been processed and deducted from the freelancer wallet.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {completedWithdrawals.length === 0 ? (
+
+                    <div className="px-6 py-16 text-center">
+
+                        <div
+                            className="
+                                mx-auto
+                                flex
+                                h-14
+                                w-14
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-slate-100
+                            "
+                        >
+                            <CheckCircle2 className="h-7 w-7 text-slate-400" />
+                        </div>
+
+                        <h3 className="mt-4 font-semibold text-slate-900">
+                            No completed withdrawals
+                        </h3>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                            No withdrawal requests have been completed yet.
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    <div className="divide-y divide-slate-100">
+
+                        {completedWithdrawals.map(
+                            (withdrawal) => {
+
+                                const user =
+                                    withdrawal.userId
+                                        ? users[
+                                        withdrawal.userId
+                                        ]
+                                        : undefined;
+
+                                return (
+                                    <Link
+                                        key={withdrawal.id}
+                                        href={`/admin/withdrawals/${withdrawal.id}`}
+                                        className="
+                                            block
+                                            px-6
+                                            py-5
+                                            transition
+                                            hover:bg-slate-50
+                                        "
+                                    >
+
+                                        <div
+                                            className="
+                                                flex
+                                                flex-col
+                                                gap-4
+                                                lg:flex-row
+                                                lg:items-center
+                                                lg:justify-between
+                                            "
+                                        >
+
+                                            <div className="flex min-w-0 items-center gap-4">
+
+                                                {user?.profileImageUrl ? (
+
+                                                    <img
+                                                        src={user.profileImageUrl}
+                                                        alt={getUserDisplayName(user)}
+                                                        className="
+                                                            h-11
+                                                            w-11
+                                                            flex-shrink-0
+                                                            rounded-full
+                                                            object-cover
+                                                        "
+                                                    />
+
+                                                ) : (
+
+                                                    <div
+                                                        className="
+                                                            flex
+                                                            h-11
+                                                            w-11
+                                                            flex-shrink-0
+                                                            items-center
+                                                            justify-center
+                                                            rounded-full
+                                                            bg-slate-100
+                                                            text-sm
+                                                            font-bold
+                                                            text-slate-500
+                                                        "
+                                                    >
+                                                        {getUserDisplayName(user)
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </div>
+
+                                                )}
+
+                                                <div className="min-w-0">
+
+                                                    <p className="truncate font-semibold text-slate-900">
+                                                        {getUserDisplayName(user)}
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs text-slate-400">
+                                                        GCash:{" "}
+                                                        {withdrawal.gcashNumber ?? "—"}
+                                                    </p>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-5">
+
+                                                <div>
+
+                                                    <span className="block text-xs text-slate-400">
+                                                        Amount
+                                                    </span>
+
+                                                    <span className="font-semibold text-slate-900">
+                                                        {formatAmount(
+                                                            withdrawal.amount
+                                                        )}
+                                                    </span>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <span className="block text-xs text-slate-400">
+                                                        Completed
+                                                    </span>
+
+                                                    <span className="text-sm font-medium text-slate-700">
+                                                        {formatDate(
+                                                            withdrawal.completedAt
+                                                        )}
+                                                    </span>
+
+                                                </div>
+
+                                                <StatusBadge
+                                                    status={
+                                                        withdrawal.status
+                                                    }
+                                                />
+
+                                                <ChevronRight className="h-5 w-5 text-slate-300" />
+
+                                            </div>
+
+                                        </div>
+
+                                    </Link>
+                                );
+                            }
+                        )}
+
+                    </div>
+
+                )}
+
+            </section>
+
+            {/* =====================================================
+                REJECTED WITHDRAWALS
+            ====================================================== */}
+
+            <section
+                className="
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white
+                    shadow-sm
+                "
+            >
+
+                <div
+                    className="
+                        border-b
+                        border-slate-200
+                        px-6
+                        py-5
+                    "
+                >
+
+                    <div className="flex items-center gap-3">
+
+                        <div
+                            className="
+                                flex
+                                h-10
+                                w-10
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-red-50
+                            "
+                        >
+                            <XCircle className="h-5 w-5 text-red-600" />
+                        </div>
+
+                        <div>
+
+                            <h2 className="font-semibold text-slate-900">
+                                Rejected Withdrawals
+                            </h2>
+
+                            <p className="text-sm text-slate-500">
+                                Requests rejected by an administrator. Wallet balance was not deducted.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {rejectedWithdrawals.length === 0 ? (
+
+                    <div className="px-6 py-16 text-center">
+
+                        <div
+                            className="
+                                mx-auto
+                                flex
+                                h-14
+                                w-14
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-slate-100
+                            "
+                        >
+                            <XCircle className="h-7 w-7 text-slate-400" />
+                        </div>
+
+                        <h3 className="mt-4 font-semibold text-slate-900">
+                            No rejected withdrawals
+                        </h3>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                            No withdrawal requests have been rejected.
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    <div className="divide-y divide-slate-100">
+
+                        {rejectedWithdrawals.map(
+                            (withdrawal) => {
+
+                                const user =
+                                    withdrawal.userId
+                                        ? users[
+                                            withdrawal.userId
+                                        ]
+                                        : undefined;
+
+                                return (
+                                    <Link
+                                        key={withdrawal.id}
+                                        href={`/admin/withdrawals/${withdrawal.id}`}
+                                        className="
+                                            block
+                                            px-6
+                                            py-5
+                                            transition
+                                            hover:bg-slate-50
+                                        "
+                                    >
+
+                                        <div
+                                            className="
+                                                flex
+                                                flex-col
+                                                gap-4
+                                                lg:flex-row
+                                                lg:items-center
+                                                lg:justify-between
+                                            "
+                                        >
+
+                                            <div className="flex min-w-0 items-center gap-4">
+
+                                                {user?.profileImageUrl ? (
+
+                                                    <img
+                                                        src={user.profileImageUrl}
+                                                        alt={getUserDisplayName(user)}
+                                                        className="
+                                                            h-11
+                                                            w-11
+                                                            flex-shrink-0
+                                                            rounded-full
+                                                            object-cover
+                                                        "
+                                                    />
+
+                                                ) : (
+
+                                                    <div
+                                                        className="
+                                                            flex
+                                                            h-11
+                                                            w-11
+                                                            flex-shrink-0
+                                                            items-center
+                                                            justify-center
+                                                            rounded-full
+                                                            bg-slate-100
+                                                            text-sm
+                                                            font-bold
+                                                            text-slate-500
+                                                        "
+                                                    >
+                                                        {getUserDisplayName(user)
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+                                                    </div>
+
+                                                )}
+
+                                                <div className="min-w-0">
+
+                                                    <p className="truncate font-semibold text-slate-900">
+                                                        {getUserDisplayName(user)}
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs text-slate-400">
+                                                        GCash:{" "}
+                                                        {withdrawal.gcashNumber ?? "—"}
+                                                    </p>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-5">
+
+                                                <div>
+
+                                                    <span className="block text-xs text-slate-400">
+                                                        Amount
+                                                    </span>
+
+                                                    <span className="font-semibold text-slate-900">
+                                                        {formatAmount(
+                                                            withdrawal.amount
+                                                        )}
+                                                    </span>
+
+                                                </div>
+
+                                                <div>
+
+                                                    <span className="block text-xs text-slate-400">
+                                                        Rejected
+                                                    </span>
+
+                                                    <span className="text-sm font-medium text-slate-700">
+                                                        {formatDate(
+                                                            withdrawal.completedAt
+                                                        )}
+                                                    </span>
+
+                                                </div>
+
+                                                <StatusBadge
+                                                    status={
+                                                        withdrawal.status
+                                                    }
+                                                />
+
+                                                <ChevronRight className="h-5 w-5 text-slate-300" />
+
+                                            </div>
+
+                                        </div>
+
+                                    </Link>
+                                );
+                            }
+                        )}
+
+                    </div>
+
                 )}
 
             </section>

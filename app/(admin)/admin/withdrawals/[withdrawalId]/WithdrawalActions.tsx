@@ -27,6 +27,7 @@ type ProcessWithdrawalResponse = {
     success: boolean;
     withdrawalId: string;
     action: "approve" | "reject";
+    transactionId?: string | null;
 };
 
 export default function WithdrawalActions({
