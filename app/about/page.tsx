@@ -57,7 +57,7 @@ export default function AboutPage() {
           </p>
 
           <div className="mt-8 inline-block rounded-full bg-gradient-to-r from-blue-700 to-sky-500 px-6 py-3 font-semibold text-white shadow">
-            Connecting Clients with Trusted Local Professionals
+            Connecting Clients with Trusted Local Freelancers
           </div>
         </section>
 
@@ -75,7 +75,7 @@ export default function AboutPage() {
           </p>
 
           <p className="mt-5 leading-8 text-gray-600">
-            The platform helps clients find reliable professionals while
+            The platform helps clients find reliable freelancers while
             giving freelancers opportunities to grow their careers and earn
             income through a secure and transparent system.
           </p>
@@ -153,7 +153,7 @@ export default function AboutPage() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-3xl leading-8 text-gray-600">
-            To make it easier for people to find reliable professionals
+            To make it easier for people to find reliable freelancers
             nearby while providing freelancers with access to fair
             opportunities, secure payments, and a trusted marketplace
             for their services.

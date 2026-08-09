@@ -6,6 +6,7 @@ import {
     LayoutDashboard,
     Users,
     UserCheck,
+    Briefcase,
     CalendarCheck,
     CreditCard,
     ArrowUpRight,
@@ -35,6 +36,11 @@ const navigation = [
         label: "Freelancers",
         href: "/admin/freelancers",
         icon: UserCheck,
+    },
+    {
+        label: "PostJobRequests",
+        href: "/admin/post-job-requests",
+        icon: Briefcase,
     },
     {
         label: "Bookings",
