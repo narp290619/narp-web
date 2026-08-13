@@ -14,6 +14,7 @@ import {
     AlertTriangle,
     Settings,
     X,
+    Scale,
 } from "lucide-react";
 
 type AdminSidebarProps = {
@@ -66,6 +67,11 @@ const navigation = [
         label: "Reports",
         href: "/admin/reports",
         icon: AlertTriangle,
+    },
+    {
+        label: "Disputes",
+        href: "/admin/disputes",
+        icon: Scale,
     },
 ];
 
@@ -120,10 +126,9 @@ export default function AdminSidebar({
                     transition-transform
                     duration-300
                     lg:translate-x-0
-                    ${
-                        mobileOpen
-                            ? "translate-x-0"
-                            : "-translate-x-full"
+                    ${mobileOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full"
                     }
                 `}
             >
@@ -196,10 +201,9 @@ export default function AdminSidebar({
                                         text-sm
                                         font-medium
                                         transition
-                                        ${
-                                            isActive
-                                                ? "bg-blue-50 text-blue-700"
-                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                        ${isActive
+                                            ? "bg-blue-50 text-blue-700"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                         }
                                     `}
                                 >
@@ -242,10 +246,9 @@ export default function AdminSidebar({
                                         text-sm
                                         font-medium
                                         transition
-                                        ${
-                                            isActive
-                                                ? "bg-blue-50 text-blue-700"
-                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                                        ${isActive
+                                            ? "bg-blue-50 text-blue-700"
+                                            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                                         }
                                     `}
                                 >

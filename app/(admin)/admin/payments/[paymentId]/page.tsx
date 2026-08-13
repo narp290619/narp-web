@@ -2,27 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-
+import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft,
     CheckCircle2,
     XCircle,
     Clock,
-    Receipt,
     User,
-    BriefcaseBusiness,
-    CalendarDays,
-    CreditCard,
-    ShieldCheck,
-    AlertTriangle,
-    FileText,
-    ExternalLink,
-    RefreshCw,
     Mail,
     Phone,
+    BriefcaseBusiness,
+    CalendarDays,
     MapPin,
+    CreditCard,
+    FileText,
+    ShieldCheck,
     Loader2,
+    AlertCircle,
+    ExternalLink,
 } from "lucide-react";
 
 import {
@@ -32,27 +29,17 @@ import {
     serverTimestamp,
 } from "firebase/firestore";
 
-import {
-    getAuth,
-} from "firebase/auth";
-
 import { db } from "@/lib/firebase";
-
-/*
- * =====================================================
- * TYPES
- * =====================================================
- */
+import { getAuth } from "firebase/auth";
 
 type PaymentRecord = {
     id: string;
 
-    clientId?: string;
-    requestId?: string;
     receiptId?: string;
+    requestId?: string;
+    clientId?: string;
 
     skillId?: string;
-
     amount?: number;
     referenceNumber?: string;
 
@@ -62,12 +49,12 @@ type PaymentRecord = {
     remarks?: string;
 
     verifiedBy?: string;
+    verifiedAt?: Date | null;
 
     createdAt?: Date | null;
-    verifiedAt?: Date | null;
 };
 
-type ClientRecord = {
+type UserRecord = {
     id: string;
 
     name?: string;
@@ -81,7 +68,7 @@ type ClientRecord = {
     profileImageUrl?: string;
 };
 
-type RequestRecord = {
+type PostJobRequest = {
     id: string;
 
     clientId?: string;
@@ -89,60 +76,73 @@ type RequestRecord = {
     freelancerName?: string;
 
     skillId?: string;
+    details?: string;
 
     price?: number;
 
     status?: string;
     paymentStatus?: string;
 
-    details?: string;
+    date?: string;
+    time?: string;
+    isAsap?: boolean;
+
+    distance?: number;
+    eta?: string;
+
+    clientLat?: number;
+    clientLng?: number;
+
+    freelancerLat?: number;
+    freelancerLng?: number;
+
     address?: string;
 
-    date?: string;
-    time?: string;
-
     createdAt?: Date | null;
+    acceptedAt?: Date | null;
     updatedAt?: Date | null;
-    schedule?: Date | null;
-
+    expiresAt?: Date | null;
     completedAt?: Date | null;
 };
 
-type BookingRecord = {
+type Booking = {
     id: string;
 
+    clientId?: string;
     freelancerId?: string;
     freelancerName?: string;
 
-    clientId?: string;
-
     skillId?: string;
+    details?: string;
 
     price?: number;
 
     status?: string;
     paymentStatus?: string;
 
-    details?: string;
-
     date?: string;
     time?: string;
+    isAsap?: boolean;
+
+    distance?: number;
+    eta?: string;
+
+    clientLat?: number;
+    clientLng?: number;
+
+    freelancerLat?: number;
+    freelancerLng?: number;
+
+    address?: string;
 
     createdAt?: Date | null;
+    acceptedAt?: Date | null;
     updatedAt?: Date | null;
-
+    expiresAt?: Date | null;
     completedAt?: Date | null;
 };
 
-/*
- * =====================================================
- * HELPERS
- * =====================================================
- */
-
-function getDate(
-    value: unknown
-): Date | null {
+function getDate(value: unknown): Date | null {
     if (
         value &&
         typeof value === "object" &&
@@ -167,8 +167,71 @@ function getDate(
     return null;
 }
 
+function getString(
+    value: unknown
+): string | undefined {
+    return typeof value === "string"
+        ? value
+        : undefined;
+}
+
+function getNumber(
+    value: unknown
+): number | undefined {
+    return typeof value === "number"
+        ? value
+        : undefined;
+}
+
+function getBoolean(
+    value: unknown
+): boolean | undefined {
+    return typeof value === "boolean"
+        ? value
+        : undefined;
+}
+
+function getUserName(
+    user?: UserRecord | null
+) {
+    if (!user) {
+        return "Unknown Client";
+    }
+
+    if (user.name?.trim()) {
+        return user.name;
+    }
+
+    const fullName = [
+        user.firstName,
+        user.middleName,
+        user.lastName,
+    ]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+    return fullName || "Unknown Client";
+}
+
+function formatMoney(
+    value?: number
+) {
+    if (value === undefined) {
+        return "₱—";
+    }
+
+    return `₱${value.toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }
+    )}`;
+}
+
 function formatDate(
-    date: Date | null
+    date?: Date | null
 ) {
     if (!date) {
         return "—";
@@ -185,7 +248,7 @@ function formatDate(
 }
 
 function formatDateTime(
-    date: Date | null
+    date?: Date | null
 ) {
     if (!date) {
         return "—";
@@ -203,282 +266,363 @@ function formatDateTime(
     );
 }
 
-function formatAmount(
-    amount?: number
+function normalizeStatus(
+    value?: string
 ) {
-    if (
-        typeof amount !== "number"
-    ) {
-        return "₱—";
-    }
-
-    return `₱${amount.toLocaleString(
-        "en-PH",
-        {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }
-    )}`;
-}
-
-function getClientName(
-    client: ClientRecord | null
-) {
-    if (!client) {
-        return "Unknown client";
-    }
-
-    if (client.name?.trim()) {
-        return client.name;
-    }
-
-    const fullName = [
-        client.firstName,
-        client.middleName,
-        client.lastName,
-    ]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
-
-    return fullName || "Unnamed client";
-}
-
-function getInitials(
-    name: string
-) {
-    const parts = name
-        .split(" ")
-        .filter(Boolean);
-
-    if (
-        parts.length === 0
-    ) {
-        return "?";
-    }
-
-    if (
-        parts.length === 1
-    ) {
-        return parts[0]
-            .substring(0, 2)
-            .toUpperCase();
-    }
-
     return (
-        parts[0][0] +
-        parts[parts.length - 1][0]
-    ).toUpperCase();
+        value
+            ?.trim()
+            .toLowerCase() ?? ""
+    );
 }
 
-function getStatusConfig(
-    status?: string
-) {
-    const normalized =
-        status?.toLowerCase() ?? "";
-
-    if (
-        normalized ===
-        "approved"
-    ) {
-        return {
-            label: "Approved",
-            className:
-                "border-green-200 bg-green-50 text-green-700",
-            icon: CheckCircle2,
-        };
-    }
-
-    if (
-        normalized ===
-        "rejected"
-    ) {
-        return {
-            label: "Rejected",
-            className:
-                "border-red-200 bg-red-50 text-red-700",
-            icon: XCircle,
-        };
-    }
-
-    return {
-        label: "Pending",
-        className:
-            "border-orange-200 bg-orange-50 text-orange-700",
-        icon: Clock,
-    };
-}
-
-/*
- * =====================================================
- * STATUS BADGE
- * =====================================================
- */
-
-function StatusBadge({
+function PaymentStatusBadge({
     status,
 }: {
     status?: string;
 }) {
-    const config =
-        getStatusConfig(status);
+    const normalized =
+        normalizeStatus(status);
 
-    const Icon =
-        config.icon;
+    if (normalized === "approved") {
+        return (
+            <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-sm font-semibold text-green-700">
+                <CheckCircle2 className="h-4 w-4" />
+                Approved
+            </span>
+        );
+    }
+
+    if (normalized === "rejected") {
+        return (
+            <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700">
+                <XCircle className="h-4 w-4" />
+                Rejected
+            </span>
+        );
+    }
 
     return (
-        <span
-            className={`
-                inline-flex
-                items-center
-                gap-2
-                rounded-full
-                border
-                px-3
-                py-1.5
-                text-sm
-                font-semibold
-                ${config.className}
-            `}
-        >
-            <Icon className="h-4 w-4" />
-
-            {config.label}
+        <span className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-sm font-semibold text-orange-700">
+            <Clock className="h-4 w-4" />
+            Pending Verification
         </span>
     );
 }
 
-/*
- * =====================================================
- * INFO ITEM
- * =====================================================
- */
+function StatusBadge({
+    value,
+}: {
+    value?: string;
+}) {
+    if (!value) {
+        return (
+            <span className="text-sm text-slate-400">
+                —
+            </span>
+        );
+    }
+
+    return (
+        <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+            {value.replaceAll("_", " ")}
+        </span>
+    );
+}
 
 function InfoItem({
     icon: Icon,
     label,
     value,
 }: {
-    icon: typeof User;
+    icon: typeof Mail;
     label: string;
     value: string;
 }) {
     return (
         <div className="flex items-start gap-3">
-
-            <div
-                className="
-                    mt-0.5
-                    flex
-                    h-9
-                    w-9
-                    flex-shrink-0
-                    items-center
-                    justify-center
-                    rounded-lg
-                    bg-slate-100
-                "
-            >
-                <Icon
-                    className="
-                        h-4
-                        w-4
-                        text-slate-500
-                    "
-                />
+            <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                <Icon className="h-4 w-4 text-slate-500" />
             </div>
 
             <div className="min-w-0">
-
-                <p
-                    className="
-                        text-xs
-                        font-medium
-                        uppercase
-                        tracking-wide
-                        text-slate-400
-                    "
-                >
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
                     {label}
                 </p>
 
-                <p
-                    className="
-                        mt-1
-                        break-words
-                        text-sm
-                        font-medium
-                        text-slate-800
-                    "
-                >
+                <p className="mt-1 break-words text-sm font-medium text-slate-800">
                     {value}
                 </p>
-
             </div>
-
         </div>
     );
 }
 
-/*
- * =====================================================
- * PAYMENT FIELD
- * =====================================================
- */
+function parsePayment(
+    id: string,
+    data: Record<string, unknown>
+): PaymentRecord {
+    return {
+        id,
 
-function PaymentField({
-    label,
-    value,
-}: {
-    label: string;
-    value: string;
-}) {
-    return (
-        <div>
+        receiptId:
+            getString(data.receiptId),
 
-            <p
-                className="
-                    text-xs
-                    font-medium
-                    uppercase
-                    tracking-wide
-                    text-slate-400
-                "
-            >
-                {label}
-            </p>
+        requestId:
+            getString(data.requestId),
 
-            <p
-                className="
-                    mt-1
-                    break-all
-                    text-sm
-                    font-medium
-                    text-slate-800
-                "
-            >
-                {value}
-            </p>
+        clientId:
+            getString(data.clientId),
 
-        </div>
-    );
+        skillId:
+            getString(data.skillId),
+
+        amount:
+            getNumber(data.amount),
+
+        referenceNumber:
+            data.referenceNumber !== undefined
+                ? String(
+                      data.referenceNumber
+                  )
+                : undefined,
+
+        receiptImageUrl:
+            getString(
+                data.receiptImageUrl
+            ),
+
+        status:
+            getString(data.status),
+
+        remarks:
+            getString(data.remarks),
+
+        verifiedBy:
+            getString(data.verifiedBy),
+
+        verifiedAt:
+            getDate(data.verifiedAt),
+
+        createdAt:
+            getDate(data.createdAt),
+    };
 }
 
-/*
- * =====================================================
- * MAIN PAGE
- * =====================================================
- */
+function parseUser(
+    id: string,
+    data: Record<string, unknown>
+): UserRecord {
+    return {
+        id,
+
+        name:
+            getString(data.name),
+
+        firstName:
+            getString(data.firstName),
+
+        middleName:
+            getString(data.middleName),
+
+        lastName:
+            getString(data.lastName),
+
+        email:
+            getString(data.email),
+
+        phoneNumber:
+            getString(data.phoneNumber),
+
+        profileImageUrl:
+            getString(
+                data.profileImageUrl
+            ),
+    };
+}
+
+function parseRequest(
+    id: string,
+    data: Record<string, unknown>
+): PostJobRequest {
+    return {
+        id,
+
+        clientId:
+            getString(data.clientId),
+
+        freelancerId:
+            getString(
+                data.freelancerId
+            ),
+
+        freelancerName:
+            getString(
+                data.freelancerName
+            ),
+
+        skillId:
+            getString(data.skillId),
+
+        details:
+            getString(data.details),
+
+        price:
+            getNumber(data.price),
+
+        status:
+            getString(data.status),
+
+        paymentStatus:
+            getString(
+                data.paymentStatus
+            ),
+
+        date:
+            getString(data.date),
+
+        time:
+            getString(data.time),
+
+        isAsap:
+            getBoolean(data.isAsap),
+
+        distance:
+            getNumber(data.distance),
+
+        eta:
+            getString(data.eta),
+
+        clientLat:
+            getNumber(data.clientLat),
+
+        clientLng:
+            getNumber(data.clientLng),
+
+        freelancerLat:
+            getNumber(
+                data.freelancerLat
+            ),
+
+        freelancerLng:
+            getNumber(
+                data.freelancerLng
+            ),
+
+        address:
+            getString(data.address),
+
+        createdAt:
+            getDate(data.createdAt),
+
+        acceptedAt:
+            getDate(data.acceptedAt),
+
+        updatedAt:
+            getDate(data.updatedAt),
+
+        expiresAt:
+            getDate(data.expiresAt),
+
+        completedAt:
+            getDate(data.completedAt),
+    };
+}
+
+function parseBooking(
+    id: string,
+    data: Record<string, unknown>
+): Booking {
+    return {
+        id,
+
+        clientId:
+            getString(data.clientId),
+
+        freelancerId:
+            getString(
+                data.freelancerId
+            ),
+
+        freelancerName:
+            getString(
+                data.freelancerName
+            ),
+
+        skillId:
+            getString(data.skillId),
+
+        details:
+            getString(data.details),
+
+        price:
+            getNumber(data.price),
+
+        status:
+            getString(data.status),
+
+        paymentStatus:
+            getString(
+                data.paymentStatus
+            ),
+
+        date:
+            getString(data.date),
+
+        time:
+            getString(data.time),
+
+        isAsap:
+            getBoolean(data.isAsap),
+
+        distance:
+            getNumber(data.distance),
+
+        eta:
+            getString(data.eta),
+
+        clientLat:
+            getNumber(data.clientLat),
+
+        clientLng:
+            getNumber(data.clientLng),
+
+        freelancerLat:
+            getNumber(
+                data.freelancerLat
+            ),
+
+        freelancerLng:
+            getNumber(
+                data.freelancerLng
+            ),
+
+        address:
+            getString(data.address),
+
+        createdAt:
+            getDate(data.createdAt),
+
+        acceptedAt:
+            getDate(data.acceptedAt),
+
+        updatedAt:
+            getDate(data.updatedAt),
+
+        expiresAt:
+            getDate(data.expiresAt),
+
+        completedAt:
+            getDate(data.completedAt),
+    };
+}
 
 export default function AdminPaymentDetailPage() {
-
-    const params =
-        useParams();
+    const params = useParams();
+    const router = useRouter();
 
     const paymentId =
-        Array.isArray(
-            params.paymentId
-        )
+        Array.isArray(params.paymentId)
             ? params.paymentId[0]
             : params.paymentId;
 
@@ -488,191 +632,99 @@ export default function AdminPaymentDetailPage() {
         );
 
     const [client, setClient] =
-        useState<ClientRecord | null>(
+        useState<UserRecord | null>(
             null
         );
 
-    const [request, setRequest] =
-        useState<RequestRecord | null>(
+    const [postJobRequest, setPostJobRequest] =
+        useState<PostJobRequest | null>(
             null
         );
 
     const [booking, setBooking] =
-        useState<BookingRecord | null>(
+        useState<Booking | null>(
             null
         );
 
     const [loading, setLoading] =
         useState(true);
 
-    const [processing, setProcessing] =
-        useState(false);
-
     const [error, setError] =
         useState<string | null>(
             null
         );
 
-    const [success, setSuccess] =
+    const [actionLoading, setActionLoading] =
+        useState<
+            "approve" |
+            "reject" |
+            null
+        >(null);
+
+    const [showRejectDialog, setShowRejectDialog] =
+        useState(false);
+
+    const [rejectRemarks, setRejectRemarks] =
+        useState("");
+
+    const [actionError, setActionError] =
         useState<string | null>(
             null
         );
 
-    /*
-     * =================================================
-     * LOAD PAYMENT
-     * =================================================
-     */
-
     async function loadPayment() {
-
         if (!paymentId) {
-
             setError(
                 "Payment ID is missing."
             );
-
             setLoading(false);
-
             return;
         }
 
         try {
-
             setLoading(true);
             setError(null);
 
             /*
-             * -----------------------------------------
-             * PAYMENT RECEIPT
-             * -----------------------------------------
+             * 1. Payment receipt
              */
 
-            const paymentRef =
-                doc(
-                    db,
-                    "PaymentReceipts",
-                    paymentId
-                );
+            const paymentRef = doc(
+                db,
+                "PaymentReceipts",
+                paymentId
+            );
 
             const paymentSnapshot =
                 await getDoc(
                     paymentRef
                 );
 
-            if (
-                !paymentSnapshot.exists()
-            ) {
-
+            if (!paymentSnapshot.exists()) {
                 setError(
                     "Payment receipt could not be found."
                 );
-
                 return;
             }
 
-            const data =
-                paymentSnapshot.data();
-
-            const loadedPayment:
-                PaymentRecord = {
-
-                id:
+            const paymentData =
+                parsePayment(
                     paymentSnapshot.id,
+                    paymentSnapshot.data()
+                );
 
-                clientId:
-                    typeof data.clientId ===
-                    "string"
-                        ? data.clientId
-                        : undefined,
-
-                requestId:
-                    typeof data.requestId ===
-                    "string"
-                        ? data.requestId
-                        : undefined,
-
-                receiptId:
-                    typeof data.receiptId ===
-                    "string"
-                        ? data.receiptId
-                        : undefined,
-
-                skillId:
-                    typeof data.skillId ===
-                    "string"
-                        ? data.skillId
-                        : undefined,
-
-                amount:
-                    typeof data.amount ===
-                    "number"
-                        ? data.amount
-                        : undefined,
-
-                referenceNumber:
-                    data.referenceNumber !==
-                    undefined
-                        ? String(
-                              data.referenceNumber
-                          )
-                        : undefined,
-
-                receiptImageUrl:
-                    typeof data.receiptImageUrl ===
-                    "string"
-                        ? data.receiptImageUrl
-                        : undefined,
-
-                status:
-                    typeof data.status ===
-                    "string"
-                        ? data.status
-                        : undefined,
-
-                remarks:
-                    typeof data.remarks ===
-                    "string"
-                        ? data.remarks
-                        : undefined,
-
-                verifiedBy:
-                    typeof data.verifiedBy ===
-                    "string"
-                        ? data.verifiedBy
-                        : undefined,
-
-                createdAt:
-                    getDate(
-                        data.createdAt
-                    ),
-
-                verifiedAt:
-                    getDate(
-                        data.verifiedAt
-                    ),
-            };
-
-            setPayment(
-                loadedPayment
-            );
+            setPayment(paymentData);
 
             /*
-             * -----------------------------------------
-             * CLIENT
-             * -----------------------------------------
+             * 2. Client
              */
 
-            if (
-                loadedPayment.clientId
-            ) {
-
-                const clientRef =
-                    doc(
-                        db,
-                        "Users",
-                        loadedPayment.clientId
-                    );
+            if (paymentData.clientId) {
+                const clientRef = doc(
+                    db,
+                    "Users",
+                    paymentData.clientId
+                );
 
                 const clientSnapshot =
                     await getDoc(
@@ -682,202 +734,64 @@ export default function AdminPaymentDetailPage() {
                 if (
                     clientSnapshot.exists()
                 ) {
-
-                    const clientData =
-                        clientSnapshot.data();
-
-                    setClient({
-                        id:
+                    setClient(
+                        parseUser(
                             clientSnapshot.id,
-
-                        name:
-                            typeof clientData.name ===
-                            "string"
-                                ? clientData.name
-                                : undefined,
-
-                        firstName:
-                            typeof clientData.firstName ===
-                            "string"
-                                ? clientData.firstName
-                                : undefined,
-
-                        middleName:
-                            typeof clientData.middleName ===
-                            "string"
-                                ? clientData.middleName
-                                : undefined,
-
-                        lastName:
-                            typeof clientData.lastName ===
-                            "string"
-                                ? clientData.lastName
-                                : undefined,
-
-                        email:
-                            typeof clientData.email ===
-                            "string"
-                                ? clientData.email
-                                : undefined,
-
-                        phoneNumber:
-                            typeof clientData.phoneNumber ===
-                            "string"
-                                ? clientData.phoneNumber
-                                : undefined,
-
-                        profileImageUrl:
-                            typeof clientData.profileImageUrl ===
-                            "string"
-                                ? clientData.profileImageUrl
-                                : undefined,
-                    });
-
+                            clientSnapshot.data()
+                        )
+                    );
                 } else {
-
                     setClient(null);
-
                 }
             }
 
             /*
-             * -----------------------------------------
-             * POST JOB REQUEST
-             * -----------------------------------------
+             * 3. PostJobRequest
+             *
+             * requestId is the document ID.
              */
 
-            if (
-                loadedPayment.requestId
-            ) {
-
-                const postRef =
+            if (paymentData.requestId) {
+                const requestRef =
                     doc(
                         db,
                         "PostJobRequests",
-                        loadedPayment.requestId
+                        paymentData.requestId
                     );
 
-                const postSnapshot =
+                const requestSnapshot =
                     await getDoc(
-                        postRef
+                        requestRef
                     );
 
                 if (
-                    postSnapshot.exists()
+                    requestSnapshot.exists()
                 ) {
-
-                    const postData =
-                        postSnapshot.data();
-
-                    setRequest({
-
-                        id:
-                            postSnapshot.id,
-
-                        clientId:
-                            typeof postData.clientId ===
-                            "string"
-                                ? postData.clientId
-                                : undefined,
-
-                        freelancerId:
-                            typeof postData.freelancerId ===
-                            "string"
-                                ? postData.freelancerId
-                                : undefined,
-
-                        freelancerName:
-                            typeof postData.freelancerName ===
-                            "string"
-                                ? postData.freelancerName
-                                : undefined,
-
-                        skillId:
-                            typeof postData.skillId ===
-                            "string"
-                                ? postData.skillId
-                                : undefined,
-
-                        price:
-                            typeof postData.price ===
-                            "number"
-                                ? postData.price
-                                : undefined,
-
-                        status:
-                            typeof postData.status ===
-                            "string"
-                                ? postData.status
-                                : undefined,
-
-                        paymentStatus:
-                            typeof postData.paymentStatus ===
-                            "string"
-                                ? postData.paymentStatus
-                                : undefined,
-
-                        details:
-                            typeof postData.details ===
-                            "string"
-                                ? postData.details
-                                : undefined,
-
-                        address:
-                            typeof postData.address ===
-                            "string"
-                                ? postData.address
-                                : undefined,
-
-                        date:
-                            typeof postData.date ===
-                            "string"
-                                ? postData.date
-                                : undefined,
-
-                        time:
-                            typeof postData.time ===
-                            "string"
-                                ? postData.time
-                                : undefined,
-
-                        createdAt:
-                            getDate(
-                                postData.createdAt
-                            ),
-
-                        updatedAt:
-                            getDate(
-                                postData.updatedAt
-                            ),
-
-                        schedule:
-                            getDate(
-                                postData.schedule
-                            ),
-
-                        completedAt:
-                            getDate(
-                                postData.completedAt
-                            ),
-                    });
-
+                    setPostJobRequest(
+                        parseRequest(
+                            requestSnapshot.id,
+                            requestSnapshot.data()
+                        )
+                    );
                 } else {
-
-                    setRequest(null);
-
+                    setPostJobRequest(
+                        null
+                    );
                 }
 
                 /*
-                 * -------------------------------------
-                 * BOOKING
-                 * -------------------------------------
+                 * 4. Booking
+                 *
+                 * IMPORTANT:
+                 * Same requestId is the
+                 * Booking document ID.
                  */
 
                 const bookingRef =
                     doc(
                         db,
                         "Bookings",
-                        loadedPayment.requestId
+                        paymentData.requestId
                     );
 
                 const bookingSnapshot =
@@ -888,106 +802,17 @@ export default function AdminPaymentDetailPage() {
                 if (
                     bookingSnapshot.exists()
                 ) {
-
-                    const bookingData =
-                        bookingSnapshot.data();
-
-                    setBooking({
-
-                        id:
+                    setBooking(
+                        parseBooking(
                             bookingSnapshot.id,
-
-                        freelancerId:
-                            typeof bookingData.freelancerId ===
-                            "string"
-                                ? bookingData.freelancerId
-                                : undefined,
-
-                        freelancerName:
-                            typeof bookingData.freelancerName ===
-                            "string"
-                                ? bookingData.freelancerName
-                                : undefined,
-
-                        clientId:
-                            typeof bookingData.clientId ===
-                            "string"
-                                ? bookingData.clientId
-                                : undefined,
-
-                        skillId:
-                            typeof bookingData.skillId ===
-                            "string"
-                                ? bookingData.skillId
-                                : undefined,
-
-                        price:
-                            typeof bookingData.price ===
-                            "number"
-                                ? bookingData.price
-                                : undefined,
-
-                        status:
-                            typeof bookingData.status ===
-                            "string"
-                                ? bookingData.status
-                                : undefined,
-
-                        paymentStatus:
-                            typeof bookingData.paymentStatus ===
-                            "string"
-                                ? bookingData.paymentStatus
-                                : undefined,
-
-                        details:
-                            typeof bookingData.details ===
-                            "string"
-                                ? bookingData.details
-                                : undefined,
-
-                        date:
-                            typeof bookingData.date ===
-                            "string"
-                                ? bookingData.date
-                                : undefined,
-
-                        time:
-                            typeof bookingData.time ===
-                            "string"
-                                ? bookingData.time
-                                : undefined,
-
-                        createdAt:
-                            getDate(
-                                bookingData.createdAt
-                            ),
-
-                        updatedAt:
-                            getDate(
-                                bookingData.updatedAt
-                            ),
-
-                        completedAt:
-                            getDate(
-                                bookingData.completedAt
-                            ),
-                    });
-
+                            bookingSnapshot.data()
+                        )
+                    );
                 } else {
-
                     setBooking(null);
-
                 }
-
-            } else {
-
-                setRequest(null);
-                setBooking(null);
-
             }
-
         } catch (err) {
-
             console.error(
                 "Failed to load payment:",
                 err
@@ -996,11 +821,8 @@ export default function AdminPaymentDetailPage() {
             setError(
                 "Unable to load this payment."
             );
-
         } finally {
-
             setLoading(false);
-
         }
     }
 
@@ -1009,55 +831,34 @@ export default function AdminPaymentDetailPage() {
     }, [paymentId]);
 
     /*
-     * =================================================
-     * APPROVE PAYMENT
-     * =================================================
+     * Approve payment
      */
 
     async function approvePayment() {
-
         if (
             !payment ||
             !payment.requestId
         ) {
-
-            setError(
-                "This payment does not have a valid request ID."
-            );
-
-            return;
-        }
-
-        const auth =
-            getAuth();
-
-        const currentUser =
-            auth.currentUser;
-
-        if (!currentUser) {
-
-            setError(
-                "You must be signed in as an administrator."
-            );
-
-            return;
-        }
-
-        const confirmed =
-            window.confirm(
-                "Approve this payment?\n\n" +
-                "The payment receipt will be marked approved and both the PostJobRequest and Booking will be marked as payment held."
-            );
-
-        if (!confirmed) {
             return;
         }
 
         try {
+            setActionLoading(
+                "approve"
+            );
+            setActionError(null);
 
-            setProcessing(true);
-            setError(null);
-            setSuccess(null);
+            const auth =
+                getAuth();
+
+            const adminUid =
+                auth.currentUser?.uid;
+
+            if (!adminUid) {
+                throw new Error(
+                    "You must be signed in as an administrator."
+                );
+            }
 
             const receiptRef =
                 doc(
@@ -1066,7 +867,7 @@ export default function AdminPaymentDetailPage() {
                     payment.id
                 );
 
-            const postRef =
+            const requestRef =
                 doc(
                     db,
                     "PostJobRequests",
@@ -1085,9 +886,8 @@ export default function AdminPaymentDetailPage() {
                 async (
                     transaction
                 ) => {
-
                     /*
-                     * READ EVERYTHING FIRST
+                     * READS FIRST
                      */
 
                     const receiptSnapshot =
@@ -1095,9 +895,9 @@ export default function AdminPaymentDetailPage() {
                             receiptRef
                         );
 
-                    const postSnapshot =
+                    const requestSnapshot =
                         await transaction.get(
-                            postRef
+                            requestRef
                         );
 
                     const bookingSnapshot =
@@ -1105,14 +905,9 @@ export default function AdminPaymentDetailPage() {
                             bookingRef
                         );
 
-                    /*
-                     * Validate receipt
-                     */
-
                     if (
                         !receiptSnapshot.exists()
                     ) {
-
                         throw new Error(
                             "Payment receipt no longer exists."
                         );
@@ -1122,48 +917,30 @@ export default function AdminPaymentDetailPage() {
                         receiptSnapshot.data();
 
                     const currentStatus =
-                        String(
-                            receiptData.status ??
-                            "pending"
-                        ).toLowerCase();
+                        normalizeStatus(
+                            receiptData.status
+                        );
 
                     /*
-                     * IMPORTANT:
                      * Prevent double processing.
                      */
 
                     if (
-                        currentStatus !==
-                        "pending"
+                        currentStatus ===
+                            "approved" ||
+                        currentStatus ===
+                            "rejected"
                     ) {
-
                         throw new Error(
                             `This payment has already been ${currentStatus}.`
                         );
                     }
 
-                    /*
-                     * Both related documents must exist.
-                     *
-                     * This matches your Flutter implementation,
-                     * which updates both documents.
-                     */
-
                     if (
-                        !postSnapshot.exists()
+                        !requestSnapshot.exists()
                     ) {
-
                         throw new Error(
-                            "The related PostJobRequest could not be found."
-                        );
-                    }
-
-                    if (
-                        !bookingSnapshot.exists()
-                    ) {
-
-                        throw new Error(
-                            "The related Booking could not be found."
+                            "The associated PostJobRequest could not be found."
                         );
                     }
 
@@ -1174,27 +951,39 @@ export default function AdminPaymentDetailPage() {
                     transaction.update(
                         receiptRef,
                         {
-                            status:
-                                "approved",
-
+                            status: "approved",
                             verifiedBy:
-                                currentUser.uid,
-
+                                adminUid,
                             verifiedAt:
                                 serverTimestamp(),
-
-                            remarks:
-                                "",
                         }
                     );
 
                     transaction.update(
-                        postRef,
+                        requestRef,
                         {
                             paymentStatus:
                                 "held",
                         }
                     );
+
+                    /*
+                     * Booking should exist
+                     * according to the NARP
+                     * data model.
+                     *
+                     * We still check it to
+                     * prevent an invalid
+                     * transaction.
+                     */
+
+                    if (
+                        !bookingSnapshot.exists()
+                    ) {
+                        throw new Error(
+                            "The associated Booking could not be found."
+                        );
+                    }
 
                     transaction.update(
                         bookingRef,
@@ -1206,97 +995,62 @@ export default function AdminPaymentDetailPage() {
                 }
             );
 
-            setSuccess(
-                "Payment approved successfully."
-            );
-
             await loadPayment();
-
         } catch (err) {
-
             console.error(
                 "Failed to approve payment:",
                 err
             );
 
-            setError(
+            setActionError(
                 err instanceof Error
                     ? err.message
                     : "Unable to approve payment."
             );
-
         } finally {
-
-            setProcessing(false);
-
+            setActionLoading(null);
         }
     }
 
     /*
-     * =================================================
-     * REJECT PAYMENT
-     * =================================================
+     * Reject payment
      */
 
     async function rejectPayment() {
-
         if (
             !payment ||
             !payment.requestId
         ) {
-
-            setError(
-                "This payment does not have a valid request ID."
-            );
-
-            return;
-        }
-
-        const auth =
-            getAuth();
-
-        const currentUser =
-            auth.currentUser;
-
-        if (!currentUser) {
-
-            setError(
-                "You must be signed in as an administrator."
-            );
-
             return;
         }
 
         const remarks =
-            window.prompt(
-                "Enter the reason for rejecting this payment:"
+            rejectRemarks.trim();
+
+        if (!remarks) {
+            setActionError(
+                "Please provide a reason for rejecting the payment."
             );
-
-        if (
-            remarks === null
-        ) {
-            return;
-        }
-
-        const trimmedRemarks =
-            remarks.trim();
-
-        if (
-            !trimmedRemarks
-        ) {
-
-            setError(
-                "A rejection reason is required."
-            );
-
             return;
         }
 
         try {
+            setActionLoading(
+                "reject"
+            );
+            setActionError(null);
 
-            setProcessing(true);
-            setError(null);
-            setSuccess(null);
+            const auth =
+                getAuth();
+
+            const adminUid =
+                auth.currentUser?.uid;
+
+            if (!adminUid) {
+                throw new Error(
+                    "You must be signed in as an administrator."
+                );
+            }
 
             const receiptRef =
                 doc(
@@ -1305,7 +1059,7 @@ export default function AdminPaymentDetailPage() {
                     payment.id
                 );
 
-            const postRef =
+            const requestRef =
                 doc(
                     db,
                     "PostJobRequests",
@@ -1324,9 +1078,8 @@ export default function AdminPaymentDetailPage() {
                 async (
                     transaction
                 ) => {
-
                     /*
-                     * READ EVERYTHING FIRST
+                     * READS FIRST
                      */
 
                     const receiptSnapshot =
@@ -1334,9 +1087,9 @@ export default function AdminPaymentDetailPage() {
                             receiptRef
                         );
 
-                    const postSnapshot =
+                    const requestSnapshot =
                         await transaction.get(
-                            postRef
+                            requestRef
                         );
 
                     const bookingSnapshot =
@@ -1344,14 +1097,9 @@ export default function AdminPaymentDetailPage() {
                             bookingRef
                         );
 
-                    /*
-                     * Validate receipt
-                     */
-
                     if (
                         !receiptSnapshot.exists()
                     ) {
-
                         throw new Error(
                             "Payment receipt no longer exists."
                         );
@@ -1361,71 +1109,55 @@ export default function AdminPaymentDetailPage() {
                         receiptSnapshot.data();
 
                     const currentStatus =
-                        String(
-                            receiptData.status ??
-                            "pending"
-                        ).toLowerCase();
-
-                    /*
-                     * IMPORTANT:
-                     * Prevent double processing.
-                     */
+                        normalizeStatus(
+                            receiptData.status
+                        );
 
                     if (
-                        currentStatus !==
-                        "pending"
+                        currentStatus ===
+                            "approved" ||
+                        currentStatus ===
+                            "rejected"
                     ) {
-
                         throw new Error(
                             `This payment has already been ${currentStatus}.`
                         );
                     }
 
-                    /*
-                     * Both related documents must exist.
-                     */
-
                     if (
-                        !postSnapshot.exists()
+                        !requestSnapshot.exists()
                     ) {
-
                         throw new Error(
-                            "The related PostJobRequest could not be found."
+                            "The associated PostJobRequest could not be found."
                         );
                     }
 
                     if (
                         !bookingSnapshot.exists()
                     ) {
-
                         throw new Error(
-                            "The related Booking could not be found."
+                            "The associated Booking could not be found."
                         );
                     }
 
                     /*
-                     * WRITES AFTER ALL READS
+                     * WRITES
                      */
 
                     transaction.update(
                         receiptRef,
                         {
-                            status:
-                                "rejected",
-
-                            remarks:
-                                trimmedRemarks,
-
+                            status: "rejected",
+                            remarks,
                             verifiedBy:
-                                currentUser.uid,
-
+                                adminUid,
                             verifiedAt:
                                 serverTimestamp(),
                         }
                     );
 
                     transaction.update(
-                        postRef,
+                        requestRef,
                         {
                             paymentStatus:
                                 "rejected",
@@ -1442,1737 +1174,161 @@ export default function AdminPaymentDetailPage() {
                 }
             );
 
-            setSuccess(
-                "Payment rejected successfully."
+            setShowRejectDialog(
+                false
             );
+            setRejectRemarks("");
 
             await loadPayment();
-
         } catch (err) {
-
             console.error(
                 "Failed to reject payment:",
                 err
             );
 
-            setError(
+            setActionError(
                 err instanceof Error
                     ? err.message
                     : "Unable to reject payment."
             );
-
         } finally {
-
-            setProcessing(false);
-
+            setActionLoading(null);
         }
     }
 
-    /*
-     * =================================================
-     * LOADING
-     * =================================================
-     */
-
     if (loading) {
-
         return (
-            <main
-                className="
-                    min-h-screen
-                    bg-slate-50
-                "
-            >
-
-                <div
-                    className="
-                        border-b
-                        border-slate-200
-                        bg-white
-                    "
-                >
-                    <div
-                        className="
-                            mx-auto
-                            max-w-7xl
-                            px-6
-                            py-6
-                            lg:px-8
-                        "
-                    >
-                        <div
-                            className="
-                                h-5
-                                w-32
-                                animate-pulse
-                                rounded
-                                bg-slate-200
-                            "
-                        />
+            <main className="min-h-screen bg-slate-50">
+                <div className="border-b border-slate-200 bg-white">
+                    <div className="mx-auto max-w-7xl px-6 py-6 lg:px-8">
+                        <div className="h-5 w-32 animate-pulse rounded bg-slate-200" />
                     </div>
                 </div>
 
-                <div
-                    className="
-                        mx-auto
-                        max-w-7xl
-                        px-6
-                        py-8
-                        lg:px-8
-                    "
-                >
+                <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+                    <div className="space-y-6">
+                        <div className="h-48 animate-pulse rounded-3xl bg-slate-200" />
 
-                    <div
-                        className="
-                            h-8
-                            w-64
-                            animate-pulse
-                            rounded
-                            bg-slate-200
-                        "
-                    />
-
-                    <div
-                        className="
-                            mt-6
-                            grid
-                            gap-8
-                            lg:grid-cols-3
-                        "
-                    >
-
-                        <div
-                            className="
-                                h-[500px]
-                                animate-pulse
-                                rounded-2xl
-                                bg-white
-                            "
-                        />
-
-                        <div
-                            className="
-                                h-[500px]
-                                animate-pulse
-                                rounded-2xl
-                                bg-white
-                                lg:col-span-2
-                            "
-                        />
-
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            <div className="h-64 animate-pulse rounded-2xl bg-slate-200 lg:col-span-2" />
+                            <div className="h-64 animate-pulse rounded-2xl bg-slate-200" />
+                        </div>
                     </div>
-
                 </div>
-
             </main>
         );
     }
 
-    /*
-     * =================================================
-     * ERROR
-     * =================================================
-     */
-
-    if (
-        error &&
-        !payment
-    ) {
-
+    if (error || !payment) {
         return (
-            <main
-                className="
-                    min-h-screen
-                    bg-slate-50
-                "
-            >
-
-                <div
-                    className="
-                        mx-auto
-                        max-w-7xl
-                        px-6
-                        py-10
-                        lg:px-8
-                    "
-                >
-
+            <main className="min-h-screen bg-slate-50">
+                <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
                     <Link
                         href="/admin/payments"
-                        className="
-                            inline-flex
-                            items-center
-                            gap-2
-                            text-sm
-                            font-semibold
-                            text-slate-600
-                            transition
-                            hover:text-blue-600
-                        "
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Back to Payments
                     </Link>
 
-                    <div
-                        className="
-                            mt-8
-                            rounded-2xl
-                            border
-                            border-red-200
-                            bg-red-50
-                            p-8
-                            text-center
-                        "
-                    >
+                    <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+                        <AlertCircle className="mx-auto h-10 w-10 text-red-400" />
 
-                        <AlertTriangle
-                            className="
-                                mx-auto
-                                h-10
-                                w-10
-                                text-red-400
-                            "
-                        />
-
-                        <h1
-                            className="
-                                mt-4
-                                text-lg
-                                font-semibold
-                                text-red-800
-                            "
-                        >
+                        <h1 className="mt-4 text-lg font-semibold text-red-800">
                             Unable to load payment
                         </h1>
 
-                        <p
-                            className="
-                                mt-2
-                                text-sm
-                                text-red-600
-                            "
-                        >
+                        <p className="mt-2 text-sm text-red-600">
                             {error}
                         </p>
-
                     </div>
-
                 </div>
-
             </main>
         );
     }
 
-    if (!payment) {
-        return null;
-    }
-
-    const paymentStatus =
-        payment.status?.toLowerCase() ??
-        "pending";
-
-    const isPending =
-        paymentStatus ===
-        "pending";
-
     const clientName =
-        getClientName(client);
+        getUserName(client);
 
-    const statusConfig =
-        getStatusConfig(
+    const canProcess =
+        normalizeStatus(
             payment.status
-        );
-
-    /*
-     * =================================================
-     * PAGE
-     * =================================================
-     */
+        ) === "pending";
 
     return (
-        <main
-            className="
-                min-h-screen
-                bg-slate-50
-            "
-        >
+        <main className="min-h-screen bg-slate-50">
 
-            {/* =========================================
-                HEADER
-            ========================================= */}
+            {/* Header */}
 
-            <div
-                className="
-                    border-b
-                    border-slate-200
-                    bg-white
-                "
-            >
+            <div className="border-b border-slate-200 bg-white">
+                <div className="mx-auto max-w-7xl px-6 py-6 lg:px-8">
 
-                <div
-                    className="
-                        mx-auto
-                        max-w-7xl
-                        px-6
-                        py-6
-                        lg:px-8
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            flex-col
-                            gap-4
-                            sm:flex-row
-                            sm:items-center
-                            sm:justify-between
-                        "
+                    <Link
+                        href="/admin/payments"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-blue-600"
                     >
-
-                        <Link
-                            href="/admin/payments"
-                            className="
-                                inline-flex
-                                items-center
-                                gap-2
-                                text-sm
-                                font-semibold
-                                text-slate-600
-                                transition
-                                hover:text-blue-600
-                            "
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Back to Payments
-                        </Link>
-
-                        <button
-                            type="button"
-                            onClick={
-                                loadPayment
-                            }
-                            disabled={
-                                loading ||
-                                processing
-                            }
-                            className="
-                                inline-flex
-                                items-center
-                                justify-center
-                                gap-2
-                                rounded-xl
-                                border
-                                border-slate-200
-                                bg-white
-                                px-4
-                                py-2.5
-                                text-sm
-                                font-semibold
-                                text-slate-700
-                                shadow-sm
-                                transition
-                                hover:bg-slate-50
-                                disabled:cursor-not-allowed
-                                disabled:opacity-50
-                            "
-                        >
-
-                            <RefreshCw
-                                className={`
-                                    h-4
-                                    w-4
-                                    ${
-                                        loading
-                                            ? "animate-spin"
-                                            : ""
-                                    }
-                                `}
-                            />
-
-                            Refresh
-
-                        </button>
-
-                    </div>
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to Payments
+                    </Link>
 
                 </div>
-
             </div>
 
-            {/* =========================================
-                MAIN
-            ========================================= */}
+            {/* Main */}
 
-            <div
-                className="
-                    mx-auto
-                    max-w-7xl
-                    px-6
-                    py-8
-                    lg:px-8
-                "
-            >
+            <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
 
-                {/* =====================================
-                    TITLE
-                ===================================== */}
+                {/* Payment header */}
 
-                <div
-                    className="
-                        flex
-                        flex-col
-                        gap-5
-                        sm:flex-row
-                        sm:items-center
-                        sm:justify-between
-                    "
-                >
+                <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
-                    <div
-                        className="
-                            flex
-                            items-center
-                            gap-3
-                        "
-                    >
+                    <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 px-6 py-8 lg:px-8">
 
-                        <div
-                            className="
-                                flex
-                                h-11
-                                w-11
-                                items-center
-                                justify-center
-                                rounded-xl
-                                bg-blue-50
-                            "
-                        >
-                            <Receipt
-                                className="
-                                    h-5
-                                    w-5
-                                    text-blue-600
-                                "
-                            />
-                        </div>
-
-                        <div>
-
-                            <h1
-                                className="
-                                    text-2xl
-                                    font-bold
-                                    tracking-tight
-                                    text-slate-900
-                                "
-                            >
-                                Payment Details
-                            </h1>
-
-                            <p
-                                className="
-                                    mt-1
-                                    text-sm
-                                    text-slate-500
-                                "
-                            >
-                                Receipt #{payment.id}
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <StatusBadge
-                        status={
-                            payment.status
-                        }
-                    />
-
-                </div>
-
-                {/* =====================================
-                    SUCCESS
-                ===================================== */}
-
-                {success && (
-                    <div
-                        className="
-                            mt-6
-                            flex
-                            items-start
-                            gap-3
-                            rounded-xl
-                            border
-                            border-green-200
-                            bg-green-50
-                            px-5
-                            py-4
-                            text-sm
-                            text-green-700
-                        "
-                    >
-
-                        <CheckCircle2
-                            className="
-                                mt-0.5
-                                h-5
-                                w-5
-                                flex-shrink-0
-                            "
-                        />
-
-                        <p>
-                            {success}
-                        </p>
-
-                    </div>
-                )}
-
-                {/* =====================================
-                    ACTION ERROR
-                ===================================== */}
-
-                {error && payment && (
-                    <div
-                        className="
-                            mt-6
-                            flex
-                            items-start
-                            gap-3
-                            rounded-xl
-                            border
-                            border-red-200
-                            bg-red-50
-                            px-5
-                            py-4
-                            text-sm
-                            text-red-700
-                        "
-                    >
-
-                        <AlertTriangle
-                            className="
-                                mt-0.5
-                                h-5
-                                w-5
-                                flex-shrink-0
-                            "
-                        />
-
-                        <p>
-                            {error}
-                        </p>
-
-                    </div>
-                )}
-
-                {/* =====================================
-                    APPROVAL ACTIONS
-                ===================================== */}
-
-                {isPending && (
-                    <section
-                        className="
-                            mt-6
-                            rounded-2xl
-                            border
-                            border-orange-200
-                            bg-orange-50
-                            p-5
-                        "
-                    >
-
-                        <div
-                            className="
-                                flex
-                                flex-col
-                                gap-4
-                                sm:flex-row
-                                sm:items-center
-                                sm:justify-between
-                            "
-                        >
+                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
                             <div>
-
-                                <div
-                                    className="
-                                        flex
-                                        items-center
-                                        gap-2
-                                    "
-                                >
-
-                                    <Clock
-                                        className="
-                                            h-5
-                                            w-5
-                                            text-orange-600
-                                        "
-                                    />
-
-                                    <h2
-                                        className="
-                                            font-semibold
-                                            text-orange-900
-                                        "
-                                    >
-                                        Payment requires verification
-                                    </h2>
-
-                                </div>
-
-                                <p
-                                    className="
-                                        mt-1
-                                        text-sm
-                                        text-orange-700
-                                    "
-                                >
-                                    Review the receipt before approving or rejecting this payment.
+                                <p className="text-sm font-medium text-blue-100">
+                                    Payment Receipt
                                 </p>
 
-                            </div>
-
-                            <div
-                                className="
-                                    flex
-                                    flex-col
-                                    gap-3
-                                    sm:flex-row
-                                "
-                            >
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        rejectPayment
-                                    }
-                                    disabled={
-                                        processing
-                                    }
-                                    className="
-                                        inline-flex
-                                        items-center
-                                        justify-center
-                                        gap-2
-                                        rounded-xl
-                                        border
-                                        border-red-200
-                                        bg-white
-                                        px-5
-                                        py-3
-                                        text-sm
-                                        font-semibold
-                                        text-red-600
-                                        shadow-sm
-                                        transition
-                                        hover:bg-red-50
-                                        disabled:cursor-not-allowed
-                                        disabled:opacity-50
-                                    "
-                                >
-
-                                    {processing ? (
-                                        <Loader2
-                                            className="
-                                                h-4
-                                                w-4
-                                                animate-spin
-                                            "
-                                        />
-                                    ) : (
-                                        <XCircle
-                                            className="
-                                                h-4
-                                                w-4
-                                            "
-                                        />
-                                    )}
-
-                                    Reject
-
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={
-                                        approvePayment
-                                    }
-                                    disabled={
-                                        processing
-                                    }
-                                    className="
-                                        inline-flex
-                                        items-center
-                                        justify-center
-                                        gap-2
-                                        rounded-xl
-                                        bg-green-600
-                                        px-5
-                                        py-3
-                                        text-sm
-                                        font-semibold
-                                        text-white
-                                        shadow-sm
-                                        transition
-                                        hover:bg-green-700
-                                        disabled:cursor-not-allowed
-                                        disabled:opacity-50
-                                    "
-                                >
-
-                                    {processing ? (
-                                        <Loader2
-                                            className="
-                                                h-4
-                                                w-4
-                                                animate-spin
-                                            "
-                                        />
-                                    ) : (
-                                        <CheckCircle2
-                                            className="
-                                                h-4
-                                                w-4
-                                            "
-                                        />
-                                    )}
-
-                                    Approve Payment
-
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                    </section>
-                )}
-
-                {/* =====================================
-                    RECEIPT + SUMMARY
-                ===================================== */}
-
-                <div
-                    className="
-                        mt-8
-                        grid
-                        gap-8
-                        lg:grid-cols-3
-                    "
-                >
-
-                    {/* Receipt */}
-
-                    <section
-                        className="
-                            overflow-hidden
-                            rounded-2xl
-                            border
-                            border-slate-200
-                            bg-white
-                            shadow-sm
-                            lg:col-span-2
-                        "
-                    >
-
-                        <div
-                            className="
-                                border-b
-                                border-slate-200
-                                px-6
-                                py-5
-                            "
-                        >
-
-                            <div
-                                className="
-                                    flex
-                                    items-center
-                                    gap-3
-                                "
-                            >
-
-                                <Receipt
-                                    className="
-                                        h-5
-                                        w-5
-                                        text-slate-500
-                                    "
-                                />
-
-                                <div>
-
-                                    <h2
-                                        className="
-                                            font-semibold
-                                            text-slate-900
-                                        "
-                                    >
-                                        Payment Receipt
-                                    </h2>
-
-                                    <p
-                                        className="
-                                            text-xs
-                                            text-slate-400
-                                        "
-                                    >
-                                        Submitted payment proof
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="p-6">
-
-                            {payment.receiptImageUrl ? (
-
-                                <a
-                                    href={
-                                        payment.receiptImageUrl
-                                    }
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="
-                                        group
-                                        block
-                                        overflow-hidden
-                                        rounded-2xl
-                                        border
-                                        border-slate-200
-                                        bg-slate-50
-                                    "
-                                >
-
-                                    <img
-                                        src={
-                                            payment.receiptImageUrl
-                                        }
-                                        alt="Payment receipt"
-                                        className="
-                                            max-h-[700px]
-                                            w-full
-                                            object-contain
-                                            transition
-                                            duration-200
-                                            group-hover:scale-[1.01]
-                                        "
-                                    />
-
-                                </a>
-
-                            ) : (
-
-                                <div
-                                    className="
-                                        flex
-                                        h-80
-                                        items-center
-                                        justify-center
-                                        rounded-2xl
-                                        bg-slate-50
-                                        text-sm
-                                        text-slate-400
-                                    "
-                                >
-                                    No receipt image available.
-                                </div>
-
-                            )}
-
-                            {payment.receiptImageUrl && (
-                                <a
-                                    href={
-                                        payment.receiptImageUrl
-                                    }
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="
-                                        mt-4
-                                        inline-flex
-                                        items-center
-                                        gap-2
-                                        text-sm
-                                        font-semibold
-                                        text-blue-600
-                                        hover:text-blue-700
-                                    "
-                                >
-
-                                    <ExternalLink className="h-4 w-4" />
-
-                                    Open full receipt
-
-                                </a>
-                            )}
-
-                        </div>
-
-                    </section>
-
-                    {/* Payment Summary */}
-
-                    <aside className="space-y-6">
-
-                        <section
-                            className="
-                                rounded-2xl
-                                border
-                                border-slate-200
-                                bg-white
-                                p-6
-                                shadow-sm
-                            "
-                        >
-
-                            <h2
-                                className="
-                                    font-semibold
-                                    text-slate-900
-                                "
-                            >
-                                Payment Summary
-                            </h2>
-
-                            <div
-                                className="
-                                    mt-6
-                                    space-y-5
-                                "
-                            >
-
-                                <PaymentField
-                                    label="Amount"
-                                    value={formatAmount(
+                                <h1 className="mt-1 text-3xl font-bold text-white">
+                                    {formatMoney(
                                         payment.amount
                                     )}
-                                />
+                                </h1>
 
-                                <PaymentField
-                                    label="Reference Number"
-                                    value={
-                                        payment.referenceNumber ??
-                                        "Not provided"
-                                    }
-                                />
-
-                                <PaymentField
-                                    label="Service"
-                                    value={
-                                        payment.skillId ??
-                                        "Unknown"
-                                    }
-                                />
-
-                                <PaymentField
-                                    label="Created"
-                                    value={formatDateTime(
-                                        payment.createdAt ??
-                                            null
-                                    )}
-                                />
-
-                            </div>
-
-                        </section>
-
-                    </aside>
-
-                </div>
-
-                {/* =====================================
-                    CLIENT
-                ===================================== */}
-
-                <section
-                    className="
-                        mt-8
-                        rounded-2xl
-                        border
-                        border-slate-200
-                        bg-white
-                        p-6
-                        shadow-sm
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            items-center
-                            gap-3
-                        "
-                    >
-
-                        <div
-                            className="
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-xl
-                                bg-blue-50
-                            "
-                        >
-                            <User
-                                className="
-                                    h-5
-                                    w-5
-                                    text-blue-600
-                                "
-                            />
-                        </div>
-
-                        <div>
-
-                            <h2
-                                className="
-                                    font-semibold
-                                    text-slate-900
-                                "
-                            >
-                                Client
-                            </h2>
-
-                            <p
-                                className="
-                                    text-xs
-                                    text-slate-400
-                                "
-                            >
-                                Customer associated with this payment
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <div
-                        className="
-                            mt-6
-                            flex
-                            flex-col
-                            gap-6
-                            sm:flex-row
-                            sm:items-center
-                        "
-                    >
-
-                        {/* Profile */}
-
-                        {client?.profileImageUrl ? (
-
-                            <img
-                                src={
-                                    client.profileImageUrl
-                                }
-                                alt={
-                                    clientName
-                                }
-                                className="
-                                    h-20
-                                    w-20
-                                    flex-shrink-0
-                                    rounded-2xl
-                                    object-cover
-                                "
-                            />
-
-                        ) : (
-
-                            <div
-                                className="
-                                    flex
-                                    h-20
-                                    w-20
-                                    flex-shrink-0
-                                    items-center
-                                    justify-center
-                                    rounded-2xl
-                                    bg-blue-100
-                                    text-xl
-                                    font-bold
-                                    text-blue-700
-                                "
-                            >
-                                {getInitials(
-                                    clientName
-                                )}
-                            </div>
-
-                        )}
-
-                        <div
-                            className="
-                                grid
-                                flex-1
-                                gap-6
-                                sm:grid-cols-3
-                            "
-                        >
-
-                            <InfoItem
-                                icon={
-                                    User
-                                }
-                                label="Name"
-                                value={
-                                    clientName
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    Mail
-                                }
-                                label="Email"
-                                value={
-                                    client?.email ??
-                                    "Not provided"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    Phone
-                                }
-                                label="Phone"
-                                value={
-                                    client?.phoneNumber ??
-                                    "Not provided"
-                                }
-                            />
-
-                        </div>
-
-                    </div>
-
-                </section>
-
-                {/* =====================================
-                    VERIFICATION
-                ===================================== */}
-
-                <section
-                    className="
-                        mt-8
-                        rounded-2xl
-                        border
-                        border-slate-200
-                        bg-white
-                        p-6
-                        shadow-sm
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            items-center
-                            gap-3
-                        "
-                    >
-
-                        <ShieldCheck
-                            className="
-                                h-5
-                                w-5
-                                text-slate-500
-                            "
-                        />
-
-                        <h2
-                            className="
-                                font-semibold
-                                text-slate-900
-                            "
-                        >
-                            Verification
-                        </h2>
-
-                    </div>
-
-                    <div
-                        className="
-                            mt-6
-                            grid
-                            gap-6
-                            md:grid-cols-3
-                        "
-                    >
-
-                        <InfoItem
-                            icon={
-                                ShieldCheck
-                            }
-                            label="Status"
-                            value={
-                                statusConfig.label
-                            }
-                        />
-
-                        <InfoItem
-                            icon={
-                                User
-                            }
-                            label="Verified By"
-                            value={
-                                payment.verifiedBy ??
-                                "Not yet verified"
-                            }
-                        />
-
-                        <InfoItem
-                            icon={
-                                CalendarDays
-                            }
-                            label="Verified At"
-                            value={formatDateTime(
-                                payment.verifiedAt ??
-                                    null
-                            )}
-                        />
-
-                    </div>
-
-                    {paymentStatus ===
-                        "rejected" &&
-                        payment.remarks && (
-
-                            <div
-                                className="
-                                    mt-6
-                                    rounded-xl
-                                    border
-                                    border-red-200
-                                    bg-red-50
-                                    p-4
-                                "
-                            >
-
-                                <div
-                                    className="
-                                        flex
-                                        items-center
-                                        gap-2
-                                    "
-                                >
-
-                                    <AlertTriangle
-                                        className="
-                                            h-4
-                                            w-4
-                                            text-red-600
-                                        "
-                                    />
-
-                                    <p
-                                        className="
-                                            text-sm
-                                            font-semibold
-                                            text-red-800
-                                        "
-                                    >
-                                        Rejection Reason
-                                    </p>
-
-                                </div>
-
-                                <p
-                                    className="
-                                        mt-2
-                                        whitespace-pre-wrap
-                                        text-sm
-                                        leading-6
-                                        text-red-700
-                                    "
-                                >
-                                    {
-                                        payment.remarks
-                                    }
+                                <p className="mt-2 font-mono text-sm text-blue-100">
+                                    {payment.id}
                                 </p>
-
                             </div>
 
-                        )}
-
-                </section>
-
-                {/* =====================================
-                    RELATED JOB REQUEST
-                ===================================== */}
-
-                <section
-                    className="
-                        mt-8
-                        rounded-2xl
-                        border
-                        border-slate-200
-                        bg-white
-                        p-6
-                        shadow-sm
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            items-center
-                            gap-3
-                        "
-                    >
-
-                        <div
-                            className="
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-xl
-                                bg-blue-50
-                            "
-                        >
-                            <BriefcaseBusiness
-                                className="
-                                    h-5
-                                    w-5
-                                    text-blue-600
-                                "
+                            <PaymentStatusBadge
+                                status={
+                                    payment.status
+                                }
                             />
-                        </div>
-
-                        <div>
-
-                            <h2
-                                className="
-                                    font-semibold
-                                    text-slate-900
-                                "
-                            >
-                                Post Job Request
-                            </h2>
-
-                            <p
-                                className="
-                                    text-xs
-                                    text-slate-400
-                                "
-                            >
-                                Job request associated with this payment
-                            </p>
 
                         </div>
 
                     </div>
 
-                    {request ? (
+                    <div className="grid gap-6 px-6 py-7 sm:grid-cols-2 lg:grid-cols-4 lg:px-8">
 
-                        <div
-                            className="
-                                mt-6
-                                grid
-                                gap-6
-                                md:grid-cols-2
-                                lg:grid-cols-4
-                            "
-                        >
-
-                            <InfoItem
-                                icon={
-                                    BriefcaseBusiness
-                                }
-                                label="Service"
-                                value={
-                                    request.skillId ??
-                                    payment.skillId ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    User
-                                }
-                                label="Freelancer"
-                                value={
-                                    request.freelancerName ??
-                                    request.freelancerId ??
-                                    "Not assigned"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    CreditCard
-                                }
-                                label="Price"
-                                value={formatAmount(
-                                    request.price
-                                )}
-                            />
-
-                            <InfoItem
-                                icon={
-                                    ShieldCheck
-                                }
-                                label="Payment Status"
-                                value={
-                                    request.paymentStatus ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    CalendarDays
-                                }
-                                label="Date"
-                                value={
-                                    request.date ??
-                                    "Not specified"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    Clock
-                                }
-                                label="Time"
-                                value={
-                                    request.time ??
-                                    "Not specified"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    FileText
-                                }
-                                label="Request Status"
-                                value={
-                                    request.status ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    MapPin
-                                }
-                                label="Address"
-                                value={
-                                    request.address ??
-                                    "Not provided"
-                                }
-                            />
-
-                        </div>
-
-                    ) : (
-
-                        <div
-                            className="
-                                mt-6
-                                rounded-xl
-                                border
-                                border-orange-200
-                                bg-orange-50
-                                p-4
-                                text-sm
-                                text-orange-700
-                            "
-                        >
-                            The related PostJobRequest could not be loaded.
-                        </div>
-
-                    )}
-
-                    {request?.details && (
-                        <div
-                            className="
-                                mt-6
-                                rounded-xl
-                                bg-slate-50
-                                p-5
-                            "
-                        >
-
-                            <p
-                                className="
-                                    text-xs
-                                    font-medium
-                                    uppercase
-                                    tracking-wide
-                                    text-slate-400
-                                "
-                            >
-                                Job Details
-                            </p>
-
-                            <p
-                                className="
-                                    mt-2
-                                    whitespace-pre-wrap
-                                    text-sm
-                                    leading-6
-                                    text-slate-700
-                                "
-                            >
-                                {
-                                    request.details
-                                }
-                            </p>
-
-                        </div>
-                    )}
-
-                </section>
-
-                {/* =====================================
-                    BOOKING
-                ===================================== */}
-
-                <section
-                    className="
-                        mt-8
-                        rounded-2xl
-                        border
-                        border-slate-200
-                        bg-white
-                        p-6
-                        shadow-sm
-                    "
-                >
-
-                    <div
-                        className="
-                            flex
-                            items-center
-                            gap-3
-                        "
-                    >
-
-                        <div
-                            className="
-                                flex
-                                h-10
-                                w-10
-                                items-center
-                                justify-center
-                                rounded-xl
-                                bg-green-50
-                            "
-                        >
-                            <BriefcaseBusiness
-                                className="
-                                    h-5
-                                    w-5
-                                    text-green-600
-                                "
-                            />
-                        </div>
-
-                        <div>
-
-                            <h2
-                                className="
-                                    font-semibold
-                                    text-slate-900
-                                "
-                            >
-                                Booking
-                            </h2>
-
-                            <p
-                                className="
-                                    text-xs
-                                    text-slate-400
-                                "
-                            >
-                                Booking associated with this payment
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    {booking ? (
-
-                        <div
-                            className="
-                                mt-6
-                                grid
-                                gap-6
-                                md:grid-cols-2
-                                lg:grid-cols-4
-                            "
-                        >
-
-                            <InfoItem
-                                icon={
-                                    BriefcaseBusiness
-                                }
-                                label="Service"
-                                value={
-                                    booking.skillId ??
-                                    payment.skillId ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    User
-                                }
-                                label="Freelancer"
-                                value={
-                                    booking.freelancerName ??
-                                    booking.freelancerId ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    CreditCard
-                                }
-                                label="Price"
-                                value={formatAmount(
-                                    booking.price
-                                )}
-                            />
-
-                            <InfoItem
-                                icon={
-                                    ShieldCheck
-                                }
-                                label="Payment Status"
-                                value={
-                                    booking.paymentStatus ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    FileText
-                                }
-                                label="Booking Status"
-                                value={
-                                    booking.status ??
-                                    "Unknown"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    CalendarDays
-                                }
-                                label="Date"
-                                value={
-                                    booking.date ??
-                                    "Not specified"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    Clock
-                                }
-                                label="Time"
-                                value={
-                                    booking.time ??
-                                    "Not specified"
-                                }
-                            />
-
-                            <InfoItem
-                                icon={
-                                    CalendarDays
-                                }
-                                label="Created"
-                                value={formatDateTime(
-                                    booking.createdAt ??
-                                        null
-                                )}
-                            />
-
-                        </div>
-
-                    ) : (
-
-                        <div
-                            className="
-                                mt-6
-                                rounded-xl
-                                border
-                                border-orange-200
-                                bg-orange-50
-                                p-4
-                                text-sm
-                                text-orange-700
-                            "
-                        >
-                            The related Booking could not be loaded.
-                        </div>
-
-                    )}
-
-                </section>
-
-                {/* =====================================
-                    SYSTEM REFERENCES
-                ===================================== */}
-
-                <section
-                    className="
-                        mt-8
-                        rounded-2xl
-                        border
-                        border-slate-200
-                        bg-white
-                        p-6
-                        shadow-sm
-                    "
-                >
-
-                    <h2
-                        className="
-                            font-semibold
-                            text-slate-900
-                        "
-                    >
-                        System References
-                    </h2>
-
-                    <div
-                        className="
-                            mt-5
-                            grid
-                            gap-5
-                            md:grid-cols-2
-                            lg:grid-cols-3
-                        "
-                    >
-
-                        <PaymentField
-                            label="Payment Receipt ID"
+                        <InfoItem
+                            icon={
+                                CreditCard
+                            }
+                            label="Reference"
                             value={
-                                payment.id
+                                payment.referenceNumber ??
+                                "Not provided"
                             }
                         />
 
-                        <PaymentField
+                        <InfoItem
+                            icon={
+                                FileText
+                            }
                             label="Receipt ID"
                             value={
                                 payment.receiptId ??
@@ -3180,35 +1336,734 @@ export default function AdminPaymentDetailPage() {
                             }
                         />
 
-                        <PaymentField
-                            label="Request ID"
+                        <InfoItem
+                            icon={
+                                BriefcaseBusiness
+                            }
+                            label="Service"
                             value={
-                                payment.requestId ??
-                                "Not available"
+                                payment.skillId ??
+                                "Unknown"
                             }
                         />
 
-                        <PaymentField
-                            label="Client ID"
-                            value={
-                                payment.clientId ??
-                                "Not available"
+                        <InfoItem
+                            icon={
+                                CalendarDays
                             }
-                        />
-
-                        <PaymentField
-                            label="Verified By"
-                            value={
-                                payment.verifiedBy ??
-                                "Not verified"
-                            }
+                            label="Submitted"
+                            value={formatDateTime(
+                                payment.createdAt
+                            )}
                         />
 
                     </div>
 
                 </section>
 
+                {actionError && (
+                    <div className="mt-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                        <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+
+                        <span>
+                            {actionError}
+                        </span>
+                    </div>
+                )}
+
+                {/* Content */}
+
+                <div className="mt-8 grid gap-8 lg:grid-cols-3">
+
+                    <div className="space-y-8 lg:col-span-2">
+
+                        {/* Receipt image */}
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                                    <CreditCard className="h-5 w-5 text-blue-600" />
+                                </div>
+
+                                <div>
+                                    <h2 className="font-semibold text-slate-900">
+                                        Payment Receipt
+                                    </h2>
+
+                                    <p className="text-xs text-slate-400">
+                                        Submitted payment proof
+                                    </p>
+                                </div>
+                            </div>
+
+                            {payment.receiptImageUrl ? (
+                                <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                                    <img
+                                        src={
+                                            payment.receiptImageUrl
+                                        }
+                                        alt="Payment receipt"
+                                        className="max-h-[700px] w-full object-contain"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="mt-6 rounded-xl bg-slate-50 p-10 text-center text-sm text-slate-400">
+                                    No receipt image available.
+                                </div>
+                            )}
+
+                            {payment.remarks && (
+                                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-red-500">
+                                        Rejection Remarks
+                                    </p>
+
+                                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-red-700">
+                                        {
+                                            payment.remarks
+                                        }
+                                    </p>
+                                </div>
+                            )}
+
+                        </section>
+
+                        {/* Post Job Request */}
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                            <div className="flex items-center justify-between gap-4">
+
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                                        <BriefcaseBusiness className="h-5 w-5 text-blue-600" />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="font-semibold text-slate-900">
+                                            Post Job Request
+                                        </h2>
+
+                                        <p className="text-xs text-slate-400">
+                                            Original service request
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <span className="font-mono text-xs text-slate-400">
+                                    {payment.requestId ??
+                                        "—"}
+                                </span>
+
+                            </div>
+
+                            {postJobRequest ? (
+                                <div className="mt-6 space-y-6">
+
+                                    <div className="grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            icon={
+                                                BriefcaseBusiness
+                                            }
+                                            label="Skill"
+                                            value={
+                                                postJobRequest.skillId ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CreditCard
+                                            }
+                                            label="Price"
+                                            value={formatMoney(
+                                                postJobRequest.price
+                                            )}
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CalendarDays
+                                            }
+                                            label="Date"
+                                            value={
+                                                postJobRequest.date ??
+                                                "—"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                Clock
+                                            }
+                                            label="Time"
+                                            value={
+                                                postJobRequest.isAsap
+                                                    ? "ASAP"
+                                                    : postJobRequest.time ??
+                                                      "—"
+                                            }
+                                        />
+
+                                    </div>
+
+                                    <div className="border-t border-slate-100 pt-5">
+
+                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                            Details
+                                        </p>
+
+                                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                            {postJobRequest.details ??
+                                                "No details provided."}
+                                        </p>
+
+                                    </div>
+
+                                    <div className="grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            icon={
+                                                User
+                                            }
+                                            label="Freelancer"
+                                            value={
+                                                postJobRequest.freelancerName ??
+                                                postJobRequest.freelancerId ??
+                                                "Not assigned"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CheckCircle2
+                                            }
+                                            label="Request Status"
+                                            value={
+                                                postJobRequest.status ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CreditCard
+                                            }
+                                            label="Payment Status"
+                                            value={
+                                                postJobRequest.paymentStatus ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                MapPin
+                                            }
+                                            label="Distance"
+                                            value={
+                                                postJobRequest.distance !==
+                                                undefined
+                                                    ? `${postJobRequest.distance} km`
+                                                    : "—"
+                                            }
+                                        />
+
+                                    </div>
+
+                                    {postJobRequest.address && (
+                                        <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4">
+                                            <MapPin className="mt-0.5 h-4 w-4 text-slate-500" />
+
+                                            <div>
+                                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                                    Address
+                                                </p>
+
+                                                <p className="mt-1 text-sm text-slate-700">
+                                                    {
+                                                        postJobRequest.address
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+                            ) : (
+                                <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-5 text-sm text-orange-700">
+                                    The PostJobRequest with ID{" "}
+                                    <span className="font-mono font-semibold">
+                                        {
+                                            payment.requestId
+                                        }
+                                    </span>{" "}
+                                    could not be found.
+                                </div>
+                            )}
+
+                        </section>
+
+                        {/* Booking */}
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                            <div className="flex items-center justify-between gap-4">
+
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                                        <FileText className="h-5 w-5 text-blue-600" />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="font-semibold text-slate-900">
+                                            Booking
+                                        </h2>
+
+                                        <p className="text-xs text-slate-400">
+                                            Booking created from this request
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <span className="font-mono text-xs text-slate-400">
+                                    {payment.requestId ??
+                                        "—"}
+                                </span>
+
+                            </div>
+
+                            {booking ? (
+                                <div className="mt-6 space-y-6">
+
+                                    <div className="grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            icon={
+                                                BriefcaseBusiness
+                                            }
+                                            label="Skill"
+                                            value={
+                                                booking.skillId ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CreditCard
+                                            }
+                                            label="Price"
+                                            value={formatMoney(
+                                                booking.price
+                                            )}
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CheckCircle2
+                                            }
+                                            label="Booking Status"
+                                            value={
+                                                booking.status ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CreditCard
+                                            }
+                                            label="Payment Status"
+                                            value={
+                                                booking.paymentStatus ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                    </div>
+
+                                    <div className="grid gap-5 sm:grid-cols-2">
+
+                                        <InfoItem
+                                            icon={
+                                                User
+                                            }
+                                            label="Freelancer"
+                                            value={
+                                                booking.freelancerName ??
+                                                booking.freelancerId ??
+                                                "Unknown"
+                                            }
+                                        />
+
+                                        <InfoItem
+                                            icon={
+                                                CalendarDays
+                                            }
+                                            label="Schedule"
+                                            value={
+                                                booking.isAsap
+                                                    ? "ASAP"
+                                                    : `${booking.date ?? "—"} ${booking.time ?? ""}`.trim()
+                                            }
+                                        />
+
+                                    </div>
+
+                                    {booking.details && (
+                                        <div className="border-t border-slate-100 pt-5">
+
+                                            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                                Details
+                                            </p>
+
+                                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                                {
+                                                    booking.details
+                                                }
+                                            </p>
+
+                                        </div>
+                                    )}
+
+                                </div>
+                            ) : (
+                                <div className="mt-6 rounded-xl border border-orange-200 bg-orange-50 p-5 text-sm text-orange-700">
+                                    The Booking with ID{" "}
+                                    <span className="font-mono font-semibold">
+                                        {
+                                            payment.requestId
+                                        }
+                                    </span>{" "}
+                                    could not be found.
+                                </div>
+                            )}
+
+                        </section>
+
+                    </div>
+
+                    {/* Right sidebar */}
+
+                    <aside className="space-y-8">
+
+                        {/* Client */}
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                            <div className="flex items-center gap-3">
+
+                                {client?.profileImageUrl ? (
+                                    <img
+                                        src={
+                                            client.profileImageUrl
+                                        }
+                                        alt={
+                                            clientName
+                                        }
+                                        className="h-12 w-12 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-700">
+                                        {clientName
+                                            .split(" ")
+                                            .filter(
+                                                Boolean
+                                            )
+                                            .slice(
+                                                0,
+                                                2
+                                            )
+                                            .map(
+                                                (
+                                                    part
+                                                ) =>
+                                                    part[0]
+                                            )
+                                            .join("")
+                                            .toUpperCase()}
+                                    </div>
+                                )}
+
+                                <div className="min-w-0">
+                                    <h2 className="truncate font-semibold text-slate-900">
+                                        {clientName}
+                                    </h2>
+
+                                    <p className="mt-0.5 truncate text-xs text-slate-400">
+                                        Client
+                                    </p>
+                                </div>
+
+                            </div>
+
+                            <div className="mt-6 space-y-5">
+
+                                <InfoItem
+                                    icon={
+                                        Mail
+                                    }
+                                    label="Email"
+                                    value={
+                                        client?.email ??
+                                        "Not provided"
+                                    }
+                                />
+
+                                <InfoItem
+                                    icon={
+                                        Phone
+                                    }
+                                    label="Phone"
+                                    value={
+                                        client?.phoneNumber ??
+                                        "Not provided"
+                                    }
+                                />
+
+                            </div>
+
+                            {payment.clientId && (
+                                <div className="mt-5 border-t border-slate-100 pt-5">
+
+                                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                                        Client ID
+                                    </p>
+
+                                    <p className="mt-1 break-all font-mono text-xs text-slate-500">
+                                        {
+                                            payment.clientId
+                                        }
+                                    </p>
+
+                                </div>
+                            )}
+
+                        </section>
+
+                        {/* Verification */}
+
+                        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                                    <ShieldCheck className="h-5 w-5 text-blue-600" />
+                                </div>
+
+                                <div>
+                                    <h2 className="font-semibold text-slate-900">
+                                        Verification
+                                    </h2>
+
+                                    <p className="text-xs text-slate-400">
+                                        Payment review information
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 space-y-5">
+
+                                <InfoItem
+                                    icon={
+                                        ShieldCheck
+                                    }
+                                    label="Status"
+                                    value={
+                                        payment.status ??
+                                        "Unknown"
+                                    }
+                                />
+
+                                <InfoItem
+                                    icon={
+                                        User
+                                    }
+                                    label="Verified By"
+                                    value={
+                                        payment.verifiedBy ??
+                                        "Not yet verified"
+                                    }
+                                />
+
+                                <InfoItem
+                                    icon={
+                                        CalendarDays
+                                    }
+                                    label="Verified At"
+                                    value={formatDateTime(
+                                        payment.verifiedAt
+                                    )}
+                                />
+
+                            </div>
+
+                        </section>
+
+                        {/* Actions */}
+
+                        {canProcess && (
+                            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                                <h2 className="font-semibold text-slate-900">
+                                    Admin Actions
+                                </h2>
+
+                                <p className="mt-1 text-sm leading-6 text-slate-500">
+                                    Verify the submitted payment before allowing the funds to be held.
+                                </p>
+
+                                <div className="mt-6 space-y-3">
+
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            actionLoading !==
+                                            null
+                                        }
+                                        onClick={
+                                            approvePayment
+                                        }
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {actionLoading ===
+                                        "approve" ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <CheckCircle2 className="h-4 w-4" />
+                                        )}
+
+                                        {actionLoading ===
+                                        "approve"
+                                            ? "Approving..."
+                                            : "Approve Payment"}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            actionLoading !==
+                                            null
+                                        }
+                                        onClick={() => {
+                                            setActionError(
+                                                null
+                                            );
+                                            setShowRejectDialog(
+                                                true
+                                            );
+                                        }}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <XCircle className="h-4 w-4" />
+                                        Reject Payment
+                                    </button>
+
+                                </div>
+
+                            </section>
+                        )}
+
+                    </aside>
+
+                </div>
+
             </div>
+
+            {/* Reject dialog */}
+
+            {showRejectDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+
+                        <div className="flex items-center gap-3">
+
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50">
+                                <XCircle className="h-5 w-5 text-red-600" />
+                            </div>
+
+                            <div>
+                                <h2 className="font-semibold text-slate-900">
+                                    Reject Payment
+                                </h2>
+
+                                <p className="text-xs text-slate-400">
+                                    Provide a reason for rejection.
+                                </p>
+                            </div>
+
+                        </div>
+
+                        <textarea
+                            value={
+                                rejectRemarks
+                            }
+                            onChange={(
+                                event
+                            ) =>
+                                setRejectRemarks(
+                                    event.target
+                                        .value
+                                )
+                            }
+                            rows={5}
+                            placeholder="Reason for rejection..."
+                            className="mt-6 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-400 focus:bg-white focus:ring-4 focus:ring-red-500/10"
+                        />
+
+                        <div className="mt-6 flex gap-3">
+
+                            <button
+                                type="button"
+                                disabled={
+                                    actionLoading !==
+                                    null
+                                }
+                                onClick={() =>
+                                    setShowRejectDialog(
+                                        false
+                                    )
+                                }
+                                className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                disabled={
+                                    actionLoading !==
+                                        null ||
+                                    !rejectRemarks.trim()
+                                }
+                                onClick={
+                                    rejectPayment
+                                }
+                                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {actionLoading ===
+                                "reject" ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <XCircle className="h-4 w-4" />
+                                )}
+
+                                {actionLoading ===
+                                "reject"
+                                    ? "Rejecting..."
+                                    : "Reject Payment"}
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            )}
 
         </main>
     );

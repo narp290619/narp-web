@@ -10,34 +10,55 @@ import {
 
 import { db } from "@/lib/firebase";
 
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
+
 export type AdminActivity = {
     id: string;
+
     type:
-    | "booking"
-    | "payment"
-    | "verification"
-    | "withdrawal"
-    | "report";
+        | "booking"
+        | "payment"
+        | "verification"
+        | "withdrawal"
+        | "report"
+        | "dispute";
 
     title: string;
+
     description: string;
+
     status?: string;
+
     createdAt: Date | null;
 };
 
 export type AdminDashboardStats = {
     totalUsers: number;
+
     totalFreelancers: number;
+
     activeBookings: number;
+
     totalPayments: number;
 
     pendingVerifications: number;
+
     pendingWithdrawals: number;
+
     reports: number;
+
     pendingSkillRequests: number;
+
+    pendingDisputes: number;
 
     recentActivity: AdminActivity[];
 };
+
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
 
 function getTimestampDate(
     value: unknown
@@ -66,14 +87,19 @@ function getTimestampDate(
     return null;
 }
 
-export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
-    /*
-     * ----------------------------------------------------------------------
-     * Collections
-     * ----------------------------------------------------------------------
-     */
+/* -------------------------------------------------------------------------- */
+/* Dashboard                                                                  */
+/* -------------------------------------------------------------------------- */
 
-    const usersRef = collection(db, "Users");
+export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
+    /* ---------------------------------------------------------------------- */
+    /* Collections                                                            */
+    /* ---------------------------------------------------------------------- */
+
+    const usersRef = collection(
+        db,
+        "Users"
+    );
 
     const skillMembersRef = collection(
         db,
@@ -90,15 +116,17 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         "PaymentReceipts"
     );
 
-    const freelancerVerificationRef = collection(
-        db,
-        "FreelancerVerification"
-    );
+    const freelancerVerificationRef =
+        collection(
+            db,
+            "FreelancerVerification"
+        );
 
-    const withdrawalRequestsRef = collection(
-        db,
-        "WithdrawalRequests"
-    );
+    const withdrawalRequestsRef =
+        collection(
+            db,
+            "WithdrawalRequests"
+        );
 
     const reportsRef = collection(
         db,
@@ -110,44 +138,58 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         "SkillRequests"
     );
 
-    /*
-     * ----------------------------------------------------------------------
-     * Dashboard queries
-     * ----------------------------------------------------------------------
-     */
-
-    const pendingVerificationsQuery = query(
-        freelancerVerificationRef,
-        where(
-            "verificationStatus",
-            "==",
-            "pending"
-        )
+    const disputesRef = collection(
+        db,
+        "Disputes"
     );
 
-    const pendingWithdrawalsQuery = query(
-        withdrawalRequestsRef,
-        where(
-            "status",
-            "==",
-            "pending"
-        )
-    );
+    /* ---------------------------------------------------------------------- */
+    /* Pending queries                                                        */
+    /* ---------------------------------------------------------------------- */
 
-    const pendingSkillRequestsQuery = query(
-        skillRequestsRef,
-        where(
-            "status",
-            "==",
-            "pending"
-        )
-    );
+    const pendingVerificationsQuery =
+        query(
+            freelancerVerificationRef,
+            where(
+                "verificationStatus",
+                "==",
+                "pending"
+            )
+        );
 
-    /*
-     * ----------------------------------------------------------------------
-     * Basic counts
-     * ----------------------------------------------------------------------
-     */
+    const pendingWithdrawalsQuery =
+        query(
+            withdrawalRequestsRef,
+            where(
+                "status",
+                "==",
+                "pending"
+            )
+        );
+
+    const pendingSkillRequestsQuery =
+        query(
+            skillRequestsRef,
+            where(
+                "status",
+                "==",
+                "pending"
+            )
+        );
+
+    const pendingDisputesQuery =
+        query(
+            disputesRef,
+            where(
+                "status",
+                "==",
+                "pending"
+            )
+        );
+
+    /* ---------------------------------------------------------------------- */
+    /* Basic counts                                                           */
+    /* ---------------------------------------------------------------------- */
 
     const [
         usersSnapshot,
@@ -156,10 +198,15 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         pendingWithdrawalsSnapshot,
         reportsSnapshot,
         pendingSkillRequestsSnapshot,
+        pendingDisputesSnapshot,
     ] = await Promise.all([
-        getCountFromServer(usersRef),
+        getCountFromServer(
+            usersRef
+        ),
 
-        getCountFromServer(bookingsRef),
+        getCountFromServer(
+            bookingsRef
+        ),
 
         getCountFromServer(
             pendingVerificationsQuery
@@ -176,70 +223,82 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         getCountFromServer(
             pendingSkillRequestsQuery
         ),
+
+        getCountFromServer(
+            pendingDisputesQuery
+        ),
     ]);
 
-    /*
-     * ----------------------------------------------------------------------
-     * Unique freelancers
-     * ----------------------------------------------------------------------
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Unique freelancers                                                     */
+    /* ---------------------------------------------------------------------- */
 
     const skillMembersSnapshot =
-        await getDocs(skillMembersRef);
+        await getDocs(
+            skillMembersRef
+        );
 
-    const freelancerIds = new Set<string>();
+    const freelancerIds =
+        new Set<string>();
 
-    skillMembersSnapshot.forEach((document) => {
-        const data = document.data();
+    skillMembersSnapshot.forEach(
+        (document) => {
+            const data =
+                document.data();
 
-        if (
-            typeof data.userId === "string" &&
-            data.userId.trim() !== ""
-        ) {
-            freelancerIds.add(
-                data.userId
-            );
-
-            return;
-        }
-
-        /*
-         * Fallback:
-         * document ID = userId_skillId
-         */
-
-        const documentId = document.id;
-
-        const separatorIndex =
-            documentId.lastIndexOf("_");
-
-        if (separatorIndex > 0) {
-            const userId =
-                documentId.substring(
-                    0,
-                    separatorIndex
+            if (
+                typeof data.userId ===
+                    "string" &&
+                data.userId.trim() !== ""
+            ) {
+                freelancerIds.add(
+                    data.userId
                 );
 
-            if (userId.trim() !== "") {
-                freelancerIds.add(userId);
+                return;
+            }
+
+            const documentId =
+                document.id;
+
+            const separatorIndex =
+                documentId.lastIndexOf(
+                    "_"
+                );
+
+            if (
+                separatorIndex > 0
+            ) {
+                const userId =
+                    documentId.substring(
+                        0,
+                        separatorIndex
+                    );
+
+                if (
+                    userId.trim() !== ""
+                ) {
+                    freelancerIds.add(
+                        userId
+                    );
+                }
             }
         }
-    });
-
-    /*
-     * ----------------------------------------------------------------------
-     * Approved payments
-     * ----------------------------------------------------------------------
-     */
-
-    const approvedPaymentsQuery = query(
-        paymentReceiptsRef,
-        where(
-            "status",
-            "==",
-            "approved"
-        )
     );
+
+    /* ---------------------------------------------------------------------- */
+    /* Approved payments                                                      */
+    /* ---------------------------------------------------------------------- */
+
+    const approvedPaymentsQuery =
+        query(
+            paymentReceiptsRef,
+            where(
+                "status",
+                "==",
+                "approved"
+            )
+        );
 
     const approvedPaymentsSnapshot =
         await getDocs(
@@ -250,57 +309,89 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
 
     approvedPaymentsSnapshot.forEach(
         (document) => {
-            const data = document.data();
+            const data =
+                document.data();
 
             if (
-                typeof data.amount === "number" &&
-                Number.isFinite(data.amount)
+                typeof data.amount ===
+                    "number" &&
+                Number.isFinite(
+                    data.amount
+                )
             ) {
-                totalPayments += data.amount;
+                totalPayments +=
+                    data.amount;
             }
         }
     );
 
-    /*
-    * ----------------------------------------------------------------------
-    * Recent Activity
-    * ----------------------------------------------------------------------
-    *
-    * Only retrieve the 10 newest documents from each collection.
-    *
-    * This prevents the dashboard from downloading the entire
-    * collection just to display the latest activity.
-    */
+    /* ---------------------------------------------------------------------- */
+    /* Recent activity queries                                                */
+    /* ---------------------------------------------------------------------- */
 
-    const recentBookingsQuery = query(
-        bookingsRef,
-        orderBy("createdAt", "desc"),
-        limit(10)
-    );
+    const recentBookingsQuery =
+        query(
+            bookingsRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
 
-    const recentPaymentsQuery = query(
-        paymentReceiptsRef,
-        orderBy("createdAt", "desc"),
-        limit(10)
-    );
+    const recentPaymentsQuery =
+        query(
+            paymentReceiptsRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
 
-    const recentVerificationQuery = query(
-        freelancerVerificationRef,
-        orderBy("createdAt", "desc"),
-        limit(10)
-    );
+    const recentVerificationQuery =
+        query(
+            freelancerVerificationRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
 
-    const recentWithdrawalsQuery = query(
-        withdrawalRequestsRef,
-        orderBy("createdAt", "desc"),
-        limit(10)
-    );
+    const recentWithdrawalsQuery =
+        query(
+            withdrawalRequestsRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
 
-    const recentReportsQuery = query(
-        reportsRef,
-        orderBy("createdAt", "desc"),
-        limit(10)
-    );
+    const recentReportsQuery =
+        query(
+            reportsRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
+
+    const recentDisputesQuery =
+        query(
+            disputesRef,
+            orderBy(
+                "createdAt",
+                "desc"
+            ),
+            limit(10)
+        );
+
+    /* ---------------------------------------------------------------------- */
+    /* Get recent documents                                                   */
+    /* ---------------------------------------------------------------------- */
 
     const [
         recentBookingsSnapshot,
@@ -308,98 +399,145 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         recentVerificationSnapshot,
         recentWithdrawalsSnapshot,
         recentReportsSnapshot,
+        recentDisputesSnapshot,
     ] = await Promise.all([
-        getDocs(recentBookingsQuery),
+        getDocs(
+            recentBookingsQuery
+        ),
 
-        getDocs(recentPaymentsQuery),
+        getDocs(
+            recentPaymentsQuery
+        ),
 
-        getDocs(recentVerificationQuery),
+        getDocs(
+            recentVerificationQuery
+        ),
 
-        getDocs(recentWithdrawalsQuery),
+        getDocs(
+            recentWithdrawalsQuery
+        ),
 
-        getDocs(recentReportsQuery),
+        getDocs(
+            recentReportsQuery
+        ),
+
+        getDocs(
+            recentDisputesQuery
+        ),
     ]);
 
-    const activities: AdminActivity[] = [];
+    const activities: AdminActivity[] =
+        [];
 
-    /*
-     * Bookings
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Bookings                                                               */
+    /* ---------------------------------------------------------------------- */
 
-    recentBookingsSnapshot.forEach((document) => {
-        const data = document.data();
+    recentBookingsSnapshot.forEach(
+        (document) => {
+            const data =
+                document.data();
 
-        activities.push({
-            id: `booking-${document.id}`,
-            type: "booking",
-            title: "Booking activity",
-            description:
-                `Booking ${document.id}`,
-            status:
-                typeof data.status === "string"
-                    ? data.status
-                    : undefined,
-            createdAt:
-                getTimestampDate(
-                    data.createdAt
-                ),
-        });
-    });
+            activities.push({
+                id:
+                    `booking-${document.id}`,
 
-    /*
-     * Payments
-     */
+                type: "booking",
 
-    recentPaymentsSnapshot.forEach((document) => {
-        const data = document.data();
+                title:
+                    "Booking activity",
 
-        const amount =
-            typeof data.amount === "number"
-                ? data.amount
-                : 0;
+                description:
+                    `Booking ${document.id}`,
 
-        activities.push({
-            id: `payment-${document.id}`,
-            type: "payment",
-            title: "Payment received",
-            description:
-                `₱${amount.toLocaleString(
-                    "en-PH",
-                    {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                    }
-                )}`,
-            status:
-                typeof data.status === "string"
-                    ? data.status
-                    : undefined,
-            createdAt:
-                getTimestampDate(
-                    data.createdAt
-                ),
-        });
-    });
+                status:
+                    typeof data.status ===
+                        "string"
+                        ? data.status
+                        : undefined,
 
-    /*
-     * Freelancer verification
-     */
+                createdAt:
+                    getTimestampDate(
+                        data.createdAt
+                    ),
+            });
+        }
+    );
+
+    /* ---------------------------------------------------------------------- */
+    /* Payments                                                               */
+    /* ---------------------------------------------------------------------- */
+
+    recentPaymentsSnapshot.forEach(
+        (document) => {
+            const data =
+                document.data();
+
+            const amount =
+                typeof data.amount ===
+                    "number"
+                    ? data.amount
+                    : 0;
+
+            activities.push({
+                id:
+                    `payment-${document.id}`,
+
+                type: "payment",
+
+                title:
+                    "Payment received",
+
+                description:
+                    `₱${amount.toLocaleString(
+                        "en-PH",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        }
+                    )}`,
+
+                status:
+                    typeof data.status ===
+                        "string"
+                        ? data.status
+                        : undefined,
+
+                createdAt:
+                    getTimestampDate(
+                        data.createdAt
+                    ),
+            });
+        }
+    );
+
+    /* ---------------------------------------------------------------------- */
+    /* Freelancer verification                                                */
+    /* ---------------------------------------------------------------------- */
 
     recentVerificationSnapshot.forEach(
         (document) => {
-            const data = document.data();
+            const data =
+                document.data();
 
             activities.push({
-                id: `verification-${document.id}`,
+                id:
+                    `verification-${document.id}`,
+
                 type: "verification",
-                title: "Freelancer verification",
+
+                title:
+                    "Freelancer verification",
+
                 description:
                     `Verification request ${document.id}`,
+
                 status:
                     typeof data.verificationStatus ===
                         "string"
                         ? data.verificationStatus
                         : undefined,
+
                 createdAt:
                     getTimestampDate(
                         data.createdAt
@@ -408,24 +546,33 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         }
     );
 
-    /*
-     * Withdrawals
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Withdrawals                                                            */
+    /* ---------------------------------------------------------------------- */
 
     recentWithdrawalsSnapshot.forEach(
         (document) => {
-            const data = document.data();
+            const data =
+                document.data();
 
             activities.push({
-                id: `withdrawal-${document.id}`,
+                id:
+                    `withdrawal-${document.id}`,
+
                 type: "withdrawal",
-                title: "Withdrawal request",
+
+                title:
+                    "Withdrawal request",
+
                 description:
                     `Withdrawal ${document.id}`,
+
                 status:
-                    typeof data.status === "string"
+                    typeof data.status ===
+                        "string"
                         ? data.status
                         : undefined,
+
                 createdAt:
                     getTimestampDate(
                         data.createdAt
@@ -434,20 +581,27 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         }
     );
 
-    /*
-     * Reports
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Reports                                                                */
+    /* ---------------------------------------------------------------------- */
 
     recentReportsSnapshot.forEach(
         (document) => {
-            const data = document.data();
+            const data =
+                document.data();
 
             activities.push({
-                id: `report-${document.id}`,
+                id:
+                    `report-${document.id}`,
+
                 type: "report",
-                title: "New report",
+
+                title:
+                    "New report",
+
                 description:
                     `Report ${document.id}`,
+
                 createdAt:
                     getTimestampDate(
                         data.createdAt
@@ -456,33 +610,72 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         }
     );
 
-    /*
-    * Combine all five collections and sort them
-    * by newest activity.
-    */
+    /* ---------------------------------------------------------------------- */
+    /* Disputes                                                               */
+    /* ---------------------------------------------------------------------- */
 
-    activities.sort((a, b) => {
-        const aTime =
-            a.createdAt?.getTime() ?? 0;
+    recentDisputesSnapshot.forEach(
+        (document) => {
+            const data =
+                document.data();
 
-        const bTime =
-            b.createdAt?.getTime() ?? 0;
+            const category =
+                typeof data.category ===
+                    "string" &&
+                data.category.trim() !== ""
+                    ? data.category
+                    : "Dispute";
 
-        return bTime - aTime;
-    });
+            activities.push({
+                id:
+                    `dispute-${document.id}`,
 
-    /*
-     * Only show the 10 newest activities.
-     */
+                type: "dispute",
+
+                title:
+                    "New dispute",
+
+                description:
+                    `${category} • Dispute ${document.id}`,
+
+                status:
+                    typeof data.status ===
+                        "string"
+                        ? data.status
+                        : undefined,
+
+                createdAt:
+                    getTimestampDate(
+                        data.createdAt
+                    ),
+            });
+        }
+    );
+
+    /* ---------------------------------------------------------------------- */
+    /* Sort activity by newest                                               */
+    /* ---------------------------------------------------------------------- */
+
+    activities.sort(
+        (a, b) => {
+            const aTime =
+                a.createdAt?.getTime() ??
+                0;
+
+            const bTime =
+                b.createdAt?.getTime() ??
+                0;
+
+            return bTime - aTime;
+        }
+    );
 
     const recentActivity =
         activities.slice(0, 10);
 
-    /*
-     * ----------------------------------------------------------------------
-     * Return
-     * ----------------------------------------------------------------------
-     */
+    /* ---------------------------------------------------------------------- */
+    /* Return                                                                 */
+    /* ---------------------------------------------------------------------- */
 
     return {
         totalUsers:
@@ -497,16 +690,29 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
         totalPayments,
 
         pendingVerifications:
-            pendingVerificationsSnapshot.data().count,
+            pendingVerificationsSnapshot
+                .data()
+                .count,
 
         pendingWithdrawals:
-            pendingWithdrawalsSnapshot.data().count,
+            pendingWithdrawalsSnapshot
+                .data()
+                .count,
 
         reports:
-            reportsSnapshot.data().count,
+            reportsSnapshot
+                .data()
+                .count,
 
         pendingSkillRequests:
-            pendingSkillRequestsSnapshot.data().count,
+            pendingSkillRequestsSnapshot
+                .data()
+                .count,
+
+        pendingDisputes:
+            pendingDisputesSnapshot
+                .data()
+                .count,
 
         recentActivity,
     };

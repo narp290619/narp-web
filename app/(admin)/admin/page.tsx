@@ -33,6 +33,7 @@ const emptyStats: AdminDashboardStats = {
     pendingWithdrawals: 0,
     reports: 0,
     pendingSkillRequests: 0,
+    pendingDisputes: 0,
     recentActivity: [],
 };
 
@@ -232,6 +233,13 @@ export default function AdminDashboardPage() {
                             description="Requests for new skills"
                             value={stats.pendingSkillRequests}
                             icon={Wrench}
+                        />
+
+                        <AttentionCard
+                            title="Disputes"
+                            description="Pending disputes requiring review"
+                            value={stats.pendingDisputes}
+                            icon={AlertTriangle}
                         />
 
                     </div>
@@ -572,6 +580,13 @@ function getActivityConfig(
                 icon: AlertTriangle,
                 background: "bg-red-50",
                 iconColor: "text-red-600",
+            };
+
+        case "dispute":
+            return {
+                icon: AlertTriangle,
+                background: "bg-orange-50",
+                iconColor: "text-orange-600",
             };
 
         default:
