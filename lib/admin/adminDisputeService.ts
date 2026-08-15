@@ -11,29 +11,73 @@ import {
 
 import { db } from "@/lib/firebase";
 
-/* -------------------------------------------------------------------------- */
-/* Types                                                                      */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   TYPES
+============================================================================= */
 
 export type AdminDisputeStatus =
     | "pending"
     | "under_review"
     | "resolved";
 
+/* --------------------------------------------------------------------------
+   Evidence
+----------------------------------------------------------------------------- */
+
 export type AdminDisputeEvidence = {
     url?: string;
     downloadUrl?: string;
+
     type?: string;
     contentType?: string;
+
     name?: string;
     fileName?: string;
+    originalName?: string;
+
+    path?: string;
+
+    sha256?: string;
+
+    size?: number;
 };
+
+/* --------------------------------------------------------------------------
+   Individual report
+----------------------------------------------------------------------------- */
+
+export type AdminDisputeReport = {
+    reportedBy: string;
+
+    reportedByRole:
+        | "client"
+        | "freelancer"
+        | string;
+
+    category: string;
+
+    description: string;
+
+    createdAt: Date | null;
+
+    evidence: AdminDisputeEvidence[];
+};
+
+/* --------------------------------------------------------------------------
+   Dispute
+----------------------------------------------------------------------------- */
 
 export type AdminDispute = {
     disputeId: string;
 
     bookingId: string;
 
+    /*
+     * Original/top-level report information.
+     *
+     * These are retained because your existing dispute documents
+     * contain these fields.
+     */
     reportedBy: string;
 
     reportedByRole: string;
@@ -46,7 +90,14 @@ export type AdminDispute = {
 
     description: string;
 
-    evidence: AdminDisputeEvidence[];
+    /*
+     * IMPORTANT:
+     *
+     * All actual reports submitted by the parties are stored here.
+     *
+     * Each report has its OWN evidence array.
+     */
+    reports: AdminDisputeReport[];
 
     status: AdminDisputeStatus;
 
@@ -58,15 +109,20 @@ export type AdminDispute = {
 
     resolutionNote: string | null;
 
+    refundAmount: number | null;
+
     createdAt: Date | null;
 
     updatedAt: Date | null;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Helpers                                                                    */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   FIRESTORE HELPERS
+============================================================================= */
 
+/**
+ * Convert a Firestore Timestamp into a JavaScript Date.
+ */
 function getTimestampDate(
     value: unknown
 ): Date | null {
@@ -94,6 +150,9 @@ function getTimestampDate(
     return null;
 }
 
+/**
+ * Safely get a string.
+ */
 function getString(
     value: unknown,
     fallback = ""
@@ -103,6 +162,9 @@ function getString(
         : fallback;
 }
 
+/**
+ * Safely get nullable string.
+ */
 function getNullableString(
     value: unknown
 ): string | null {
@@ -111,9 +173,161 @@ function getNullableString(
         : null;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Map Firestore document                                                     */
-/* -------------------------------------------------------------------------- */
+/**
+ * Safely get a number.
+ */
+function getNumber(
+    value: unknown,
+    fallback = 0
+): number {
+    if (
+        typeof value === "number" &&
+        Number.isFinite(value)
+    ) {
+        return value;
+    }
+
+    return fallback;
+}
+
+/**
+ * Safely parse one evidence object.
+ */
+function mapEvidence(
+    value: unknown
+): AdminDisputeEvidence | null {
+    if (
+        value === null ||
+        typeof value !== "object"
+    ) {
+        return null;
+    }
+
+    const item =
+        value as Record<string, unknown>;
+
+    return {
+        url:
+            typeof item.url === "string"
+                ? item.url
+                : undefined,
+
+        downloadUrl:
+            typeof item.downloadUrl === "string"
+                ? item.downloadUrl
+                : undefined,
+
+        type:
+            typeof item.type === "string"
+                ? item.type
+                : undefined,
+
+        contentType:
+            typeof item.contentType === "string"
+                ? item.contentType
+                : undefined,
+
+        name:
+            typeof item.name === "string"
+                ? item.name
+                : undefined,
+
+        fileName:
+            typeof item.fileName === "string"
+                ? item.fileName
+                : undefined,
+
+        originalName:
+            typeof item.originalName === "string"
+                ? item.originalName
+                : undefined,
+
+        path:
+            typeof item.path === "string"
+                ? item.path
+                : undefined,
+
+        sha256:
+            typeof item.sha256 === "string"
+                ? item.sha256
+                : undefined,
+
+        size:
+            typeof item.size === "number"
+                ? item.size
+                : undefined,
+    };
+}
+
+/**
+ * Safely parse one report.
+ */
+function mapReport(
+    value: unknown
+): AdminDisputeReport | null {
+    if (
+        value === null ||
+        typeof value !== "object"
+    ) {
+        return null;
+    }
+
+    const report =
+        value as Record<string, unknown>;
+
+    /*
+     * Evidence belongs to THIS report.
+     */
+    const rawEvidence =
+        Array.isArray(report.evidence)
+            ? report.evidence
+            : [];
+
+    const evidence =
+        rawEvidence
+            .map((item) =>
+                mapEvidence(item)
+            )
+            .filter(
+                (
+                    item
+                ): item is AdminDisputeEvidence =>
+                    item !== null
+            );
+
+    return {
+        reportedBy:
+            getString(
+                report.reportedBy
+            ),
+
+        reportedByRole:
+            getString(
+                report.reportedByRole
+            ),
+
+        category:
+            getString(
+                report.category
+            ),
+
+        description:
+            getString(
+                report.description
+            ),
+
+        createdAt:
+            getTimestampDate(
+                report.createdAt
+            ),
+
+        evidence,
+    };
+}
+
+/* ==========================================================================
+   MAP FIRESTORE DOCUMENT
+============================================================================= */
 
 function mapAdminDispute(
     document: {
@@ -121,7 +335,12 @@ function mapAdminDispute(
         data: () => Record<string, unknown>;
     }
 ): AdminDispute {
-    const data = document.data();
+    const data =
+        document.data();
+
+    /* ----------------------------------------------------------------------
+       STATUS
+    ---------------------------------------------------------------------- */
 
     const rawStatus =
         getString(
@@ -136,53 +355,30 @@ function mapAdminDispute(
                 ? "resolved"
                 : "pending";
 
-    const rawEvidence =
-        Array.isArray(data.evidence)
-            ? data.evidence
+    /* ----------------------------------------------------------------------
+       REPORTS
+    ---------------------------------------------------------------------- */
+
+    const rawReports =
+        Array.isArray(data.reports)
+            ? data.reports
             : [];
 
-    const evidence: AdminDisputeEvidence[] =
-        rawEvidence
+    const reports =
+        rawReports
+            .map((item) =>
+                mapReport(item)
+            )
             .filter(
                 (
                     item
-                ): item is Record<string, unknown> =>
-                    item !== null &&
-                    typeof item === "object"
-            )
-            .map((item) => ({
-                url:
-                    typeof item.url === "string"
-                        ? item.url
-                        : undefined,
+                ): item is AdminDisputeReport =>
+                    item !== null
+            );
 
-                downloadUrl:
-                    typeof item.downloadUrl ===
-                    "string"
-                        ? item.downloadUrl
-                        : undefined,
-
-                type:
-                    typeof item.type === "string"
-                        ? item.type
-                        : undefined,
-
-                contentType:
-                    typeof item.contentType ===
-                    "string"
-                        ? item.contentType
-                        : undefined,
-
-                name:
-                    typeof item.name === "string"
-                        ? item.name
-                        : undefined,
-
-                fileName:
-                    typeof item.fileName === "string"
-                        ? item.fileName
-                        : undefined,
-            }));
+    /* ----------------------------------------------------------------------
+       RETURN
+    ---------------------------------------------------------------------- */
 
     return {
         disputeId:
@@ -192,27 +388,47 @@ function mapAdminDispute(
             ),
 
         bookingId:
-            getString(data.bookingId),
+            getString(
+                data.bookingId
+            ),
 
+        /*
+         * Top-level dispute information.
+         */
         reportedBy:
-            getString(data.reportedBy),
+            getString(
+                data.reportedBy
+            ),
 
         reportedByRole:
-            getString(data.reportedByRole),
+            getString(
+                data.reportedByRole
+            ),
 
         clientId:
-            getString(data.clientId),
+            getString(
+                data.clientId
+            ),
 
         freelancerId:
-            getString(data.freelancerId),
+            getString(
+                data.freelancerId
+            ),
 
         category:
-            getString(data.category),
+            getString(
+                data.category
+            ),
 
         description:
-            getString(data.description),
+            getString(
+                data.description
+            ),
 
-        evidence,
+        /*
+         * Individual reports.
+         */
+        reports,
 
         status,
 
@@ -236,6 +452,11 @@ function mapAdminDispute(
                 data.resolutionNote
             ),
 
+        refundAmount:
+            typeof data.refundAmount === "number"
+                ? data.refundAmount
+                : null,
+
         createdAt:
             getTimestampDate(
                 data.createdAt
@@ -248,9 +469,9 @@ function mapAdminDispute(
     };
 }
 
-/* -------------------------------------------------------------------------- */
-/* Get all disputes                                                           */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   GET ALL DISPUTES
+============================================================================= */
 
 export async function getAdminDisputes(
     status?: AdminDisputeStatus
@@ -263,75 +484,123 @@ export async function getAdminDisputes(
 
     let disputesQuery;
 
+    /* ----------------------------------------------------------------------
+       Filter by status
+    ---------------------------------------------------------------------- */
+
     if (status) {
-        disputesQuery = query(
-            disputesRef,
-            where(
-                "status",
-                "==",
-                status
-            ),
-            orderBy(
-                "createdAt",
-                "desc"
-            ),
-            limit(50)
-        );
-    } else {
-        disputesQuery = query(
-            disputesRef,
-            orderBy(
-                "createdAt",
-                "desc"
-            ),
-            limit(50)
-        );
+        disputesQuery =
+            query(
+                disputesRef,
+
+                where(
+                    "status",
+                    "==",
+                    status
+                ),
+
+                orderBy(
+                    "createdAt",
+                    "desc"
+                ),
+
+                limit(50)
+            );
     }
+
+    /* ----------------------------------------------------------------------
+       All statuses
+    ---------------------------------------------------------------------- */
+
+    else {
+        disputesQuery =
+            query(
+                disputesRef,
+
+                orderBy(
+                    "createdAt",
+                    "desc"
+                ),
+
+                limit(50)
+            );
+    }
+
+    /* ----------------------------------------------------------------------
+       Execute query
+    ---------------------------------------------------------------------- */
 
     const snapshot =
         await getDocs(
             disputesQuery
         );
 
+    /* ----------------------------------------------------------------------
+       Map documents
+    ---------------------------------------------------------------------- */
+
     return snapshot.docs.map(
         (document) =>
             mapAdminDispute({
-                id: document.id,
+                id:
+                    document.id,
+
                 data: () =>
                     document.data(),
             })
     );
 }
 
-/* -------------------------------------------------------------------------- */
-/* Get single dispute                                                         */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   GET SINGLE DISPUTE
+============================================================================= */
 
 export async function getAdminDispute(
     disputeId: string
 ): Promise<AdminDispute | null> {
-    if (!disputeId.trim()) {
+    const trimmedId =
+        disputeId.trim();
+
+    if (!trimmedId) {
         return null;
     }
+
+    /* ----------------------------------------------------------------------
+       Reference
+    ---------------------------------------------------------------------- */
 
     const disputeRef =
         doc(
             db,
             "Disputes",
-            disputeId
+            trimmedId
         );
+
+    /* ----------------------------------------------------------------------
+       Get document
+    ---------------------------------------------------------------------- */
 
     const snapshot =
         await getDoc(
             disputeRef
         );
 
+    /* ----------------------------------------------------------------------
+       Not found
+    ---------------------------------------------------------------------- */
+
     if (!snapshot.exists()) {
         return null;
     }
 
+    /* ----------------------------------------------------------------------
+       Map document
+    ---------------------------------------------------------------------- */
+
     return mapAdminDispute({
-        id: snapshot.id,
+        id:
+            snapshot.id,
+
         data: () =>
             snapshot.data(),
     });

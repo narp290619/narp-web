@@ -15,6 +15,8 @@ import {
     Settings,
     X,
     Scale,
+    ReceiptText,
+    WalletCards,
 } from "lucide-react";
 
 type AdminSidebarProps = {
@@ -72,6 +74,16 @@ const navigation = [
         label: "Disputes",
         href: "/admin/disputes",
         icon: Scale,
+    },
+    {
+        label: "Refund Requests",
+        href: "/admin/refund-requests",
+        icon: ReceiptText,
+    },
+    {
+        label: "Manual Refunds",
+        href: "/admin/manual-refunds",
+        icon: WalletCards,
     },
 ];
 

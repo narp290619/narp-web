@@ -25,23 +25,23 @@ const STATUS_TABS: {
     value: DisputeStatus;
     label: string;
 }[] = [
-    {
-        value: "all",
-        label: "All",
-    },
-    {
-        value: "pending",
-        label: "Pending",
-    },
-    {
-        value: "under_review",
-        label: "Under Review",
-    },
-    {
-        value: "resolved",
-        label: "Resolved",
-    },
-];
+        {
+            value: "all",
+            label: "All",
+        },
+        {
+            value: "pending",
+            label: "Pending",
+        },
+        {
+            value: "under_review",
+            label: "Under Review",
+        },
+        {
+            value: "resolved",
+            label: "Resolved",
+        },
+    ];
 
 export default function AdminDisputesPage() {
     const [status, setStatus] =
@@ -182,11 +182,10 @@ export default function AdminDisputesPage() {
                             "
                         >
                             <RefreshCw
-                                className={`h-4 w-4 ${
-                                    loading
+                                className={`h-4 w-4 ${loading
                                         ? "animate-spin"
                                         : ""
-                                }`}
+                                    }`}
                             />
 
                             Refresh
@@ -231,10 +230,9 @@ export default function AdminDisputesPage() {
                                             text-sm
                                             font-semibold
                                             transition
-                                            ${
-                                                active
-                                                    ? "bg-blue-600 text-white shadow-sm"
-                                                    : "text-slate-600 hover:bg-slate-100"
+                                            ${active
+                                                ? "bg-blue-600 text-white shadow-sm"
+                                                : "text-slate-600 hover:bg-slate-100"
                                             }
                                         `}
                                     >
@@ -365,12 +363,11 @@ export default function AdminDisputesPage() {
                         <p className="mt-1 text-sm text-slate-500">
                             {loading
                                 ? "Loading disputes..."
-                                : `${filteredDisputes.length} dispute${
-                                      filteredDisputes.length ===
-                                      1
-                                          ? ""
-                                          : "s"
-                                  }`}
+                                : `${filteredDisputes.length} dispute${filteredDisputes.length ===
+                                    1
+                                    ? ""
+                                    : "s"
+                                }`}
                         </p>
                     </div>
                 </div>
@@ -399,7 +396,7 @@ export default function AdminDisputesPage() {
 
                 {!loading &&
                     filteredDisputes.length ===
-                        0 && (
+                    0 && (
                         <div
                             className="
                                 mt-5
@@ -431,7 +428,7 @@ export default function AdminDisputesPage() {
 
                 {!loading &&
                     filteredDisputes.length >
-                        0 && (
+                    0 && (
                         <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                             <div className="divide-y divide-slate-100">
                                 {filteredDisputes.map(
@@ -465,6 +462,12 @@ function DisputeRow({
 }: {
     dispute: AdminDispute;
 }) {
+    const evidenceCount = dispute.reports.reduce(
+        (total, report) =>
+            total + report.evidence.length,
+        0
+    );
+
     return (
         <button
             type="button"
@@ -554,15 +557,13 @@ function DisputeRow({
 
             {/* Evidence */}
 
-            {dispute.evidence.length >
-                0 && (
+            {evidenceCount > 0 && (
                 <div className="hidden items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 md:flex">
                     <FileWarning className="h-3.5 w-3.5" />
 
-                    {dispute.evidence.length}{" "}
-                    evidence
-                    {dispute.evidence.length ===
-                    1
+                    {evidenceCount} evidence
+
+                    {evidenceCount === 1
                         ? ""
                         : "s"}
                 </div>
