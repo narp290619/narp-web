@@ -25,12 +25,11 @@ import {
 import {
     doc,
     getDoc,
-    runTransaction,
-    serverTimestamp,
 } from "firebase/firestore";
 
+import { getFunctions, httpsCallable } from "firebase/functions";
+
 import { db } from "@/lib/firebase";
-import { getAuth } from "firebase/auth";
 
 type PaymentRecord = {
     id: string;
@@ -383,8 +382,8 @@ function parsePayment(
         referenceNumber:
             data.referenceNumber !== undefined
                 ? String(
-                      data.referenceNumber
-                  )
+                    data.referenceNumber
+                )
                 : undefined,
 
         receiptImageUrl:
@@ -835,165 +834,28 @@ export default function AdminPaymentDetailPage() {
      */
 
     async function approvePayment() {
-        if (
-            !payment ||
-            !payment.requestId
-        ) {
+        if (!payment?.requestId) {
             return;
         }
 
         try {
-            setActionLoading(
-                "approve"
-            );
+            setActionLoading("approve");
             setActionError(null);
 
-            const auth =
-                getAuth();
-
-            const adminUid =
-                auth.currentUser?.uid;
-
-            if (!adminUid) {
-                throw new Error(
-                    "You must be signed in as an administrator."
-                );
-            }
-
-            const receiptRef =
-                doc(
-                    db,
-                    "PaymentReceipts",
-                    payment.id
-                );
-
-            const requestRef =
-                doc(
-                    db,
-                    "PostJobRequests",
-                    payment.requestId
-                );
-
-            const bookingRef =
-                doc(
-                    db,
-                    "Bookings",
-                    payment.requestId
-                );
-
-            await runTransaction(
-                db,
-                async (
-                    transaction
-                ) => {
-                    /*
-                     * READS FIRST
-                     */
-
-                    const receiptSnapshot =
-                        await transaction.get(
-                            receiptRef
-                        );
-
-                    const requestSnapshot =
-                        await transaction.get(
-                            requestRef
-                        );
-
-                    const bookingSnapshot =
-                        await transaction.get(
-                            bookingRef
-                        );
-
-                    if (
-                        !receiptSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "Payment receipt no longer exists."
-                        );
-                    }
-
-                    const receiptData =
-                        receiptSnapshot.data();
-
-                    const currentStatus =
-                        normalizeStatus(
-                            receiptData.status
-                        );
-
-                    /*
-                     * Prevent double processing.
-                     */
-
-                    if (
-                        currentStatus ===
-                            "approved" ||
-                        currentStatus ===
-                            "rejected"
-                    ) {
-                        throw new Error(
-                            `This payment has already been ${currentStatus}.`
-                        );
-                    }
-
-                    if (
-                        !requestSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "The associated PostJobRequest could not be found."
-                        );
-                    }
-
-                    /*
-                     * WRITES AFTER ALL READS
-                     */
-
-                    transaction.update(
-                        receiptRef,
-                        {
-                            status: "approved",
-                            verifiedBy:
-                                adminUid,
-                            verifiedAt:
-                                serverTimestamp(),
-                        }
-                    );
-
-                    transaction.update(
-                        requestRef,
-                        {
-                            paymentStatus:
-                                "held",
-                        }
-                    );
-
-                    /*
-                     * Booking should exist
-                     * according to the NARP
-                     * data model.
-                     *
-                     * We still check it to
-                     * prevent an invalid
-                     * transaction.
-                     */
-
-                    if (
-                        !bookingSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "The associated Booking could not be found."
-                        );
-                    }
-
-                    transaction.update(
-                        bookingRef,
-                        {
-                            paymentStatus:
-                                "held",
-                        }
-                    );
-                }
+            const functions = getFunctions(
+                undefined,
+                "asia-southeast1"
             );
+
+            const callable = httpsCallable(
+                functions,
+                "approvePayment"
+            );
+
+            await callable.call({
+                receiptId: payment.id,
+                requestId: payment.requestId,
+            });
 
             await loadPayment();
         } catch (err) {
@@ -1017,10 +879,7 @@ export default function AdminPaymentDetailPage() {
      */
 
     async function rejectPayment() {
-        if (
-            !payment ||
-            !payment.requestId
-        ) {
+        if (!payment?.requestId) {
             return;
         }
 
@@ -1035,148 +894,26 @@ export default function AdminPaymentDetailPage() {
         }
 
         try {
-            setActionLoading(
-                "reject"
-            );
+            setActionLoading("reject");
             setActionError(null);
 
-            const auth =
-                getAuth();
-
-            const adminUid =
-                auth.currentUser?.uid;
-
-            if (!adminUid) {
-                throw new Error(
-                    "You must be signed in as an administrator."
-                );
-            }
-
-            const receiptRef =
-                doc(
-                    db,
-                    "PaymentReceipts",
-                    payment.id
-                );
-
-            const requestRef =
-                doc(
-                    db,
-                    "PostJobRequests",
-                    payment.requestId
-                );
-
-            const bookingRef =
-                doc(
-                    db,
-                    "Bookings",
-                    payment.requestId
-                );
-
-            await runTransaction(
-                db,
-                async (
-                    transaction
-                ) => {
-                    /*
-                     * READS FIRST
-                     */
-
-                    const receiptSnapshot =
-                        await transaction.get(
-                            receiptRef
-                        );
-
-                    const requestSnapshot =
-                        await transaction.get(
-                            requestRef
-                        );
-
-                    const bookingSnapshot =
-                        await transaction.get(
-                            bookingRef
-                        );
-
-                    if (
-                        !receiptSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "Payment receipt no longer exists."
-                        );
-                    }
-
-                    const receiptData =
-                        receiptSnapshot.data();
-
-                    const currentStatus =
-                        normalizeStatus(
-                            receiptData.status
-                        );
-
-                    if (
-                        currentStatus ===
-                            "approved" ||
-                        currentStatus ===
-                            "rejected"
-                    ) {
-                        throw new Error(
-                            `This payment has already been ${currentStatus}.`
-                        );
-                    }
-
-                    if (
-                        !requestSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "The associated PostJobRequest could not be found."
-                        );
-                    }
-
-                    if (
-                        !bookingSnapshot.exists()
-                    ) {
-                        throw new Error(
-                            "The associated Booking could not be found."
-                        );
-                    }
-
-                    /*
-                     * WRITES
-                     */
-
-                    transaction.update(
-                        receiptRef,
-                        {
-                            status: "rejected",
-                            remarks,
-                            verifiedBy:
-                                adminUid,
-                            verifiedAt:
-                                serverTimestamp(),
-                        }
-                    );
-
-                    transaction.update(
-                        requestRef,
-                        {
-                            paymentStatus:
-                                "rejected",
-                        }
-                    );
-
-                    transaction.update(
-                        bookingRef,
-                        {
-                            paymentStatus:
-                                "rejected",
-                        }
-                    );
-                }
+            const functions = getFunctions(
+                undefined,
+                "asia-southeast1"
             );
 
-            setShowRejectDialog(
-                false
+            const callable = httpsCallable(
+                functions,
+                "rejectPayment"
             );
+
+            await callable.call({
+                receiptId: payment.id,
+                requestId: payment.requestId,
+                remarks,
+            });
+
+            setShowRejectDialog(false);
             setRejectRemarks("");
 
             await loadPayment();
@@ -1504,7 +1241,7 @@ export default function AdminPaymentDetailPage() {
                                                 postJobRequest.isAsap
                                                     ? "ASAP"
                                                     : postJobRequest.time ??
-                                                      "—"
+                                                    "—"
                                             }
                                         />
 
@@ -1566,7 +1303,7 @@ export default function AdminPaymentDetailPage() {
                                             label="Distance"
                                             value={
                                                 postJobRequest.distance !==
-                                                undefined
+                                                    undefined
                                                     ? `${postJobRequest.distance} km`
                                                     : "—"
                                             }
@@ -1930,14 +1667,14 @@ export default function AdminPaymentDetailPage() {
                                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {actionLoading ===
-                                        "approve" ? (
+                                            "approve" ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
                                             <CheckCircle2 className="h-4 w-4" />
                                         )}
 
                                         {actionLoading ===
-                                        "approve"
+                                            "approve"
                                             ? "Approving..."
                                             : "Approve Payment"}
                                     </button>
@@ -2037,7 +1774,7 @@ export default function AdminPaymentDetailPage() {
                                 type="button"
                                 disabled={
                                     actionLoading !==
-                                        null ||
+                                    null ||
                                     !rejectRemarks.trim()
                                 }
                                 onClick={
@@ -2046,14 +1783,14 @@ export default function AdminPaymentDetailPage() {
                                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {actionLoading ===
-                                "reject" ? (
+                                    "reject" ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                     <XCircle className="h-4 w-4" />
                                 )}
 
                                 {actionLoading ===
-                                "reject"
+                                    "reject"
                                     ? "Rejecting..."
                                     : "Reject Payment"}
                             </button>

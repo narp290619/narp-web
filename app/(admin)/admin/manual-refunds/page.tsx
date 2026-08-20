@@ -17,8 +17,8 @@ import {
 } from "lucide-react";
 
 import {
-    getManualRefundRequests,
-    markBookingRefunded,
+    // getManualRefundRequests,
+    // markBookingRefunded,
     type AdminRefundRequest,
 } from "@/lib/admin/adminRefundService";
 
@@ -78,10 +78,10 @@ export default function AdminManualRefundsPage() {
             setLoading(true);
             setError(null);
 
-            const result =
-                await getManualRefundRequests();
+            // const result =
+            //     await getManualRefundRequests();
 
-            setRequests(result);
+            // setRequests(result);
         } catch (error) {
             console.error(
                 "Failed to load manual refunds:",
@@ -165,32 +165,32 @@ export default function AdminManualRefundsPage() {
             setError(null);
             setSuccess(null);
 
-            const result =
-                await markBookingRefunded(
-                    referenceModal.bookingId,
-                    reference
-                );
+            // const result =
+            //     await markBookingRefunded(
+            //         referenceModal.bookingId,
+            //         reference
+            //     );
 
-            if (
-                !result.success
-            ) {
-                throw new Error(
-                    result.message ??
-                        "Unable to mark booking as refunded."
-                );
-            }
+            // if (
+            //     !result.success
+            // ) {
+            //     throw new Error(
+            //         result.message ??
+            //             "Unable to mark booking as refunded."
+            //     );
+            // }
 
-            setReferenceModal(
-                null
-            );
+            // setReferenceModal(
+            //     null
+            // );
 
-            setRefundReference("");
+            // setRefundReference("");
 
-            setSuccess(
-                result.alreadyRefunded
-                    ? "This booking was already marked as refunded."
-                    : `Refund recorded successfully. Reference: ${reference}`
-            );
+            // setSuccess(
+            //     result.alreadyRefunded
+            //         ? "This booking was already marked as refunded."
+            //         : `Refund recorded successfully. Reference: ${reference}`
+            // );
 
             await loadRequests();
         } catch (error) {
