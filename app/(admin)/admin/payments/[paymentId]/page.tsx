@@ -852,7 +852,7 @@ export default function AdminPaymentDetailPage() {
                 "approvePayment"
             );
 
-            await callable.call({
+            await callable({
                 receiptId: payment.id,
                 requestId: payment.requestId,
             });
