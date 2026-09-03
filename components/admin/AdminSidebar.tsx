@@ -17,6 +17,7 @@ import {
     Scale,
     ReceiptText,
     WalletCards,
+    Wrench,
 } from "lucide-react";
 
 type AdminSidebarProps = {
@@ -39,6 +40,11 @@ const navigation = [
         label: "Freelancers",
         href: "/admin/freelancers",
         icon: UserCheck,
+    },
+    {
+        label: "Skill Requests",
+        href: "/admin/skill-requests",
+        icon: Wrench,
     },
     {
         label: "PostJobRequests",
