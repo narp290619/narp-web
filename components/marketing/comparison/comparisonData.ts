@@ -6,7 +6,7 @@ export interface ComparisonItem {
 
 export const comparisonData: ComparisonItem[] = [
   {
-    title: "Finding Professionals",
+    title: "Finding Freelancers",
     traditional: "Manual searching",
     narp: "AI Smart Matching",
   },

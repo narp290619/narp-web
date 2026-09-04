@@ -178,7 +178,7 @@ export default function Footer() {
 
                             Connecting customers with trusted freelancers across the
                             Philippines through AI-powered matching, secure bookings,
-                            and verified professionals.
+                            and verified freelancers.
 
                         </p>
 

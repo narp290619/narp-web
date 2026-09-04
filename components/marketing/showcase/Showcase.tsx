@@ -39,7 +39,7 @@ export default function Showcase() {
                     <SectionTitle
                         badge="App Experience"
                         title="Everything You Need in One App"
-                        subtitle="Discover professionals, chat, book services, pay securely, and track every job with NARP."
+                        subtitle="Discover freelancers, chat, book services, pay securely, and track every job with NARP."
                     />
 
                     <ShowcaseTabs
@@ -183,7 +183,7 @@ export default function Showcase() {
 
                     <FeatureBubble
                         icon={MapPinned}
-                        title="Nearby Professionals"
+                        title="Nearby Freelancers"
                         className="absolute left-0 top-12"
                     />
 

@@ -64,7 +64,7 @@ export const mockSuggestions = [
         ],
 
         reason:
-            "Leaks involving sinks and pipes are best handled by plumbing professionals.",
+            "Leaks involving sinks and pipes are best handled by plumbing freelancers.",
 
         recommendations: [
 

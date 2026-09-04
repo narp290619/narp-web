@@ -15,10 +15,10 @@ export const aiProducts: AIProduct[] = [
 
     color: "orange",
 
-    title: "Find the Right Professional",
+    title: "Find the Right Freelancer",
 
     description:
-        "Analyzes skills, ratings, availability, experience and distance to recommend the best professional in seconds.",
+        "Analyzes skills, ratings, availability, experience and distance to recommend the best freelancer in seconds.",
 },
 
 {
@@ -44,7 +44,7 @@ export const aiProducts: AIProduct[] = [
     title: "Smart Communication",
 
     description:
-        "Provides AI-assisted replies so professionals can answer customer inquiries faster.",
+        "Provides AI-assisted replies so freelancers can answer customer inquiries faster.",
 },
 
 {

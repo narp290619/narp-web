@@ -88,7 +88,7 @@ export default function ReviewsHelpPage() {
                     <ul>
                         <li>Truthful and based on actual experience.</li>
                         <li>Relevant to the service provided.</li>
-                        <li>Respectful and professional.</li>
+                        <li>Respectful and freelancer.</li>
                         <li>Free from threats or abusive language.</li>
                     </ul>
 

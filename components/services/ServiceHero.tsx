@@ -89,7 +89,7 @@ export default function ServiceHero({
                         "
                     >
                         {skill.description ??
-                            `Book trusted ${skill.title.toLowerCase()} professionals anywhere in the Philippines with NARP.`}
+                            `Book trusted ${skill.title.toLowerCase()} freelancers anywhere in the Philippines with NARP.`}
                     </p>
 
                     {/* Statistics */}
@@ -99,7 +99,7 @@ export default function ServiceHero({
                         <Stat
                             icon={<Users size={18} />}
                             value={`${skill.totalMembers}`}
-                            label="Professionals"
+                            label="Freelancers"
                         />
 
                         <Stat
@@ -135,7 +135,7 @@ export default function ServiceHero({
                                 hover:bg-orange-600
                             "
                         >
-                            Find Professionals
+                            Find Freelancers
                         </button>
 
                         <button

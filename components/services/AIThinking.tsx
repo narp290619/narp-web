@@ -10,7 +10,7 @@ const steps = [
 
     "Checking similar jobs",
 
-    "Ranking professionals",
+    "Ranking freelancers",
 
 ];
 

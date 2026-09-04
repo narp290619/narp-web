@@ -33,7 +33,7 @@ export default function AIServiceFinder() {
                 <p className="mt-3 max-w-2xl text-lg text-orange-100">
 
                     Describe your problem in your own words.
-                    NARP AI will recommend the right professional.
+                    NARP AI will recommend the right freelancer.
 
                 </p>
 

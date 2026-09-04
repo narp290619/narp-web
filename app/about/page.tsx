@@ -8,7 +8,7 @@ export const metadata = {
 
 const clientFeatures = [
   "Post job requests",
-  "Find nearby professionals",
+  "Find nearby freelancers",
   "Hire verified freelancers",
   "Pay securely through the platform",
   "Track job progress",

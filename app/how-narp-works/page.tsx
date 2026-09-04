@@ -197,7 +197,7 @@ export default function HowItWorksPage() {
 
             <FeatureCard
               icon="✔️"
-              title="Verified Professionals"
+              title="Verified Freelancers"
               description="Work with trusted and verified service providers."
             />
 
@@ -210,7 +210,7 @@ export default function HowItWorksPage() {
             <FeatureCard
               icon="📍"
               title="Nearby Services"
-              description="Discover professionals close to your location."
+              description="Discover freelancers close to your location."
             />
 
             <FeatureCard
@@ -232,7 +232,7 @@ export default function HowItWorksPage() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-lg text-white/90">
-            Whether you're looking for reliable professionals or want
+            Whether you're looking for reliable freelancers or want
             to earn by offering your skills, NARP makes the process
             simple, secure, and transparent.
           </p>

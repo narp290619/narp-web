@@ -41,7 +41,7 @@ export default function SuccessScene() {
         </p>
 
         <p className="text-sm text-slate-500">
-          Rated 4.9 • Verified Professional
+          Rated 4.9 • Verified Freelancer
         </p>
 
       </div>
@@ -51,7 +51,7 @@ export default function SuccessScene() {
       <div className="mt-auto rounded-2xl bg-gradient-to-r from-orange-500 to-amber-400 p-4 text-center text-white">
 
         <p className="text-sm font-semibold">
-          Find your next trusted professional
+          Find your next trusted freelancer
         </p>
 
       </div>

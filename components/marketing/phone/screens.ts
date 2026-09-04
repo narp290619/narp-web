@@ -2,7 +2,7 @@ export const screens = [
   {
     id: "ai",
     title: "AI Smart Matching",
-    subtitle: "Finding the best professional...",
+    subtitle: "Finding the best freelancer...",
     color: "bg-orange-500",
     emoji: "🤖",
   },
@@ -16,7 +16,7 @@ export const screens = [
   {
     id: "tracking",
     title: "Live Tracking",
-    subtitle: "Professional is nearby",
+    subtitle: "Freelancer is nearby",
     color: "bg-sky-500",
     emoji: "📍",
   },

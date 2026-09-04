@@ -2,7 +2,7 @@ export interface CoveragePin {
   city: string;
   x: number;
   y: number;
-  professionals: number;
+  freelancers: number;
   skills: number;
   rating: number;
 }
@@ -12,7 +12,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Baguio",
     x: 42,
     y: 28,
-    professionals: 620,
+    freelancers: 620,
     skills: 68,
     rating: 4.9,
   },
@@ -20,7 +20,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Manila",
     x: 45,
     y: 38,
-    professionals: 2500,
+    freelancers: 2500,
     skills: 72,
     rating: 4.9,
   },
@@ -28,7 +28,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Naga",
     x: 57,
     y: 43,
-    professionals: 480,
+    freelancers: 480,
     skills: 34,
     rating: 4.8,
   },
@@ -36,7 +36,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Cebu",
     x: 62,
     y: 63,
-    professionals: 1700,
+    freelancers: 1700,
     skills: 45,
     rating: 4.9,
   },
@@ -44,7 +44,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Iloilo",
     x: 53,
     y: 61,
-    professionals: 900,
+    freelancers: 900,
     skills: 39,
     rating: 4.8,
   },
@@ -52,7 +52,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Cagayan de Oro",
     x: 67,
     y: 75,
-    professionals: 760,
+    freelancers: 760,
     skills: 42,
     rating: 4.9,
   },
@@ -60,7 +60,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Davao",
     x: 72,
     y: 83,
-    professionals: 1400,
+    freelancers: 1400,
     skills: 37,
     rating: 4.9,
   },
@@ -68,7 +68,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Palawan",
     x: 30,
     y: 68,
-    professionals: 840,
+    freelancers: 840,
     skills: 52,
     rating: 4.9,
   },
@@ -76,7 +76,7 @@ export const coveragePins: CoveragePin[] = [
     city: "Coron",
     x:39,
     y: 53,
-    professionals: 840,
+    freelancers: 840,
     skills: 48,
     rating: 4.9,
   },

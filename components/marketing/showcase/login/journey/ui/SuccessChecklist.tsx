@@ -3,7 +3,7 @@
 import { CheckCircle2 } from "lucide-react";
 
 const items = [
-  "AI matched the best professional",
+  "AI matched the best freelancer",
   "Face verification completed",
   "Live tracking finished",
   "Secure payment protected",

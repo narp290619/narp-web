@@ -1,7 +1,7 @@
 export const SITE = {
   name: "NARP",
   description:
-    "Find trusted professionals across the Philippines.",
+    "Find trusted freelancers across the Philippines.",
   url: "https://narp.ph",
 };
 

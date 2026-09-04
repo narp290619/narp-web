@@ -18,7 +18,7 @@ export default function HomeScreen() {
                 <h1 className="mt-2 text-3xl font-bold leading-tight">
                     Find trusted
                     <br />
-                    professionals
+                    freelancers
                 </h1>
 
                 <SearchBar />
@@ -30,7 +30,7 @@ export default function HomeScreen() {
                 <div className="space-y-3">
                     <SkillCard
                         title="Builder"
-                        members="2,351 Professionals"
+                        members="2,351 Freelancers"
                         rating={4.9}
                         badge="Popular"
                         badgeColor="#f97316"
@@ -38,7 +38,7 @@ export default function HomeScreen() {
 
                     <SkillCard
                         title="Electrician"
-                        members="1,842 Professionals"
+                        members="1,842 Freelancers"
                         rating={4.8}
                         badge="Verified"
                         badgeColor="#0ea5e9"
@@ -46,7 +46,7 @@ export default function HomeScreen() {
 
                     <SkillCard
                         title="Cleaner"
-                        members="986 Professionals"
+                        members="986 Freelancers"
                         rating={4.9}
                         badge="Top Rated"
                         badgeColor="#10b981"

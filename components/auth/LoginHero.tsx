@@ -34,7 +34,7 @@ const features = [
     },
     {
         icon: ShieldCheck,
-        title: "Verified Professionals",
+        title: "Verified Freelancers",
     },
 ];
 
@@ -99,14 +99,14 @@ export default function LoginHero() {
 
                         Manage the Philippines'
                         <br />
-                        skilled professionals platform.
+                        skilled freelancers platform.
 
                     </h2>
 
                     <p className="mt-6 max-w-lg text-lg text-orange-50">
 
                         Everything you need to manage
-                        professionals, bookings,
+                        freelancers, bookings,
                         AI recommendations,
                         payments, and nationwide coverage.
 

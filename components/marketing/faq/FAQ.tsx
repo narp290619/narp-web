@@ -15,7 +15,7 @@ export default function FAQ() {
                 <SectionTitle
                     badge="FAQ"
                     title="Frequently Asked Questions"
-                    subtitle="Everything you need to know about booking trusted professionals through NARP."
+                    subtitle="Everything you need to know about booking trusted freelancers through NARP."
                 />
 
                 <div className="mx-auto mt-16 max-w-4xl space-y-5">

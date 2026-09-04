@@ -1,13 +1,13 @@
 interface Props {
     city: string;
-    professionals: number;
+    freelancers: number;
     skills: number;
     rating: number;
 }
 
 export default function CoverageTooltip({
     city,
-    professionals,
+    freelancers,
     skills,
     rating,
 }: Props) {
@@ -42,9 +42,9 @@ export default function CoverageTooltip({
             <div className="mt-3 space-y-2 text-sm">
 
                 <div className="flex justify-between">
-                    <span>👷 Professionals</span>
+                    <span>👷 Freelancers</span>
                     <span className="font-semibold">
-                        {professionals.toLocaleString()}
+                        {freelancers.toLocaleString()}
                     </span>
                 </div>
 
@@ -71,7 +71,7 @@ export default function CoverageTooltip({
                     <div className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
 
                     <span className="text-xs text-slate-500">
-                        Professionals available
+                        Freelancers available
                     </span>
 
                 </div>

@@ -1,7 +1,7 @@
 const stats = [
     {
         value: "10,000+",
-        label: "Professionals",
+        label: "Freelancers",
     },
     {
         value: "150+",

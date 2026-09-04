@@ -13,7 +13,7 @@ export default function How() {
           <SectionTitle
             badge="How It Works"
             title="Getting Things Done Has Never Been Easier"
-            subtitle="Hire trusted professionals in just three simple steps."
+            subtitle="Hire trusted freelancers in just three simple steps."
           />
         </FadeUp>
 

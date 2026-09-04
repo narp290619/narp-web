@@ -13,7 +13,7 @@ export default function Why() {
           <SectionTitle
             badge="Why Choose NARP?"
             title="Everything You Need to Hire with Confidence"
-            subtitle="Built to make finding trusted professionals simple, fast, and secure."
+            subtitle="Built to make finding trusted freelancers simple, fast, and secure."
           />
         </FadeUp>
 

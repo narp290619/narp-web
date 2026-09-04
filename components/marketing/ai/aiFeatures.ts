@@ -44,21 +44,21 @@ export const aiFeatures = [
         icon: Brain,
         title: "AI Match",
         description:
-            "Finds the best professionals using skills, ratings, distance and availability.",
+            "Finds the best freelancers using skills, ratings, distance and availability.",
         color: "orange",
     },
     {
         icon: ScanFace,
         title: "AI Verify",
         description:
-            "Face verification helps confirm the identity of clients and professionals during important account and booking actions.",
+            "Face verification helps confirm the identity of clients and freelancers during important account and booking actions.",
         color: "blue",
     },
     {
         icon: MessageCircle,
         title: "AI Assist",
         description:
-            "AI-assisted replies help professionals respond to customers faster and more consistently.",
+            "AI-assisted replies help freelancers respond to customers faster and more consistently.",
         color: "green",
     },
     {

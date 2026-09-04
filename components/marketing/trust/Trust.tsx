@@ -13,7 +13,7 @@ export default function Trust() {
         <SectionTitle
           badge="Trust & Security"
           title="Built with Safety, Transparency, and Trust"
-          subtitle="Every booking is backed by intelligent verification, secure payments, and technologies designed to protect both clients and professionals."
+          subtitle="Every booking is backed by intelligent verification, secure payments, and technologies designed to protect both clients and freelancers."
         />
 
         <div className="mt-20 grid gap-8 md:grid-cols-2 xl:grid-cols-3">

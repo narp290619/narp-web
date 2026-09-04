@@ -4,7 +4,7 @@ export const journey: JourneyScene[] = [
     {
         id: "ai",
         title: "AI Matching",
-        subtitle: "Finding your best professional",
+        subtitle: "Finding your best freelancer",
         assistantMessages: [
             "Finding nearby Builders...",
             "Comparing ratings and reviews...",

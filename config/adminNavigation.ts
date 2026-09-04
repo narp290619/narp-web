@@ -23,8 +23,8 @@ export const adminNavigation = [
         icon: Briefcase,
     },
     {
-        title: "Professionals",
-        href: "/admin/professionals",
+        title: "Freelancers",
+        href: "/admin/freelancers",
         icon: Users,
     },
     {

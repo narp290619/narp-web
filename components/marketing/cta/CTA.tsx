@@ -15,7 +15,7 @@ export default function CTA() {
                         </h2>
 
                         <p className="mt-6 text-lg text-orange-100">
-                            Join thousands of Filipinos using NARP to find trusted professionals
+                            Join thousands of Filipinos using NARP to find trusted freelancers
                             and grow their businesses.
                         </p>
 
@@ -32,7 +32,7 @@ export default function CTA() {
                                 href="#"
                                 className="rounded-xl border border-white px-8 py-4 font-semibold text-white transition hover:bg-white hover:text-orange-600"
                             >
-                                Become a Professional
+                                Become a Freelancer
                             </Link>
 
                         </div>

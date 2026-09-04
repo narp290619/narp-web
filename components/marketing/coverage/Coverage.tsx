@@ -15,7 +15,7 @@ export default function Coverage() {
                 <SectionTitle
                     badge="Coverage"
                     title="The Largest Growing Freelancer Network in the Philippines."
-                    subtitle="NARP is building the country's largest network of trusted professionals."
+                    subtitle="NARP is building the country's largest network of trusted freelancers."
                 />
 
                 <div className="mt-20">

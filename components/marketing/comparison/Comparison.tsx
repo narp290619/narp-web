@@ -13,7 +13,7 @@ export default function Comparison() {
 
                 <SectionTitle
                     badge="Why NARP?"
-                    title="A Better Way to Hire Trusted Professionals"
+                    title="A Better Way to Hire Trusted freelancers"
                     subtitle="NARP combines AI, identity verification, secure payments, and real-time technology into one platform."
                 />
 

@@ -1,14 +1,14 @@
 export const features = [
   {
-    title: "Nearby Professionals",
+    title: "Nearby Freelancers",
     description:
-      "Discover skilled professionals close to your location using NARP's interactive map.",
+      "Discover skilled freelancers close to your location using NARP's interactive map.",
     icon: "📍",
   },
   {
     title: "Verified Experts",
     description:
-      "Work with trusted professionals verified by the NARP community.",
+      "Work with trusted freelancers verified by the NARP community.",
     icon: "🛡️",
   },
   {
@@ -20,7 +20,7 @@ export const features = [
   {
     title: "Instant Booking",
     description:
-      "Book jobs, chat with professionals, and manage appointments in one place.",
+      "Book jobs, chat with freelancers, and manage appointments in one place.",
     icon: "💬",
   },
   {
@@ -32,7 +32,7 @@ export const features = [
   {
     title: "150+ Skills",
     description:
-      "From electricians to developers, NARP connects you with professionals for almost any service.",
+      "From electricians to developers, NARP connects you with freelancers for almost any service.",
     icon: "🛠️",
   },
 ]

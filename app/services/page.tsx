@@ -158,13 +158,13 @@ export default function ServicesPage() {
                     <h1 className="mt-8 text-6xl font-extrabold leading-tight">
                         Find the Perfect
                         <span className="block text-orange-500">
-                            Professional
+                            Freelancer
                         </span>
                     </h1>
 
                     <p className="mx-auto mt-6 max-w-3xl text-xl leading-8 text-slate-600">
                         Browse hundreds of verified services,
-                        discover skilled professionals nearby,
+                        discover skilled freelancers nearby,
                         and let NARP AI recommend the best match.
                     </p>
 

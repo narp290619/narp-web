@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 interface Props {
   city: string;
-  professionals: number;
+  freelancers: number;
   online: number;
   x: number;
   y: number;
@@ -13,7 +13,7 @@ interface Props {
 
 export default function CoverageHighlight({
   city,
-  professionals,
+  freelancers,
   online,
   x,
   y,
@@ -59,7 +59,7 @@ export default function CoverageHighlight({
             </p>
 
             <p className="text-xs text-slate-500">
-              {professionals.toLocaleString()} Professionals
+              {freelancers.toLocaleString()} Freelancers
             </p>
           </div>
 

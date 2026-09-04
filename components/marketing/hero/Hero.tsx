@@ -46,7 +46,7 @@ export default function Hero() {
                             to Find Trusted
                         </span>
 
-                        Professionals <br /> Near You
+                        Freelancers <br /> Near You
 
                     </h1>
 
@@ -57,7 +57,7 @@ export default function Hero() {
                             {" "}Nearby App for Reliable Professionals
                         </span>.
 
-                        We connect homeowners, businesses, and customers with trusted local professionals—
+                        We connect homeowners, businesses, and customers with trusted local freelancers—
                         including builders, electricians, plumbers, cleaners, mechanics, tutors, chefs, and many more.
 
                     </p>
@@ -83,7 +83,7 @@ export default function Hero() {
 
                         <Feature text="AI Smart Matching" />
 
-                        <Feature text="Verified Professionals" />
+                        <Feature text="Verified Freelancers" />
 
                         <Feature text="Secure Payments" />
 
@@ -109,7 +109,7 @@ export default function Hero() {
                             icon="👷"
                             value={10000}
                             suffix="+"
-                            title="Professionals"
+                            title="Freelancers"
                         />
 
                         <StatCard

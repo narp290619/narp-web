@@ -126,7 +126,7 @@ export default function CoveragePin({ pin }: Props) {
                         >
                             <CoverageTooltip
                                 city={pin.city}
-                                professionals={pin.professionals}
+                                freelancers={pin.freelancers}
                                 skills={pin.skills}
                                 rating={pin.rating}
                             />
