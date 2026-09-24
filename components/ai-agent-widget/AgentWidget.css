@@ -363,25 +363,542 @@
    ========================================================= */
 
 .ai-agent-widget__tool-activity {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     padding: 8px 10px;
-
+    border: 1px solid var(--agent-widget-border);
     border-radius: 10px;
-
-    background: var(--agent-widget-surface-muted);
+    background: var(--agent-widget-surface);
     color: var(--agent-widget-text-muted);
-
     font-size: 11px;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .ai-agent-widget__tool {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 22px;
 }
 
-.ai-agent-widget__tool + .ai-agent-widget__tool {
+.ai-agent-widget__tool-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__tool--active .ai-agent-widget__tool-icon {
+    background: var(--agent-widget-surface-muted);
+}
+
+.ai-agent-widget__tool-label {
+    flex: 1;
+}
+
+.ai-agent-widget__tool--active .ai-agent-widget__tool-label {
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__tool--complete .ai-agent-widget__tool-label {
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__tool-check {
+    flex: 0 0 auto;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__tool-spinner {
+    width: 11px;
+    height: 11px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: ai-agent-widget-spin 700ms linear infinite;
+}
+
+@keyframes ai-agent-widget-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.ai-agent-widget__tool+.ai-agent-widget__tool {
+    margin-top: 0;
+}
+
+
+.ai-agent-widget__product-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__product-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ai-agent-widget__product-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__product-card-price {
+    margin-top: 3px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__product-card-description {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__product-card-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.ai-agent-widget__product-card-feature {
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text-muted);
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+
+.ai-agent-widget__order-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__order-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-agent-widget__order-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__order-card-title {
+    min-width: 0;
+}
+
+.ai-agent-widget__order-card-label {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__order-card-number {
     margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
 }
 
+.ai-agent-widget__order-card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ai-agent-widget__order-card-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ai-agent-widget__order-card-delivery {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+}
+
+.ai-agent-widget__order-card-delivery-label {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__order-card-delivery-value {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+
+.ai-agent-widget__shipping-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__shipping-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-agent-widget__shipping-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__shipping-card-title {
+    min-width: 0;
+}
+
+.ai-agent-widget__shipping-card-label {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__shipping-card-country {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__shipping-card-cost {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+}
+
+.ai-agent-widget__shipping-card-cost-label {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__shipping-card-cost-value {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__shipping-card-delivery {
+    margin-top: 10px;
+}
+
+.ai-agent-widget__shipping-card-delivery-label {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__shipping-card-delivery-value {
+    margin-top: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+
+.ai-agent-widget__return-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__return-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-agent-widget__return-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__return-card-title {
+    min-width: 0;
+}
+
+.ai-agent-widget__return-card-label {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__return-card-window {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__return-card-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+}
+
+.ai-agent-widget__return-card-section-label {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__return-card-section-value {
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__return-card-contact {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--agent-widget-text-muted);
+}
+
+
+.ai-agent-widget__ticket-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__ticket-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-agent-widget__ticket-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__ticket-card-title {
+    min-width: 0;
+}
+
+.ai-agent-widget__ticket-card-label {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__ticket-card-number {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__ticket-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.ai-agent-widget__ticket-card-badge {
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ai-agent-widget__ticket-card-message {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--agent-widget-text-muted);
+}
+
+
+.ai-agent-widget__escalation-card {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--agent-widget-border);
+    border-radius: 14px;
+    background: var(--agent-widget-background);
+    box-sizing: border-box;
+}
+
+.ai-agent-widget__escalation-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ai-agent-widget__escalation-card-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__escalation-card-title {
+    min-width: 0;
+}
+
+.ai-agent-widget__escalation-card-label {
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--agent-widget-text-muted);
+}
+
+.ai-agent-widget__escalation-card-heading {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__escalation-card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: var(--agent-widget-surface-muted);
+    color: var(--agent-widget-text);
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.ai-agent-widget__escalation-card-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ai-agent-widget__escalation-card-message {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--agent-widget-border);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--agent-widget-text);
+}
+
+.ai-agent-widget__escalation-card-id {
+    margin-top: 8px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: var(--agent-widget-text-muted);
+    word-break: break-all;
+}
+
+.ai-agent-widget__message-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
 /* =========================================================
    Error

@@ -14,6 +14,65 @@ type PublicAgentResponse = {
     toolCalls?: Array<Record<string, unknown>>;
 };
 
+type PublicAgentConversationMessage = {
+    role: "user" | "assistant";
+    content: string;
+    toolCalls?: Array<Record<string, unknown>>;
+    createdAt: number | null;
+};
+
+type PublicAgentConversationResponse = {
+    success: boolean;
+    agentId: string;
+    conversationId: string;
+    messages: PublicAgentConversationMessage[];
+};
+
+const getPublicAgentConversation =
+    httpsCallable<
+        {
+            agentId: string;
+            conversationId: string;
+        },
+        PublicAgentConversationResponse
+    >(
+        functions,
+        "getPublicAgentConversation"
+    );
+
+export async function loadPublicAgentConversation(
+    agentId: string,
+    conversationId: string,
+) {
+    const cleanAgentId =
+        agentId.trim();
+
+    const cleanConversationId =
+        conversationId.trim();
+
+    if (!cleanAgentId) {
+        throw new Error(
+            "Agent ID is required."
+        );
+    }
+
+    if (!cleanConversationId) {
+        throw new Error(
+            "Conversation ID is required."
+        );
+    }
+
+    const result =
+        await getPublicAgentConversation({
+            agentId:
+                cleanAgentId,
+            conversationId:
+                cleanConversationId,
+        });
+
+    return result.data;
+}
+
 const runPublicAgent =
     httpsCallable<
         {

@@ -265,14 +265,26 @@ export function AgentWidget({
                             </div>
                         ) : (
                             <div className="ai-agent-widget__messages">
-                                {messages.map(
-                                    (message) => (
+                                {messages.map((message) => (
+                                    <div
+                                        key={message.id}
+                                        className="ai-agent-widget__message-group"
+                                    >
                                         <AgentMessageBubble
-                                            key={message.id}
                                             message={message}
                                         />
-                                    )
-                                )}
+
+                                        {message.role === "assistant" &&
+                                            message.toolCalls &&
+                                            message.toolCalls.length > 0 && (
+                                                <AgentToolActivity
+                                                    toolCalls={
+                                                        message.toolCalls
+                                                    }
+                                                />
+                                            )}
+                                    </div>
+                                ))}
 
                                 {/* Loading */}
                                 {isLoading && (
@@ -283,6 +295,7 @@ export function AgentWidget({
                                 {showToolActivity && (
                                     <AgentToolActivity
                                         toolCalls={toolCalls}
+                                        isLoading={isLoading}
                                     />
                                 )}
 
