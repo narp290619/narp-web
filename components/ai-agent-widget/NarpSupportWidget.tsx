@@ -3,7 +3,7 @@
 import { AgentWidget } from "./AgentWidget";
 
 const NARP_SUPPORT_AGENT_ID =
-  "p3LeEc6dovtnS0dMi13I";
+  "AfBQY2alLOkPhZhvoqmq";
 
 export default function NarpSupportWidget() {
   return (
