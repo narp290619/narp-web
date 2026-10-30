@@ -40,7 +40,7 @@ type PaymentRecord = {
 
     skillId?: string;
     amount?: number;
-    referenceNumber?: string;
+    receiptRefNo?: string;
 
     receiptImageUrl?: string;
 
@@ -379,10 +379,10 @@ function parsePayment(
         amount:
             getNumber(data.amount),
 
-        referenceNumber:
-            data.referenceNumber !== undefined
+        receiptRefNo:
+            data.receiptRefNo !== undefined
                 ? String(
-                    data.referenceNumber
+                    data.receiptRefNo
                 )
                 : undefined,
 
@@ -1057,7 +1057,7 @@ export default function AdminPaymentDetailPage() {
                             }
                             label="Reference"
                             value={
-                                payment.referenceNumber ??
+                                payment.receiptRefNo ??
                                 "Not provided"
                             }
                         />
