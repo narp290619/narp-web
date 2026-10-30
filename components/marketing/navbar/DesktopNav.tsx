@@ -12,7 +12,11 @@ export default function DesktopNav() {
   return (
     <nav className="hidden items-center gap-2 lg:flex">
       {navigation.map((item) => {
-        const active = pathname === item.href
+        const active =
+          item.href === "/"
+            ? pathname === "/"
+            : pathname === item.href ||
+            pathname.startsWith(`${item.href}/`);
 
         return (
           // <Link
@@ -60,9 +64,9 @@ export default function DesktopNav() {
                   font-medium
                   transition-colors
                   ${active
-                        ? "text-orange-600"
-                        : "text-slate-600 hover:text-orange-500"
-                      }
+                  ? "text-orange-600"
+                  : "text-slate-600 hover:text-orange-500"
+                }
               `}
             >
               {item.title}
