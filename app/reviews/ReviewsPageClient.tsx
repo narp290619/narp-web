@@ -40,10 +40,10 @@ const FILTER_OPTIONS: {
     label: string;
     value: ReviewFilter;
 }[] = [
-    { label: "All Reviews", value: "all" },
-    { label: "Clients", value: "client" },
-    { label: "Freelancers", value: "freelancer" },
-];
+        { label: "All Reviews", value: "all" },
+        { label: "Clients", value: "client" },
+        { label: "Freelancers", value: "freelancer" },
+    ];
 
 function getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
@@ -134,13 +134,29 @@ function ReviewCard({ review }: { review: PlatformReview }) {
     const isClient = review.userRole === "client";
     const Icon = isClient ? UserRound : BriefcaseBusiness;
 
+    const [imageFailed, setImageFailed] = useState(false);
+
+    const profileImageUrl = review.reviewerProfileImageUrl?.trim();
+
     return (
         <article className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-blue-100 hover:shadow-lg">
             {/* Reviewer */}
             <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-lg font-bold text-[#1565c0]">
-                        {(review.userName || "N").charAt(0).toUpperCase()}
+                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-blue-50">
+                        {profileImageUrl && !imageFailed ? (
+                            <img
+                                src={profileImageUrl}
+                                alt={`${review.userName || "NARP User"}'s profile`}
+                                className="h-full w-full object-cover"
+                                referrerPolicy="no-referrer"
+                                onError={() => setImageFailed(true)}
+                            />
+                        ) : (
+                            <div className="flex h-full w-full items-center justify-center text-lg font-bold text-[#1565c0]">
+                                {(review.userName || "N").charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
 
                     <div className="min-w-0">
@@ -149,11 +165,10 @@ function ReviewCard({ review }: { review: PlatformReview }) {
                         </h3>
 
                         <span
-                            className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                isClient
+                            className={`mt-1 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${isClient
                                     ? "bg-blue-50 text-blue-700"
                                     : "bg-amber-50 text-amber-700"
-                            }`}
+                                }`}
                         >
                             <Icon size={12} />
                             {isClient ? "Client" : "Freelancer"}
@@ -595,11 +610,10 @@ export default function ReviewsPageClient() {
                                     type="button"
                                     onClick={() => setFilter(option.value)}
                                     aria-pressed={selected}
-                                    className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
-                                        selected
+                                    className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${selected
                                             ? "bg-[#1565c0] text-white shadow-md shadow-blue-900/10"
                                             : "border border-slate-200 bg-white text-slate-600 hover:border-[#1565c0] hover:text-[#1565c0]"
-                                    }`}
+                                        }`}
                                 >
                                     {option.label}
                                 </button>

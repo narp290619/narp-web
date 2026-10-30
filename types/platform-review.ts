@@ -15,6 +15,7 @@ export interface PlatformReview {
   id: string;
   userId: string;
   userName: string;
+  reviewerProfileImageUrl?: string | null;
   userRole: PlatformReviewRole;
   rating: number;
   categoryRatings: PlatformReviewCategoryRatings;
