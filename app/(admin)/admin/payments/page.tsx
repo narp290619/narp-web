@@ -38,7 +38,7 @@ type PaymentReceipt = {
 
     status?: string;
 
-    referenceNumber?: string | number;
+    receiptRefNo?: string | number;
 
     amount?: number;
 };
@@ -333,12 +333,12 @@ export default function AdminPaymentsPage() {
                                     ? data.status
                                     : undefined,
 
-                            referenceNumber:
-                                typeof data.referenceNumber ===
+                            receiptRefNo:
+                                typeof data.receiptRefNo ===
                                     "string" ||
-                                typeof data.referenceNumber ===
+                                typeof data.receiptRefNo ===
                                     "number"
-                                    ? data.referenceNumber
+                                    ? data.receiptRefNo
                                     : undefined,
 
                             amount:
@@ -498,7 +498,7 @@ export default function AdminPaymentsPage() {
                             payment.skillId,
                             payment.verifiedBy,
                             String(
-                                payment.referenceNumber ??
+                                payment.receiptRefNo ??
                                     ""
                             ),
                             String(
@@ -1276,7 +1276,7 @@ export default function AdminPaymentsPage() {
                                                 <td className="px-6 py-5">
 
                                                     <p className="text-sm font-medium text-slate-700">
-                                                        {payment.referenceNumber ??
+                                                        {payment.receiptRefNo ??
                                                             "—"}
                                                     </p>
 
