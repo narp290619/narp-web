@@ -236,11 +236,10 @@ export default function ServiceCategories({
             <button
                 type="button"
                 onClick={() => handleClick("All")}
-                className={`rounded-full px-6 py-3 text-sm font-semibold ${
-                    selected === "All"
+                className={`rounded-full px-6 py-3 text-sm font-semibold ${selected === "All"
                         ? "bg-orange-500 text-white"
                         : "bg-slate-100 text-slate-600"
-                }`}
+                    }`}
             >
                 All
             </button>
@@ -250,15 +249,18 @@ export default function ServiceCategories({
                     key={category.id}
                     type="button"
                     onClick={() => handleClick(category.slug)}
-                    className={`rounded-full px-6 py-3 text-sm font-semibold ${
-                        selected === category.slug
+                    className={`rounded-full px-6 py-3 text-sm font-semibold ${selected === category.slug
                             ? "bg-orange-500 text-white"
                             : "bg-slate-100 text-slate-600"
-                    }`}
+                        }`}
                 >
                     {category.name}
                 </button>
             ))}
+
+            <div className="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
+                TEST VERSION 123 - CATEGORY COMPONENT UPDATED
+            </div>
         </div>
     );
 }
