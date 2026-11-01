@@ -9,6 +9,7 @@ import StatCard from "@/components/shared/StatCard"
 import PhilippinesMap from "@/components/shared/PhilippinesMap"
 import { mapPins } from "./mapPins"
 import MapPin from "@/components/shared/MapPin"
+import MarketplaceStats from "@/components/shared/MarketplaceStats"
 
 export default function Hero() {
     return (
@@ -124,7 +125,7 @@ export default function Hero() {
 
                     </div>
 
-                    <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 xl:gap-5">
+                    {/* <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 xl:gap-5">
 
                         <StatCard
                             icon="👷"
@@ -153,7 +154,10 @@ export default function Hero() {
                             title="Provinces"
                         />
 
-                    </div>
+                    </div> */}
+
+                    <MarketplaceStats />
+                    
                 </div>
 
                 {/* Right Side */}
