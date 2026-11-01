@@ -14,7 +14,7 @@ export default function Hero() {
     return (
         <section
             id="home"
-            className="relative overflow-hidden pt-40 pb-24"
+            className="relative overflow-hidden pb-16 pt-32 sm:pb-20 sm:pt-36 lg:pb-24 lg:pt-40"
         >
 
             <BackgroundGlow />
@@ -34,11 +34,32 @@ export default function Hero() {
 
             </div>
 
-            <div className="container mx-auto grid items-center gap-16 lg:grid-cols-2">
+            <div className="
+                mx-auto
+                grid
+                w-full
+                max-w-[1440px]
+                grid-cols-1
+                items-center
+                gap-12
+                px-2
+                sm:px-4
+                lg:grid-cols-2
+                lg:gap-10
+                lg:px-5
+            ">
 
                 {/* Left Side */}
                 <div>
-                    <h1 className="text-5xl font-extrabold leading-tight text-slate-900 lg:text-7xl">
+                    <h1 className="
+                        text-4xl
+                        font-extrabold
+                        leading-[1.12]
+                        text-slate-900
+                        sm:text-5xl
+                        lg:text-6xl
+                        xl:text-7xl
+                    ">
 
                         The Fastest Way
 
@@ -103,7 +124,7 @@ export default function Hero() {
 
                     </div>
 
-                    <div className="mt-14 grid grid-cols-2 gap-5 xl:grid-cols-4">
+                    <div className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 xl:gap-5">
 
                         <StatCard
                             icon="👷"
@@ -136,7 +157,17 @@ export default function Hero() {
                 </div>
 
                 {/* Right Side */}
-                <div className="relative flex h-[700px] items-center justify-center">
+                <div className="
+                    relative
+                    flex
+                    h-[700px]
+                    items-center
+                    justify-center
+                    px-4
+                    sm:px-6
+                    lg:px-8
+                    xl:px-10
+                ">
 
                     <PhilippinesMap />
 
@@ -157,6 +188,7 @@ export default function Hero() {
 
                     <PhoneMockup
                         image="/images/app/home-screen.png"
+                        translate="-translate-x-8"
                         animation="float-medium"
                         delay={0.6}
                     />
@@ -164,7 +196,7 @@ export default function Hero() {
                     <PhoneMockup
                         image="/images/app/splash.png"
                         rotate="rotate-12"
-                        translate="translate-x-28"
+                        translate="translate-x-12"
                         animation="float-fast"
                         delay={1.2}
                     />
