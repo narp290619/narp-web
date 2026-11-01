@@ -208,6 +208,7 @@
 // }
 
 
+
 "use client";
 
 import type { ParentCategory } from "@/lib/models/parent-category";
@@ -223,44 +224,36 @@ export default function ServiceCategories({
     selected,
     onSelect,
 }: Props) {
-    const handleClick = (category: string) => {
-        console.log("BUTTON CLICKED:", category);
-
-        alert(`Category button clicked: ${category}`);
-
-        onSelect(category);
-    };
-
     return (
         <div className="relative z-50 mb-12 flex flex-wrap justify-center gap-3">
+            {/* All Categories */}
             <button
                 type="button"
-                onClick={() => handleClick("All")}
-                className={`rounded-full px-6 py-3 text-sm font-semibold ${selected === "All"
+                onClick={() => onSelect("All")}
+                className={`rounded-full px-6 py-3 text-sm font-semibold ${
+                    selected === "All"
                         ? "bg-orange-500 text-white"
                         : "bg-slate-100 text-slate-600"
-                    }`}
+                }`}
             >
                 All
             </button>
 
+            {/* Parent Categories */}
             {categories.map((category) => (
                 <button
                     key={category.id}
                     type="button"
-                    onClick={() => handleClick(category.slug)}
-                    className={`rounded-full px-6 py-3 text-sm font-semibold ${selected === category.slug
+                    onClick={() => onSelect(category.slug)}
+                    className={`rounded-full px-6 py-3 text-sm font-semibold ${
+                        selected === category.slug
                             ? "bg-orange-500 text-white"
                             : "bg-slate-100 text-slate-600"
-                        }`}
+                    }`}
                 >
                     {category.name}
                 </button>
             ))}
-
-            <div className="mb-4 rounded-lg bg-red-100 p-4 text-red-700">
-                TEST VERSION 123 - CATEGORY COMPONENT UPDATED
-            </div>
         </div>
     );
 }

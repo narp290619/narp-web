@@ -39,7 +39,7 @@ export default function CategoryCard({ category, skills }: Props) {
     );
 
     return (
-        <Link href={`/services?category=${category.slug}`}>
+        <Link href={`/services?category=${category.slug}#available-skills`}>
             <article
                 className="
                     group

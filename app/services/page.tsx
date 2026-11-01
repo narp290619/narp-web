@@ -209,7 +209,7 @@
 
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 
 import Container from "@/components/shared/Container";
@@ -230,9 +230,6 @@ export default function ServicesPage() {
     const { categories, loading: categoriesLoading } = useCategories();
 
     const [selectedCategory, setSelectedCategory] = useState("All");
-    const [shouldScrollToSkills, setShouldScrollToSkills] = useState(false);
-
-    const skillsSectionRef = useRef<HTMLDivElement>(null);
 
     // Read the category slug from the URL.
     useEffect(() => {
@@ -276,47 +273,32 @@ export default function ServicesPage() {
         );
     }, [categories, selectedCategory]);
 
-    // Scroll after the selected category has been rendered.
-    // Scroll the browser window to the skills section.
-    useEffect(() => {
-        if (!shouldScrollToSkills) return;
-
-        const timeout = window.setTimeout(() => {
-            const element = skillsSectionRef.current;
-
-            if (element) {
-                const elementPosition =
-                    element.getBoundingClientRect().top + window.scrollY;
-
-                window.scrollTo({
-                    top: elementPosition - 120,
-                    behavior: "smooth",
-                });
-            }
-
-            setShouldScrollToSkills(false);
-        }, 350);
-
-        return () => window.clearTimeout(timeout);
-    }, [shouldScrollToSkills, selectedCategory, activeCategory]);
-
     // Select category and update URL.
     const handleCategorySelect = (category: string) => {
-        console.log("Category selected:", category);
-
         setSelectedCategory(category);
 
         const url = new URL(window.location.href);
 
         if (category === "All") {
             url.searchParams.delete("category");
-        } else {
-            url.searchParams.set("category", category);
+            url.hash = "";
+            window.history.pushState({}, "", url.toString());
+            return;
         }
 
-        window.history.pushState({}, "", url.toString());
+        url.searchParams.set("category", category);
 
-        setShouldScrollToSkills(true);
+        window.history.pushState(
+            {},
+            "",
+            `${url.pathname}${url.search}#available-skills`
+        );
+
+        // Use the same native anchor navigation as the Help Center.
+        document.getElementById("available-skills")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
     };
 
     // Filter skills by the selected parent category.
@@ -479,10 +461,11 @@ export default function ServicesPage() {
                     </section>
                 )}
 
+
                 {/* Skills Section */}
                 <div
-                    ref={skillsSectionRef}
-                    className="scroll-mt-32"
+                    id="available-skills"
+                    className="scroll-mt-38"
                 >
                     <section className="mb-8 flex flex-wrap items-center justify-between gap-4">
                         <div>
