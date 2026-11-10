@@ -80,6 +80,13 @@ export async function claimWebAdminSession(
         installationId,
     });
 
+    console.log("WEB SESSION CLAIM RESULT", {
+        uid,
+        installationId,
+        success: result.data.success,
+        returnedInstallationId: result.data.installationId,
+    });
+
     if (
         result.data.success !== true ||
         result.data.installationId !== installationId
