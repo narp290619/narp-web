@@ -1,6 +1,5 @@
 // "use client";
 
-// import Link from "next/link";
 // import { useRouter } from "next/navigation";
 
 // import { signOut } from "firebase/auth";
@@ -31,67 +30,97 @@
 // } from "lucide-react";
 
 // export default function UserMenu() {
-
 //     const { user } = useAuthContext();
-
 //     const router = useRouter();
-
+// 8
 //     if (!user) return null;
 
 //     async function handleLogout() {
-
 //         await signOut(auth);
-
 //         router.push("/");
-
 //     }
 
-//     return (
+//     const avatarInitial =
+//         user.displayName?.trim().charAt(0) ||
+//         user.email?.charAt(0) ||
+//         "U";
 
+//     return (
 //         <DropdownMenu>
 
+//             {/* Avatar Trigger */}
 //             <DropdownMenuTrigger
+//                 aria-label="Open account menu"
 //                 className="
 //                     flex
+//                     h-11
+//                     w-11
 //                     items-center
-//                     gap-2
+//                     justify-center
 //                     rounded-full
 //                     border
-//                     px-2
-//                     py-1
-//                     hover:bg-slate-100
-//                     transition
+//                     border-white
+//                     bg-white
+//                     text-slate-900
+//                     shadow-lg
+//                     ring-1
+//                     ring-black/10
+//                     transition-all
+//                     duration-200
+//                     hover:scale-105
+//                     hover:border-orange-300
+//                     hover:bg-orange-50
+//                     hover:shadow-xl
+//                     focus-visible:outline-none
+//                     focus-visible:ring-2
+//                     focus-visible:ring-orange-400
 //                 "
 //             >
-
 //                 <Avatar className="h-9 w-9">
-//                     <AvatarImage src={user.photoURL ?? ""} />
 
-//                     <AvatarFallback>
-//                         {user.displayName?.charAt(0) ??
-//                             user.email?.charAt(0).toUpperCase() ??
-//                             "U"}
+//                     <AvatarImage
+//                         src={user.photoURL ?? ""}
+//                         alt={user.displayName ?? "User"}
+//                     />
+
+//                     <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
+//                         {avatarInitial.toUpperCase()}
 //                     </AvatarFallback>
-//                 </Avatar>
 
-//                 <span className="hidden md:block">
-//                     {user.displayName ?? user.email}
-//                 </span>
+//                 </Avatar>
 
 //             </DropdownMenuTrigger>
 
+//             {/* Account Dropdown */}
 //             <DropdownMenuContent
 //                 align="end"
-//                 className="w-60"
+//                 sideOffset={10}
+//                 className="
+//                     z-[100]
+//                     w-64
+//                     rounded-xl
+//                     border
+//                     border-slate-200
+//                     bg-white
+//                     p-2
+//                     text-slate-900
+//                     shadow-2xl
+//                     ring-1
+//                     ring-black/5
+//                     backdrop-blur-none
+//                     data-[state=open]:animate-in
+//                     data-[state=closed]:animate-out
+//                 "
 //             >
 
+//                 {/* User Information */}
 //                 <div className="px-3 py-3">
 
-//                     <p className="font-semibold">
-//                         {user.displayName ?? "User"}
+//                     <p className="truncate font-semibold text-slate-900">
+//                         {user.displayName || "User"}
 //                     </p>
 
-//                     <p className="text-sm text-slate-500">
+//                     <p className="truncate text-sm text-slate-500">
 //                         {user.email}
 //                     </p>
 
@@ -99,88 +128,43 @@
 
 //                 <DropdownMenuSeparator />
 
-//                 {/* <Link href="/profile">
-
-//                     <DropdownMenuItem>
-
-//                         <User />
-
-//                         My Profile
-
-//                     </DropdownMenuItem>
-
-//                 </Link> */}
-
-//                 <DropdownMenuItem onClick={() => router.push("/profile")}>
-//                     <User />
+//                 <DropdownMenuItem
+//                     onClick={() => router.push("/profile")}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
+//                 >
+//                     <User className="h-4 w-4" />
 //                     My Profile
 //                 </DropdownMenuItem>
 
-//                 {/* <Link href="/bookings">
-
-//                     <DropdownMenuItem>
-
-//                         <Briefcase />
-
-//                         My Bookings
-
-//                     </DropdownMenuItem>
-
-//                 </Link> */}
-
-//                 <DropdownMenuItem onClick={() => router.push("/bookings")}>
-//                     <Briefcase />
+//                 <DropdownMenuItem
+//                     onClick={() => router.push("/bookings")}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
+//                 >
+//                     <Briefcase className="h-4 w-4" />
 //                     My Bookings
 //                 </DropdownMenuItem>
 
-//                 {/* <Link href="/job-requests">
-
-//                     <DropdownMenuItem>
-
-//                         <Briefcase />
-
-//                         My Job Requests
-
-//                     </DropdownMenuItem>
-
-//                 </Link> */}
-
-//                 <DropdownMenuItem onClick={() => router.push("/job-requests")}>
-//                     <Briefcase />
+//                 <DropdownMenuItem
+//                     onClick={() => router.push("/job-requests")}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
+//                 >
+//                     <Briefcase className="h-4 w-4" />
 //                     My Job Requests
 //                 </DropdownMenuItem>
 
-//                 {/* <Link href="/notifications">
-
-//                     <DropdownMenuItem>
-
-//                         <Bell />
-
-//                         Notifications
-
-//                     </DropdownMenuItem>
-
-//                 </Link> */}
-
-//                 <DropdownMenuItem onClick={() => router.push("/notifications")}>
-//                     <Bell />
+//                 <DropdownMenuItem
+//                     onClick={() => router.push("/notifications")}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
+//                 >
+//                     <Bell className="h-4 w-4" />
 //                     Notifications
 //                 </DropdownMenuItem>
 
-//                 {/* <Link href="/settings">
-
-//                     <DropdownMenuItem>
-
-//                         <Settings />
-
-//                         Settings
-
-//                     </DropdownMenuItem>
-
-//                 </Link> */}
-
-//                 <DropdownMenuItem onClick={() => router.push("/settings")}>
-//                     <Settings />
+//                 <DropdownMenuItem
+//                     onClick={() => router.push("/settings")}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
+//                 >
+//                     <Settings className="h-4 w-4" />
 //                     Settings
 //                 </DropdownMenuItem>
 
@@ -189,21 +173,18 @@
 //                 <DropdownMenuItem
 //                     variant="destructive"
 //                     onClick={handleLogout}
+//                     className="cursor-pointer gap-3 rounded-lg py-2"
 //                 >
-
-//                     <LogOut />
-
+//                     <LogOut className="h-4 w-4" />
 //                     Logout
-
 //                 </DropdownMenuItem>
 
 //             </DropdownMenuContent>
 
 //         </DropdownMenu>
-
 //     );
-
 // }
+
 
 
 
@@ -211,10 +192,8 @@
 
 import { useRouter } from "next/navigation";
 
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-
 import { useAuthContext } from "@/providers/AuthProvider";
+import { logout } from "@/lib/services/auth/auth.service";
 
 import {
     Avatar,
@@ -236,17 +215,31 @@ import {
     Bell,
     Settings,
     LogOut,
+    ChevronDown,
 } from "lucide-react";
 
-export default function UserMenu() {
+type UserMenuProps = {
+    variant?: "desktop" | "mobile";
+};
+
+export default function UserMenu({
+    variant = "desktop",
+}: UserMenuProps) {
     const { user } = useAuthContext();
     const router = useRouter();
 
     if (!user) return null;
 
+    const isMobile = variant === "mobile";
+
     async function handleLogout() {
-        await signOut(auth);
-        router.push("/");
+        try {
+            await logout();
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            router.replace("/");
+        }
     }
 
     const avatarInitial =
@@ -256,37 +249,57 @@ export default function UserMenu() {
 
     return (
         <DropdownMenu>
+            {/* Account Trigger */}
 
-            {/* Avatar Trigger */}
             <DropdownMenuTrigger
                 aria-label="Open account menu"
-                className="
-                    flex
-                    h-11
-                    w-11
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-white
-                    bg-white
-                    text-slate-900
-                    shadow-lg
-                    ring-1
-                    ring-black/10
-                    transition-all
-                    duration-200
-                    hover:scale-105
-                    hover:border-orange-300
-                    hover:bg-orange-50
-                    hover:shadow-xl
-                    focus-visible:outline-none
-                    focus-visible:ring-2
-                    focus-visible:ring-orange-400
-                "
+                className={
+                    isMobile
+                        ? `
+                            flex
+                            w-full
+                            items-center
+                            gap-3
+                            rounded-xl
+                            border
+                            border-slate-200
+                            bg-white
+                            px-3
+                            py-3
+                            text-left
+                            transition
+                            hover:bg-slate-50
+                            focus-visible:outline-none
+                            focus-visible:ring-2
+                            focus-visible:ring-blue-400
+                        `
+                        : `
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+                            rounded-full
+                            border
+                            border-white
+                            bg-white
+                            text-slate-900
+                            shadow-lg
+                            ring-1
+                            ring-black/10
+                            transition-all
+                            duration-200
+                            hover:scale-105
+                            hover:border-orange-300
+                            hover:bg-orange-50
+                            hover:shadow-xl
+                            focus-visible:outline-none
+                            focus-visible:ring-2
+                            focus-visible:ring-orange-400
+                        `
+                }
             >
-                <Avatar className="h-9 w-9">
-
+                <Avatar className="h-9 w-9 shrink-0">
                     <AvatarImage
                         src={user.photoURL ?? ""}
                         alt={user.displayName ?? "User"}
@@ -295,18 +308,33 @@ export default function UserMenu() {
                     <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
                         {avatarInitial.toUpperCase()}
                     </AvatarFallback>
-
                 </Avatar>
 
+                {isMobile && (
+                    <>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-slate-900">
+                                {user.displayName || "User"}
+                            </p>
+
+                            <p className="truncate text-xs text-slate-500">
+                                {user.email}
+                            </p>
+                        </div>
+
+                        <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+                    </>
+                )}
             </DropdownMenuTrigger>
 
             {/* Account Dropdown */}
+
             <DropdownMenuContent
-                align="end"
+                align={isMobile ? "start" : "end"}
+                side="bottom"
                 sideOffset={10}
-                className="
+                className={`
                     z-[100]
-                    w-64
                     rounded-xl
                     border
                     border-slate-200
@@ -319,12 +347,15 @@ export default function UserMenu() {
                     backdrop-blur-none
                     data-[state=open]:animate-in
                     data-[state=closed]:animate-out
-                "
+                    ${isMobile
+                        ? "w-[calc(100vw-3rem)] max-w-64"
+                        : "w-64"
+                    }
+                `}
             >
-
                 {/* User Information */}
-                <div className="px-3 py-3">
 
+                <div className="px-3 py-3">
                     <p className="truncate font-semibold text-slate-900">
                         {user.displayName || "User"}
                     </p>
@@ -332,7 +363,6 @@ export default function UserMenu() {
                     <p className="truncate text-sm text-slate-500">
                         {user.email}
                     </p>
-
                 </div>
 
                 <DropdownMenuSeparator />
@@ -387,9 +417,7 @@ export default function UserMenu() {
                     <LogOut className="h-4 w-4" />
                     Logout
                 </DropdownMenuItem>
-
             </DropdownMenuContent>
-
         </DropdownMenu>
     );
 }

@@ -139,7 +139,7 @@ export default function MobileNav() {
                     <div className="border-t border-slate-200 pt-6">
 
                         {user ? (
-                            <UserMenu />
+                            <UserMenu variant="mobile" />
                         ) : (
                             <Link href="/login">
                                 <Button
