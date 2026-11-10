@@ -126,11 +126,18 @@ export function monitorActiveSession(
 
             const userData = snapshot.data();
             const isOwner = userData?.isOwner === true;
-
-            // Owners remain exempt from session replacement.
-            if (isOwner) return;
-
             const activeSessionId = userData?.activeSessionId;
+
+            console.log("WEB SESSION DIAGNOSTICS", {
+                monitoredUid: uid,
+                authenticatedUid: auth.currentUser?.uid,
+                isOwner,
+                installationId,
+                activeSessionId,
+                sessionMatches: activeSessionId === installationId,
+            });
+
+            if (isOwner) return;
 
             if (!snapshot.exists() || activeSessionId !== installationId) {
                 isHandlingReplacement = true;
