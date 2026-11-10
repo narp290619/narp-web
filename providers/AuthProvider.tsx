@@ -179,9 +179,17 @@ export function AuthProvider({
             uid: string,
             installationId: string
         ) {
+            console.log("STARTING SESSION MONITORING", {
+                requestedUid: uid,
+                authenticatedUid: auth.currentUser?.uid,
+                installationId,
+                isClaimInProgress: isSessionClaimInProgress(),
+            });
+
             stopSessionMonitoring();
 
             if (auth.currentUser?.uid !== uid) {
+                console.warn("SESSION MONITORING SKIPPED: UID MISMATCH");
                 return;
             }
 

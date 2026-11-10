@@ -54,6 +54,75 @@ export function subscribeToSessionClaim(
 }
 
 // ============================================================
+// MONITOR ACTIVE SESSION
+// ============================================================
+
+export function monitorActiveSession(
+    uid: string,
+    installationId: string
+): Unsubscribe {
+    const userRef = doc(db, "Users", uid);
+
+    let isHandlingReplacement = false;
+
+    return onSnapshot(
+        userRef,
+        { includeMetadataChanges: true },
+        async (snapshot) => {
+            if (snapshot.metadata.fromCache) return;
+            if (auth.currentUser?.uid !== uid) return;
+            if (isHandlingReplacement) return;
+
+            const userData = snapshot.exists()
+                ? snapshot.data()
+                : null;
+
+            const isOwner = userData?.isOwner === true;
+            const activeSessionId = userData?.activeSessionId;
+
+            console.log("WEB SESSION DIAGNOSTICS", {
+                monitoredUid: uid,
+                authenticatedUid: auth.currentUser?.uid,
+                isOwner,
+                installationId,
+                activeSessionId,
+                sessionMatches: activeSessionId === installationId,
+            });
+
+            // Owners are exempt from session replacement.
+            if (isOwner) return;
+
+            if (
+                !snapshot.exists() ||
+                activeSessionId !== installationId
+            ) {
+                isHandlingReplacement = true;
+
+                console.warn(
+                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION."
+                );
+
+                try {
+                    // Never release the active session here.
+                    await auth.signOut();
+                } catch (error) {
+                    console.error(
+                        "FAILED TO SIGN OUT AFTER SESSION REPLACEMENT:",
+                        error
+                    );
+                }
+            }
+        },
+        (error) => {
+            console.error(
+                "WEB ACTIVE SESSION LISTENER ERROR:",
+                error
+            );
+        }
+    );
+}
+
+// ============================================================
 // CLAIM ACTIVE SESSION
 // ============================================================
 
@@ -84,7 +153,9 @@ export async function claimWebAdminSession(
         result.data.success !== true ||
         result.data.installationId !== installationId
     ) {
-        throw new Error("Unable to verify your active session.");
+        throw new Error(
+            "Unable to verify your active session."
+        );
     }
 
     if (auth.currentUser?.uid !== uid) {
@@ -93,82 +164,16 @@ export async function claimWebAdminSession(
         );
     }
 
+    console.log("WEB SESSION CLAIM RESULT", {
+        uid,
+        installationId,
+        returnedInstallationId: result.data.installationId,
+        success: result.data.success,
+    });
+
     notifySessionClaimed(uid, installationId);
 
     return installationId;
-}
-
-// ============================================================
-// MONITOR ACTIVE SESSION
-// ============================================================
-
-export function monitorActiveSession(
-    uid: string,
-    installationId: string
-): Unsubscribe {
-    const userRef = doc(db, "Users", uid);
-
-    let isHandlingReplacement = false;
-
-    return onSnapshot(
-        userRef,
-        { includeMetadataChanges: true },
-        async (snapshot) => {
-            // Only trust server-confirmed snapshots.
-            if (snapshot.metadata.fromCache) {
-                return;
-            }
-
-            if (auth.currentUser?.uid !== uid) {
-                return;
-            }
-
-            if (isHandlingReplacement) {
-                return;
-            }
-
-            const activeSessionId =
-                snapshot.data()?.activeSessionId;
-
-            console.log("========== WEB SESSION ==========");
-            console.log("UID:", uid);
-            console.log("Installation ID:", installationId);
-            console.log("Active Session ID:", activeSessionId);
-            console.log(
-                "Session Matches:",
-                activeSessionId === installationId
-            );
-            console.log("=================================");
-
-            if (
-                !snapshot.exists() ||
-                activeSessionId !== installationId
-            ) {
-                isHandlingReplacement = true;
-
-                console.warn(
-                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION."
-                );
-
-                try {
-                    // Never release here.
-                    // The active session may belong to the newer device.
-                    await auth.signOut();
-                } catch (error) {
-                    console.error(
-                        "FAILED TO SIGN OUT AFTER SESSION REPLACEMENT:",
-                        error
-                    );
-                }
-            }
-        },
-        (error) => {
-            console.error(
-                "WEB ACTIVE SESSION LISTENER ERROR:",
-                error
-            );
-        }
-    );
 }
 
 // ============================================================

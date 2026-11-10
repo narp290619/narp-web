@@ -62,10 +62,6 @@ import {
     releaseWebAdminSession,
 } from "@/lib/services/session/session.service";
 
-// ============================================================
-// LOGIN
-// ============================================================
-
 export async function login(
     email: string,
     password: string
@@ -83,12 +79,9 @@ export async function login(
 
         authenticatedUser = credential.user;
 
-        await claimWebAdminSession(
-            credential.user.uid
-        );
+        await claimWebAdminSession(credential.user.uid);
 
         return credential.user;
-
     } catch (error) {
         if (authenticatedUser) {
             try {
@@ -102,35 +95,20 @@ export async function login(
         }
 
         throw error;
-
     } finally {
         finishSessionClaim();
     }
 }
 
-// ============================================================
-// LOGOUT
-// ============================================================
-
 export async function logout(): Promise<void> {
     try {
         await releaseWebAdminSession();
-
     } catch (error) {
         console.error(
             "FAILED TO RELEASE WEB SESSION:",
             error
         );
-
     } finally {
         await signOut(auth);
     }
-}
-
-// ============================================================
-// CURRENT USER
-// ============================================================
-
-export function currentUser(): User | null {
-    return auth.currentUser;
 }
