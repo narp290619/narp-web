@@ -248,20 +248,23 @@ const menuItems = [
 export default function UserMenu({
     variant = "desktop",
 }: UserMenuProps) {
-    const { user, name } = useAuthContext();
+    const { user, name, adminLoading } = useAuthContext();
     const router = useRouter();
 
     if (!user) return null;
 
     const isMobile = variant === "mobile";
 
-    const displayName =
-        name ||
+    const displayName = adminLoading
+        ? ""
+        : name ||
         user.displayName ||
         user.email?.split("@")[0] ||
         "User";
 
-    const avatarInitial = displayName.charAt(0);
+    const avatarInitial = adminLoading
+        ? ""
+        : displayName.charAt(0).toUpperCase();
 
     async function handleLogout() {
         try {
@@ -305,13 +308,17 @@ export default function UserMenu({
                         />
 
                         <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
-                            {avatarInitial.toUpperCase()}
+                            {adminLoading ? (
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                            ) : (
+                                avatarInitial
+                            )}
                         </AvatarFallback>
                     </Avatar>
 
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-slate-900">
-                            {displayName}
+                            {adminLoading ? "Loading..." : displayName}
                         </p>
 
                         <p className="truncate text-xs text-slate-500">
@@ -342,7 +349,7 @@ export default function UserMenu({
                 >
                     <div className="px-3 py-3">
                         <p className="truncate font-semibold text-slate-900">
-                            {displayName}
+                            {adminLoading ? "Loading..." : displayName}
                         </p>
 
                         <p className="truncate text-sm text-slate-500">
@@ -420,7 +427,11 @@ export default function UserMenu({
                     />
 
                     <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
-                        {avatarInitial.toUpperCase()}
+                        {adminLoading ? (
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+                        ) : (
+                            avatarInitial
+                        )}
                     </AvatarFallback>
                 </Avatar>
             </DropdownMenuTrigger>
@@ -445,7 +456,7 @@ export default function UserMenu({
             >
                 <div className="px-3 py-3">
                     <p className="truncate font-semibold text-slate-900">
-                        {displayName}
+                        {adminLoading ? "Loading..." : displayName}
                     </p>
 
                     <p className="truncate text-sm text-slate-500">
