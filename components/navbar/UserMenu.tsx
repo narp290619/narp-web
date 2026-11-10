@@ -248,17 +248,20 @@ const menuItems = [
 export default function UserMenu({
     variant = "desktop",
 }: UserMenuProps) {
-    const { user } = useAuthContext();
+    const { user, name } = useAuthContext();
     const router = useRouter();
 
     if (!user) return null;
 
     const isMobile = variant === "mobile";
 
-    const avatarInitial =
-        user.displayName?.trim().charAt(0) ||
-        user.email?.charAt(0) ||
-        "U";
+    const displayName =
+        name ||
+        user.displayName ||
+        user.email?.split("@")[0] ||
+        "User";
+
+    const avatarInitial = displayName.charAt(0);
 
     async function handleLogout() {
         try {
@@ -298,7 +301,7 @@ export default function UserMenu({
                     <Avatar className="h-10 w-10 shrink-0">
                         <AvatarImage
                             src={user.photoURL ?? ""}
-                            alt={user.displayName ?? "User"}
+                            alt={displayName}
                         />
 
                         <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
@@ -308,7 +311,7 @@ export default function UserMenu({
 
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold text-slate-900">
-                            {user.displayName || "User"}
+                            {displayName}
                         </p>
 
                         <p className="truncate text-xs text-slate-500">
@@ -339,7 +342,7 @@ export default function UserMenu({
                 >
                     <div className="px-3 py-3">
                         <p className="truncate font-semibold text-slate-900">
-                            {user.displayName || "User"}
+                            {displayName}
                         </p>
 
                         <p className="truncate text-sm text-slate-500">
@@ -413,7 +416,7 @@ export default function UserMenu({
                 <Avatar className="h-9 w-9">
                     <AvatarImage
                         src={user.photoURL ?? ""}
-                        alt={user.displayName ?? "User"}
+                        alt={displayName}
                     />
 
                     <AvatarFallback className="bg-orange-100 font-semibold text-orange-600">
@@ -442,7 +445,7 @@ export default function UserMenu({
             >
                 <div className="px-3 py-3">
                     <p className="truncate font-semibold text-slate-900">
-                        {user.displayName || "User"}
+                        {displayName}
                     </p>
 
                     <p className="truncate text-sm text-slate-500">

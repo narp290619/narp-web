@@ -52,6 +52,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, ShieldCheck } from "lucide-react";
 
 import { navigation } from "@/config/navigation";
@@ -98,7 +99,16 @@ export default function MobileNav() {
                 "
       >
         <SheetHeader>
-          <SheetTitle>NARP</SheetTitle>
+          <SheetTitle>
+            <Image
+              src="/logo/logo_smooth.png"
+              alt="NARP"
+              width={140}
+              height={45}
+              priority
+              className="h-auto w-[140px] object-contain"
+            />
+          </SheetTitle>
         </SheetHeader>
 
         <nav className="mt-8 flex flex-col gap-6 px-4">

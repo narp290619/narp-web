@@ -135,6 +135,7 @@ import { getInstallationId } from "@/lib/session";
 
 interface AuthContextType {
     user: User | null;
+    name: string | null;
     loading: boolean;
     isAdmin: boolean;
     adminLoading: boolean;
@@ -142,6 +143,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
+    name: null,
     loading: true,
     isAdmin: false,
     adminLoading: true,
@@ -153,6 +155,7 @@ export function AuthProvider({
     children: React.ReactNode;
 }) {
     const [user, setUser] = useState<User | null>(null);
+    const [name, setName] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     const [isAdmin, setIsAdmin] = useState(false);
@@ -205,9 +208,17 @@ export function AuthProvider({
                         return;
                     }
 
-                    const admin =
-                        snapshot.exists() &&
-                        snapshot.data().isAdmin === true;
+                    const userData = snapshot.exists()
+                        ? snapshot.data()
+                        : null;
+
+                    const admin = userData?.isAdmin === true;
+
+                    setName(
+                        typeof userData?.name === "string"
+                            ? userData.name.trim() || null
+                            : null
+                    );
 
                     setIsAdmin(admin);
                     setAdminLoading(false);
@@ -246,6 +257,7 @@ export function AuthProvider({
                 setLoading(false);
 
                 if (!currentUser) {
+                    setName(null);
                     setIsAdmin(false);
                     setAdminLoading(false);
                     return;
@@ -291,6 +303,7 @@ export function AuthProvider({
         <AuthContext.Provider
             value={{
                 user,
+                name,
                 loading,
                 isAdmin,
                 adminLoading,
