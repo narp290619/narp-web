@@ -114,9 +114,16 @@ import {
     useState,
 } from "react";
 
-import type { Unsubscribe } from "firebase/firestore";
+import {
+    doc,
+    onSnapshot,
+    type Unsubscribe,
+} from "firebase/firestore";
 
-import { auth } from "@/lib/firebase";
+import {
+    auth,
+    db,
+} from "@/lib/firebase";
 
 import {
     isSessionClaimInProgress,
@@ -129,11 +136,15 @@ import { getInstallationId } from "@/lib/session";
 interface AuthContextType {
     user: User | null;
     loading: boolean;
+    isAdmin: boolean;
+    adminLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
     loading: true,
+    isAdmin: false,
+    adminLoading: true,
 });
 
 export function AuthProvider({
@@ -144,12 +155,21 @@ export function AuthProvider({
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [adminLoading, setAdminLoading] = useState(true);
+
     useEffect(() => {
         let sessionUnsubscribe: Unsubscribe | null = null;
+        let adminUnsubscribe: Unsubscribe | null = null;
 
         function stopSessionMonitoring() {
             sessionUnsubscribe?.();
             sessionUnsubscribe = null;
+        }
+
+        function stopAdminMonitoring() {
+            adminUnsubscribe?.();
+            adminUnsubscribe = null;
         }
 
         function startSessionMonitoring(
@@ -165,6 +185,42 @@ export function AuthProvider({
             sessionUnsubscribe = monitorActiveSession(
                 uid,
                 installationId
+            );
+        }
+
+        function startAdminMonitoring(uid: string) {
+            stopAdminMonitoring();
+
+            setIsAdmin(false);
+            setAdminLoading(true);
+
+            const userRef = doc(db, "Users", uid);
+
+            adminUnsubscribe = onSnapshot(
+                userRef,
+                { includeMetadataChanges: true },
+                (snapshot) => {
+                    // Do not authorize using cached Firestore data.
+                    if (snapshot.metadata.fromCache) {
+                        return;
+                    }
+
+                    const admin =
+                        snapshot.exists() &&
+                        snapshot.data().isAdmin === true;
+
+                    setIsAdmin(admin);
+                    setAdminLoading(false);
+                },
+                (error) => {
+                    console.error(
+                        "Failed to monitor admin status:",
+                        error
+                    );
+
+                    setIsAdmin(false);
+                    setAdminLoading(false);
+                }
             );
         }
 
@@ -184,13 +240,19 @@ export function AuthProvider({
             auth,
             (currentUser) => {
                 stopSessionMonitoring();
+                stopAdminMonitoring();
 
                 setUser(currentUser);
                 setLoading(false);
 
                 if (!currentUser) {
+                    setIsAdmin(false);
+                    setAdminLoading(false);
                     return;
                 }
+
+                // Start monitoring the user's admin status.
+                startAdminMonitoring(currentUser.uid);
 
                 // Login is still claiming its session.
                 // Wait for the successful claim notification.
@@ -207,7 +269,6 @@ export function AuthProvider({
                         currentUser.uid,
                         installationId
                     );
-
                 } catch (error) {
                     console.error(
                         "FAILED TO INITIALIZE SESSION MONITORING:",
@@ -220,7 +281,9 @@ export function AuthProvider({
         return () => {
             unsubscribeAuth();
             unsubscribeSessionClaim();
+
             stopSessionMonitoring();
+            stopAdminMonitoring();
         };
     }, []);
 
@@ -229,6 +292,8 @@ export function AuthProvider({
             value={{
                 user,
                 loading,
+                isAdmin,
+                adminLoading,
             }}
         >
             {children}

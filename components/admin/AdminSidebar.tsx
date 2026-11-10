@@ -19,6 +19,7 @@ import {
     WalletCards,
     Wrench,
 } from "lucide-react";
+import { useAuthContext } from "@/providers/AuthProvider";
 
 type AdminSidebarProps = {
     mobileOpen?: boolean;
@@ -106,6 +107,12 @@ export default function AdminSidebar({
     onClose,
 }: AdminSidebarProps) {
     const pathname = usePathname();
+
+    const { isAdmin, adminLoading } = useAuthContext();
+
+    if (adminLoading || !isAdmin) {
+        return null;
+    }
 
     return (
         <>
