@@ -80,13 +80,6 @@ export async function claimWebAdminSession(
         installationId,
     });
 
-    console.log("WEB SESSION CLAIM RESULT", {
-        uid,
-        installationId,
-        success: result.data.success,
-        returnedInstallationId: result.data.installationId,
-    });
-
     if (
         result.data.success !== true ||
         result.data.installationId !== installationId
@@ -109,14 +102,11 @@ export async function claimWebAdminSession(
 // MONITOR ACTIVE SESSION
 // ============================================================
 
-let activeMonitorGeneration = 0;
-
 export function monitorActiveSession(
     uid: string,
     installationId: string
 ): Unsubscribe {
     const userRef = doc(db, "Users", uid);
-    const generation = ++activeMonitorGeneration;
 
     let isHandlingReplacement = false;
 
@@ -124,41 +114,45 @@ export function monitorActiveSession(
         userRef,
         { includeMetadataChanges: true },
         async (snapshot) => {
-            // Ignore callbacks from obsolete listeners.
-            if (generation !== activeMonitorGeneration) return;
+            // Only trust server-confirmed snapshots.
+            if (snapshot.metadata.fromCache) {
+                return;
+            }
 
-            if (snapshot.metadata.fromCache) return;
-            if (auth.currentUser?.uid !== uid) return;
-            if (isHandlingReplacement) return;
+            if (auth.currentUser?.uid !== uid) {
+                return;
+            }
 
-            const userData = snapshot.data();
-            const isOwner = userData?.isOwner === true;
-            const activeSessionId = userData?.activeSessionId;
+            if (isHandlingReplacement) {
+                return;
+            }
 
-            console.log("WEB SESSION DIAGNOSTICS", {
-                monitoredUid: uid,
-                authenticatedUid: auth.currentUser?.uid,
-                isOwner,
-                installationId,
-                activeSessionId,
-                sessionMatches: activeSessionId === installationId,
-            });
+            const activeSessionId =
+                snapshot.data()?.activeSessionId;
 
-            if (isOwner) return;
+            console.log("========== WEB SESSION ==========");
+            console.log("UID:", uid);
+            console.log("Installation ID:", installationId);
+            console.log("Active Session ID:", activeSessionId);
+            console.log(
+                "Session Matches:",
+                activeSessionId === installationId
+            );
+            console.log("=================================");
 
-            if (!snapshot.exists() || activeSessionId !== installationId) {
+            if (
+                !snapshot.exists() ||
+                activeSessionId !== installationId
+            ) {
                 isHandlingReplacement = true;
 
                 console.warn(
-                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION.",
-                    {
-                        uid,
-                        installationId,
-                        activeSessionId,
-                    }
+                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION."
                 );
 
                 try {
+                    // Never release here.
+                    // The active session may belong to the newer device.
                     await auth.signOut();
                 } catch (error) {
                     console.error(
@@ -169,7 +163,10 @@ export function monitorActiveSession(
             }
         },
         (error) => {
-            console.error("WEB ACTIVE SESSION LISTENER ERROR:", error);
+            console.error(
+                "WEB ACTIVE SESSION LISTENER ERROR:",
+                error
+            );
         }
     );
 }
