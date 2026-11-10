@@ -102,11 +102,14 @@ export async function claimWebAdminSession(
 // MONITOR ACTIVE SESSION
 // ============================================================
 
+let activeMonitorGeneration = 0;
+
 export function monitorActiveSession(
     uid: string,
     installationId: string
 ): Unsubscribe {
     const userRef = doc(db, "Users", uid);
+    const generation = ++activeMonitorGeneration;
 
     let isHandlingReplacement = false;
 
@@ -114,53 +117,34 @@ export function monitorActiveSession(
         userRef,
         { includeMetadataChanges: true },
         async (snapshot) => {
-            // Only trust server-confirmed snapshots.
-            if (snapshot.metadata.fromCache) {
-                return;
-            }
+            // Ignore callbacks from obsolete listeners.
+            if (generation !== activeMonitorGeneration) return;
 
-            if (auth.currentUser?.uid !== uid) {
-                return;
-            }
-
-            if (isHandlingReplacement) {
-                return;
-            }
+            if (snapshot.metadata.fromCache) return;
+            if (auth.currentUser?.uid !== uid) return;
+            if (isHandlingReplacement) return;
 
             const userData = snapshot.data();
-
             const isOwner = userData?.isOwner === true;
+
+            // Owners remain exempt from session replacement.
+            if (isOwner) return;
+
             const activeSessionId = userData?.activeSessionId;
 
-            console.log("========== WEB SESSION ==========");
-            console.log("UID:", uid);
-            console.log("Installation ID:", installationId);
-            console.log("Active Session ID:", activeSessionId);
-            console.log("Is Owner:", isOwner);
-            console.log(
-                "Session Matches:",
-                activeSessionId === installationId
-            );
-            console.log("=================================");
-
-            // Owners still claim sessions, but do not get signed out
-            // when another owner device updates activeSessionId.
-            if (isOwner) {
-                return;
-            }
-
-            if (
-                !snapshot.exists() ||
-                activeSessionId !== installationId
-            ) {
+            if (!snapshot.exists() || activeSessionId !== installationId) {
                 isHandlingReplacement = true;
 
                 console.warn(
-                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION."
+                    "WEB SESSION REPLACED BY ANOTHER INSTALLATION.",
+                    {
+                        uid,
+                        installationId,
+                        activeSessionId,
+                    }
                 );
 
                 try {
-                    // Never release here.
                     await auth.signOut();
                 } catch (error) {
                     console.error(
@@ -171,10 +155,7 @@ export function monitorActiveSession(
             }
         },
         (error) => {
-            console.error(
-                "WEB ACTIVE SESSION LISTENER ERROR:",
-                error
-            );
+            console.error("WEB ACTIVE SESSION LISTENER ERROR:", error);
         }
     );
 }
