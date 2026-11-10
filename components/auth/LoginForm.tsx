@@ -36,8 +36,19 @@ export default function LoginForm() {
                     : "/";
 
             router.replace(destination);
-        } catch {
-            setError("Invalid email or password.");
+        } catch (error) {
+            console.error("LOGIN ERROR:", error);
+
+            if (
+                error instanceof Error &&
+                error.message.includes("session")
+            ) {
+                setError(
+                    "Unable to establish your account session. Please try again."
+                );
+            } else {
+                setError("Invalid email or password.");
+            }
         } finally {
             setLoading(false);
         }

@@ -27,40 +27,29 @@
 // }: Readonly<{
 //   children: React.ReactNode;
 // }>) {
-
 //   return (
-
-//     <html lang="en">
-
+//     <html lang="en" data-scroll-behavior="smooth">
 //       <body className={geist.className}>
-
 //         <AuthProvider>
-
 //           <ScrollProgress />
 
 //           <Navbar />
 
 //           <main className="min-h-screen">
-
 //             <AppProviders>
-
 //               {children}
-
 //             </AppProviders>
-
 //           </main>
 
 //           <Footer />
 
+//           <NarpSupportWidget />
 //         </AuthProvider>
-
 //       </body>
-
 //     </html>
-
 //   );
-
 // }
+
 
 
 import type { Metadata } from "next";

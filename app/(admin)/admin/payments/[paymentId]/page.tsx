@@ -30,6 +30,7 @@ import {
 import { getFunctions, httpsCallable } from "firebase/functions";
 
 import { db } from "@/lib/firebase";
+import { getInstallationId } from "@/lib/session";
 
 type PaymentRecord = {
     id: string;
@@ -855,6 +856,7 @@ export default function AdminPaymentDetailPage() {
             await callable({
                 receiptId: payment.id,
                 requestId: payment.requestId,
+                installationId: getInstallationId(),
             });
 
             await loadPayment();
@@ -907,10 +909,11 @@ export default function AdminPaymentDetailPage() {
                 "rejectPayment"
             );
 
-            await callable.call({
+            await callable({
                 receiptId: payment.id,
                 requestId: payment.requestId,
                 remarks,
+                installationId: getInstallationId(),
             });
 
             setShowRejectDialog(false);
