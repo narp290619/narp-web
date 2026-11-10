@@ -249,54 +249,12 @@ export default function UserMenu({
 
     return (
         <DropdownMenu>
-            {/* Account Trigger */}
-
             <DropdownMenuTrigger
                 aria-label="Open account menu"
                 className={
                     isMobile
-                        ? `
-                            flex
-                            w-full
-                            items-center
-                            gap-3
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-white
-                            px-3
-                            py-3
-                            text-left
-                            transition
-                            hover:bg-slate-50
-                            focus-visible:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-blue-400
-                        `
-                        : `
-                            flex
-                            h-11
-                            w-11
-                            items-center
-                            justify-center
-                            rounded-full
-                            border
-                            border-white
-                            bg-white
-                            text-slate-900
-                            shadow-lg
-                            ring-1
-                            ring-black/10
-                            transition-all
-                            duration-200
-                            hover:scale-105
-                            hover:border-orange-300
-                            hover:bg-orange-50
-                            hover:shadow-xl
-                            focus-visible:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-orange-400
-                        `
+                        ? "flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                        : "flex h-11 w-11 items-center justify-center rounded-full border border-white bg-white text-slate-900 shadow-lg ring-1 ring-black/10 transition-all duration-200 hover:scale-105 hover:border-orange-300 hover:bg-orange-50 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                 }
             >
                 <Avatar className="h-9 w-9 shrink-0">
@@ -327,14 +285,12 @@ export default function UserMenu({
                 )}
             </DropdownMenuTrigger>
 
-            {/* Account Dropdown */}
-
             <DropdownMenuContent
                 align={isMobile ? "start" : "end"}
                 side="bottom"
-                sideOffset={10}
+                sideOffset={8}
                 className={`
-                    z-[100]
+                    z-[9999]
                     rounded-xl
                     border
                     border-slate-200
@@ -344,17 +300,9 @@ export default function UserMenu({
                     shadow-2xl
                     ring-1
                     ring-black/5
-                    backdrop-blur-none
-                    data-[state=open]:animate-in
-                    data-[state=closed]:animate-out
-                    ${isMobile
-                        ? "w-[calc(100vw-3rem)] max-w-64"
-                        : "w-64"
-                    }
+                    ${isMobile ? "w-[280px] max-w-[calc(100vw-3rem)]" : "w-64"}
                 `}
             >
-                {/* User Information */}
-
                 <div className="px-3 py-3">
                     <p className="truncate font-semibold text-slate-900">
                         {user.displayName || "User"}

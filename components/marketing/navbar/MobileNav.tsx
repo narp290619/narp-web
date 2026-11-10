@@ -58,36 +58,36 @@ import { navigation } from "@/config/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 
 import { useAuthContext } from "@/providers/AuthProvider";
 import UserMenu from "@/components/navbar/UserMenu";
 
 export default function MobileNav() {
-    const {
-        user,
-        isAdmin,
-        adminLoading,
-    } = useAuthContext();
+  const {
+    user,
+    isAdmin,
+    adminLoading,
+  } = useAuthContext();
 
-    return (
-        <Sheet>
-            <SheetTrigger
-                render={
-                    <Button variant="ghost" size="icon">
-                        <Menu />
-                    </Button>
-                }
-            />
+  return (
+    <Sheet>
+      <SheetTrigger
+        render={
+          <Button variant="ghost" size="icon">
+            <Menu />
+          </Button>
+        }
+      />
 
-            <SheetContent
-                side="right"
-                className="
+      <SheetContent
+        side="right"
+        className="
                     h-full
                     border
                     border-white/60
@@ -96,31 +96,31 @@ export default function MobileNav() {
                     shadow-[0_10px_40px_rgba(15,23,42,.12)]
                     backdrop-blur-2xl
                 "
+      >
+        <SheetHeader>
+          <SheetTitle>NARP</SheetTitle>
+        </SheetHeader>
+
+        <nav className="mt-8 flex flex-col gap-6 px-4">
+
+          {/* Main Navigation */}
+
+          {navigation.map((item) => (
+            <Link
+              key={item.title}
+              href={item.href}
+              className="text-lg font-medium"
             >
-                <SheetHeader>
-                    <SheetTitle>NARP</SheetTitle>
-                </SheetHeader>
+              {item.title}
+            </Link>
+          ))}
 
-                <nav className="mt-8 flex flex-col gap-6 px-4">
+          {/* Admin Navigation */}
 
-                    {/* Main Navigation */}
-
-                    {navigation.map((item) => (
-                        <Link
-                            key={item.title}
-                            href={item.href}
-                            className="text-lg font-medium"
-                        >
-                            {item.title}
-                        </Link>
-                    ))}
-
-                    {/* Admin Navigation */}
-
-                    {user && !adminLoading && isAdmin && (
-                        <Link
-                            href="/admin"
-                            className="
+          {user && !adminLoading && isAdmin && (
+            <Link
+              href="/admin"
+              className="
                                 flex
                                 items-center
                                 gap-2
@@ -128,17 +128,17 @@ export default function MobileNav() {
                                 font-semibold
                                 text-blue-700
                             "
-                        >
-                            <ShieldCheck className="h-5 w-5" />
-                            Admin
-                        </Link>
-                    )}
+            >
+              <ShieldCheck className="h-5 w-5" />
+              Admin
+            </Link>
+          )}
 
-                    {/* Authentication */}
+          {/* Authentication */}
 
-                    <div className="border-t border-slate-200 pt-6">
+          <div className="border-t border-slate-200 pt-6">
 
-                        {user ? (
+            {/* {user ? (
                             <UserMenu variant="mobile" />
                         ) : (
                             <Link href="/login">
@@ -154,12 +154,22 @@ export default function MobileNav() {
                                     Login
                                 </Button>
                             </Link>
-                        )}
+                        )} */}
 
-                    </div>
+            {user ? (
+              <UserMenu variant="mobile" />
+            ) : (
+              <Link href="/login">
+                <Button className="w-full rounded-full">
+                  Login
+                </Button>
+              </Link>
+            )}
 
-                </nav>
-            </SheetContent>
-        </Sheet>
-    );
+          </div>
+
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
 }
