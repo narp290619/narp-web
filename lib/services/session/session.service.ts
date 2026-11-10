@@ -127,18 +127,27 @@ export function monitorActiveSession(
                 return;
             }
 
-            const activeSessionId =
-                snapshot.data()?.activeSessionId;
+            const userData = snapshot.data();
+
+            const isOwner = userData?.isOwner === true;
+            const activeSessionId = userData?.activeSessionId;
 
             console.log("========== WEB SESSION ==========");
             console.log("UID:", uid);
             console.log("Installation ID:", installationId);
             console.log("Active Session ID:", activeSessionId);
+            console.log("Is Owner:", isOwner);
             console.log(
                 "Session Matches:",
                 activeSessionId === installationId
             );
             console.log("=================================");
+
+            // Owners still claim sessions, but do not get signed out
+            // when another owner device updates activeSessionId.
+            if (isOwner) {
+                return;
+            }
 
             if (
                 !snapshot.exists() ||
@@ -152,7 +161,6 @@ export function monitorActiveSession(
 
                 try {
                     // Never release here.
-                    // The active session may belong to the newer device.
                     await auth.signOut();
                 } catch (error) {
                     console.error(
