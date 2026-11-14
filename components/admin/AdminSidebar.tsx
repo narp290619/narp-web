@@ -18,6 +18,8 @@ import {
     ReceiptText,
     WalletCards,
     Wrench,
+    Megaphone,
+    BadgeCheck,
 } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 
@@ -61,6 +63,16 @@ const navigation = [
         label: "Payments",
         href: "/admin/payments",
         icon: CreditCard,
+    },
+    {
+        label: "Ad Payments",
+        href: "/admin/ad-payments",
+        icon: CreditCard,
+    },
+    {
+        label: "Advertisement Review",
+        href: "/admin/advertisements",
+        icon: Megaphone,
     },
     {
         label: "Withdrawals",
