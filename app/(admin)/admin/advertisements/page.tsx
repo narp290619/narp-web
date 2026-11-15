@@ -80,7 +80,11 @@ type StatusFilter =
 const functions = getFunctions(undefined, "asia-southeast1");
 
 const approveAdvertisementCallable = httpsCallable<
-    { advertisementId: string; installationId: string },
+    {
+        advertisementId: string;
+        installationId: string;
+        clientPlatform: "web";
+    },
     { success: boolean; message?: string }
 >(functions, "approveAdvertisement");
 
@@ -89,17 +93,26 @@ const rejectAdvertisementCallable = httpsCallable<
         advertisementId: string;
         rejectionReason: string;
         installationId: string;
+        clientPlatform: "web";
     },
     { success: boolean; message?: string }
 >(functions, "rejectAdvertisement");
 
 const activateAdvertisementCallable = httpsCallable<
-    { advertisementId: string; installationId: string },
+    {
+        advertisementId: string;
+        installationId: string;
+        clientPlatform: "web";
+    },
     { success: boolean; message?: string }
 >(functions, "activateAdvertisement");
 
 const getAdvertisementImageUrlCallable = httpsCallable<
-    { advertisementId: string; installationId: string },
+    {
+        advertisementId: string;
+        installationId: string;
+        clientPlatform: "web";
+    },
     { success: boolean; url: string; expiresAt: number }
 >(functions, "getAdvertisementImageUrl");
 
@@ -328,6 +341,7 @@ export default function AdminAdvertisementsPage() {
                         const result = await getAdvertisementImageUrlCallable({
                             advertisementId: ad.advertisementId || ad.id,
                             installationId: getInstallationId(),
+                            clientPlatform: "web",
                         });
 
                         return [ad.id, result.data.url] as const;
@@ -392,6 +406,7 @@ export default function AdminAdvertisementsPage() {
             const result = await approveAdvertisementCallable({
                 advertisementId,
                 installationId,
+                clientPlatform: "web",
             });
 
             setSuccess(
@@ -449,6 +464,7 @@ export default function AdminAdvertisementsPage() {
                 advertisementId,
                 rejectionReason: reason,
                 installationId,
+                clientPlatform: "web",
             });
 
             setSuccess(
@@ -502,6 +518,7 @@ export default function AdminAdvertisementsPage() {
             const result = await activateAdvertisementCallable({
                 advertisementId,
                 installationId,
+                clientPlatform: "web",
             });
 
             setSuccess(
