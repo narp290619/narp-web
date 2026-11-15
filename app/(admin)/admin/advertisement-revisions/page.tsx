@@ -4,11 +4,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     collection,
-    collectionGroup,
+    doc,
     getDocs,
     getDoc,
-    query,
-    where,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import {
@@ -231,70 +229,111 @@ export default function AdvertisementRevisionsPage() {
         );
     }, [items, search]);
 
+
     const loadQueue = useCallback(async () => {
         try {
             setLoading(true);
             setError("");
 
-            const revisionsQuery = query(
-                collectionGroup(db, "Revisions"),
-                where("status", "==", "pending_review")
+            // Load advertisements using the existing admin access rules.
+            const advertisementsSnapshot = await getDocs(
+                collection(db, "Advertisements")
             );
 
-            const snapshot = await getDocs(revisionsQuery);
+            // Only advertisements with a pending revision are relevant.
+            const pendingAdvertisements =
+                advertisementsSnapshot.docs.filter((advertisementDoc) => {
+                    const data = advertisementDoc.data();
 
-            const loaded: RevisionItem[] = [];
-
-            for (const revisionDocument of snapshot.docs) {
-                const revisionData = revisionDocument.data();
-
-                const advertisementRef =
-                    revisionDocument.ref.parent.parent;
-
-                if (!advertisementRef) continue;
-
-                const advertisementSnapshot =
-                    await getDoc(advertisementRef);
-
-                if (!advertisementSnapshot.exists()) continue;
-
-                const advertisementData =
-                    advertisementSnapshot.data();
-
-                const advertisementId = advertisementSnapshot.id;
-
-                loaded.push({
-                    id: revisionDocument.id,
-                    advertisementId,
-                    advertiserId: getString(
-                        revisionData.advertiserId
-                    ),
-                    advertiserType: getString(
-                        revisionData.advertiserType
-                    ),
-                    status: getString(revisionData.status),
-                    title: getString(revisionData.title),
-                    description: getString(
-                        revisionData.description
-                    ),
-                    businessName: getString(
-                        revisionData.businessName
-                    ),
-                    businessDescription: getString(
-                        revisionData.businessDescription
-                    ),
-                    imageChanged:
-                        revisionData.imageChanged === true,
-                    imageStoragePath: getString(
-                        revisionData.imageStoragePath
-                    ),
-                    submittedAt: getDate(
-                        revisionData.submittedAt
-                    ),
-                    data: revisionData,
-                    advertisement: advertisementData,
+                    return (
+                        typeof data.pendingRevisionId === "string" &&
+                        data.pendingRevisionId.trim().length > 0
+                    );
                 });
-            }
+
+            // Fetch each pending revision from its actual parent document.
+            const results: (RevisionItem | null)[] = await Promise.all(
+                pendingAdvertisements.map(async (advertisementDoc) => {
+                    const advertisementData = advertisementDoc.data();
+                    const advertisementId = advertisementDoc.id;
+                    const revisionId = getString(
+                        advertisementData.pendingRevisionId
+                    );
+
+                    const revisionRef = doc(
+                        db,
+                        "Advertisements",
+                        advertisementId,
+                        "Revisions",
+                        revisionId
+                    );
+
+                    const revisionSnapshot = await getDoc(revisionRef);
+
+                    if (!revisionSnapshot.exists()) {
+                        console.warn(
+                            "Pending revision document not found:",
+                            advertisementId,
+                            revisionId
+                        );
+
+                        return null;
+                    }
+
+                    const revisionData = revisionSnapshot.data();
+
+                    // Confirm that the revision still belongs to this ad.
+                    if (
+                        revisionData.advertisementId !== advertisementId ||
+                        revisionData.revisionId !== revisionId ||
+                        revisionData.status !== "pending_review"
+                    ) {
+                        console.warn(
+                            "Pending revision pointer does not match revision:",
+                            advertisementId,
+                            revisionId
+                        );
+
+                        return null;
+                    }
+
+                    return {
+                        id: revisionSnapshot.id,
+                        advertisementId,
+                        advertiserId: getString(
+                            revisionData.advertiserId
+                        ),
+                        advertiserType: getString(
+                            revisionData.advertiserType
+                        ),
+                        status: getString(revisionData.status),
+                        title: getString(revisionData.title),
+                        description: getString(
+                            revisionData.description
+                        ),
+                        businessName: getString(
+                            revisionData.businessName
+                        ),
+                        businessDescription: getString(
+                            revisionData.businessDescription
+                        ),
+                        imageChanged:
+                            revisionData.imageChanged === true,
+                        imageStoragePath: getString(
+                            revisionData.imageStoragePath
+                        ),
+                        submittedAt: getDate(
+                            revisionData.submittedAt
+                        ),
+                        data: revisionData,
+                        advertisement: advertisementData,
+                    } satisfies RevisionItem;
+                })
+            );
+
+            const loaded = results.filter(
+                (item): item is RevisionItem => item !== null
+            );
 
             loaded.sort(
                 (a, b) =>
@@ -321,12 +360,15 @@ export default function AdvertisementRevisionsPage() {
             );
 
             setError(
-                "Unable to load advertisement revisions. Check your admin access and Firestore rules, then try again."
+                err instanceof Error
+                    ? `Unable to load revisions: ${err.message}`
+                    : "Unable to load advertisement revisions. Check your admin access and Firestore rules."
             );
         } finally {
             setLoading(false);
         }
     }, []);
+
 
     useEffect(() => {
         void loadQueue();
@@ -601,9 +643,8 @@ export default function AdvertisementRevisionsPage() {
                             className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
                         >
                             <RefreshCw
-                                className={`h-4 w-4 ${
-                                    loading ? "animate-spin" : ""
-                                }`}
+                                className={`h-4 w-4 ${loading ? "animate-spin" : ""
+                                    }`}
                             />
                             Refresh
                         </button>
@@ -695,11 +736,10 @@ export default function AdvertisementRevisionsPage() {
                                             setError("");
                                             setNotice("");
                                         }}
-                                        className={`block w-full border-b border-slate-100 p-4 text-left transition hover:bg-slate-50 ${
-                                            selectedId === item.id
+                                        className={`block w-full border-b border-slate-100 p-4 text-left transition hover:bg-slate-50 ${selectedId === item.id
                                                 ? "bg-blue-50"
                                                 : "bg-white"
-                                        }`}
+                                            }`}
                                     >
                                         <div className="flex items-start justify-between gap-2">
                                             <p className="line-clamp-2 text-sm font-semibold text-slate-900">
