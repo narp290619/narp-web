@@ -519,22 +519,6 @@ export default function AdvertisementRevisionsPage() {
             setError("");
             setNotice("");
 
-            // TEMPORARY APP CHECK DIAGNOSTIC
-            console.log("[App Check] Instance initialized:", !!appCheck);
-
-            if (appCheck) {
-                try {
-                    const tokenResult = await getToken(appCheck, false);
-
-                    console.log("[App Check] Token obtained:", !!tokenResult.token);
-                    console.log("[App Check] Token length:", tokenResult.token.length);
-                } catch (appCheckError) {
-                    console.error("[App Check] Token retrieval failed:", appCheckError);
-                }
-            } else {
-                console.error("[App Check] Instance is NULL.");
-            }
-
             const callable = httpsCallable(
                 functions,
                 "approveAdvertisementRevision"
