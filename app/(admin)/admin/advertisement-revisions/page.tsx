@@ -503,6 +503,7 @@ export default function AdvertisementRevisionsPage() {
         };
     }, [selected]);
 
+
     async function approveRevision() {
         if (!selected || actionLoading) return;
 
@@ -537,14 +538,32 @@ export default function AdvertisementRevisionsPage() {
             setRejectionReason("");
 
             await loadQueue();
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(
                 "Failed to approve advertisement revision:",
                 err
             );
 
+            const firebaseError = err as {
+                code?: unknown;
+                message?: unknown;
+            };
+
+            const errorCode =
+                typeof firebaseError.code === "string"
+                    ? firebaseError.code
+                    : "unknown";
+
+            const errorMessage =
+                typeof firebaseError.message === "string"
+                    ? firebaseError.message
+                    : "An unexpected error occurred.";
+
+            console.error("Approval error code:", errorCode);
+            console.error("Approval error message:", errorMessage);
+
             setError(
-                "Unable to approve this revision. It may have changed since you opened it. Refresh and review it again."
+                `Approval failed (${errorCode}): ${errorMessage}`
             );
         } finally {
             setActionLoading(false);
