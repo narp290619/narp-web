@@ -225,13 +225,18 @@ export default function AdminAdPaymentsPage() {
 
         try {
             const callable = httpsCallable<
-                { paymentId: string; installationId: string },
+                {
+                    paymentId: string;
+                    installationId: string;
+                    clientPlatform: "web";
+                },
                 ReceiptUrlResponse
             >(functions, "getAdPaymentReceiptUrl");
 
             const result = await callable({
                 paymentId: payment.id,
                 installationId: getInstallationId(),
+                clientPlatform: "web",
             });
 
             if (!result.data?.url) {
@@ -276,13 +281,18 @@ export default function AdminAdPaymentsPage() {
             setActionError("");
 
             const callable = httpsCallable<
-                { paymentId: string; installationId: string },
+                {
+                    paymentId: string;
+                    installationId: string;
+                    clientPlatform: "web";
+                },
                 { success: boolean; message?: string }
             >(functions, "approveAdPayment");
 
             await callable({
                 paymentId: payment.id,
                 installationId: getInstallationId(),
+                clientPlatform: "web",
             });
 
             setSelectedPayment(null);
@@ -320,6 +330,7 @@ export default function AdminAdPaymentsPage() {
                     paymentId: string;
                     rejectionReason: string;
                     installationId: string;
+                    clientPlatform: "web";
                 },
                 { success: boolean; message?: string }
             >(functions, "rejectAdPayment");
@@ -328,6 +339,7 @@ export default function AdminAdPaymentsPage() {
                 paymentId: rejectingPayment.id,
                 rejectionReason: reason,
                 installationId: getInstallationId(),
+                clientPlatform: "web",
             });
 
             setRejectingPayment(null);
@@ -452,15 +464,15 @@ export default function AdminAdPaymentsPage() {
                                     key={option.value}
                                     onClick={() => setStatusFilter(option.value)}
                                     className={`rounded-lg px-3.5 py-2 text-sm font-medium transition ${active
-                                            ? "bg-slate-900 text-white"
-                                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        ? "bg-slate-900 text-white"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                         }`}
                                 >
                                     {option.label}
                                     <span
                                         className={`ml-2 rounded-full px-1.5 py-0.5 text-xs ${active
-                                                ? "bg-white/15 text-white"
-                                                : "bg-white text-slate-600"
+                                            ? "bg-white/15 text-white"
+                                            : "bg-white text-slate-600"
                                             }`}
                                     >
                                         {option.count}
