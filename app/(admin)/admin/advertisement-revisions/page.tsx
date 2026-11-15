@@ -39,7 +39,7 @@ type RevisionItem = {
     businessName?: string;
     businessDescription?: string;
     imageChanged: boolean;
-    storagePath?: string;
+    imageStoragePath?: string;
     submittedAt: Date | null;
     data: Data;
     advertisement: Data;
@@ -319,8 +319,8 @@ export default function AdvertisementRevisionsPage() {
                         ),
                         imageChanged:
                             revisionData.imageChanged === true,
-                        storagePath: getString(
-                            revisionData.storagePath
+                        imageStoragePath: getString(
+                            revisionData.imageStoragePath
                         ),
                         submittedAt: getDate(
                             revisionData.submittedAt
@@ -411,15 +411,21 @@ export default function AdvertisementRevisionsPage() {
                 if (!cancelled) {
                     setPreviewUrl(result.data.url);
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error(
                     "Failed to load revision image preview:",
                     err
                 );
 
                 if (!cancelled) {
+                    const firebaseError = err as {
+                        code?: string;
+                        message?: string;
+                    };
+
                     setPreviewError(
-                        "Unable to load the replacement image preview."
+                        `Preview failed: ${firebaseError.code ?? 'unknown'} - ${firebaseError.message ?? 'Unknown error'
+                        }`
                     );
                 }
             } finally {
@@ -737,8 +743,8 @@ export default function AdvertisementRevisionsPage() {
                                             setNotice("");
                                         }}
                                         className={`block w-full border-b border-slate-100 p-4 text-left transition hover:bg-slate-50 ${selectedId === item.id
-                                                ? "bg-blue-50"
-                                                : "bg-white"
+                                            ? "bg-blue-50"
+                                            : "bg-white"
                                             }`}
                                     >
                                         <div className="flex items-start justify-between gap-2">
