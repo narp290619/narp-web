@@ -75,6 +75,11 @@ const navigation = [
         icon: Megaphone,
     },
     {
+        label: "Ad Revision Review",
+        href: "/admin/advertisement-revisions",
+        icon: BadgeCheck,
+    },
+    {
         label: "Withdrawals",
         href: "/admin/withdrawals",
         icon: ArrowUpRight,
