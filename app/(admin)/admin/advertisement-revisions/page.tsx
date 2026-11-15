@@ -39,7 +39,7 @@ type RevisionItem = {
     businessName?: string;
     businessDescription?: string;
     imageChanged: boolean;
-    imageStoragePath?: string;
+    storagePath?: string;
     submittedAt: Date | null;
     data: Data;
     advertisement: Data;
@@ -319,8 +319,8 @@ export default function AdvertisementRevisionsPage() {
                         ),
                         imageChanged:
                             revisionData.imageChanged === true,
-                        imageStoragePath: getString(
-                            revisionData.imageStoragePath
+                        storagePath: getString(
+                            revisionData.storagePath
                         ),
                         submittedAt: getDate(
                             revisionData.submittedAt
