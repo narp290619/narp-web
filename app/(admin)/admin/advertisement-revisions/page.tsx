@@ -23,8 +23,9 @@ import {
     UserRound,
 } from "lucide-react";
 
-import { db, functions } from "@/lib/firebase";
+import { appCheck, db, functions } from "@/lib/firebase";
 import { getInstallationId } from "@/lib/session";
+import { getToken } from "firebase/app-check";
 
 type Data = Record<string, unknown>;
 
@@ -517,6 +518,22 @@ export default function AdvertisementRevisionsPage() {
             setActionLoading(true);
             setError("");
             setNotice("");
+
+            // TEMPORARY APP CHECK DIAGNOSTIC
+            console.log("[App Check] Instance initialized:", !!appCheck);
+
+            if (appCheck) {
+                try {
+                    const tokenResult = await getToken(appCheck, false);
+
+                    console.log("[App Check] Token obtained:", !!tokenResult.token);
+                    console.log("[App Check] Token length:", tokenResult.token.length);
+                } catch (appCheckError) {
+                    console.error("[App Check] Token retrieval failed:", appCheckError);
+                }
+            } else {
+                console.error("[App Check] Instance is NULL.");
+            }
 
             const callable = httpsCallable(
                 functions,

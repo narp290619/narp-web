@@ -14,6 +14,11 @@ import {
     getStorage,
 } from "firebase/storage";
 
+import {
+    initializeAppCheck,
+    ReCaptchaEnterpriseProvider,
+} from "firebase/app-check";
+
 const firebaseConfig = {
 
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -34,6 +39,17 @@ const firebaseConfig = {
 const app = getApps().length
     ? getApp()
     : initializeApp(firebaseConfig);
+
+export const appCheck =
+    typeof window !== "undefined" &&
+        process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY
+        ? initializeAppCheck(app, {
+            provider: new ReCaptchaEnterpriseProvider(
+                process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY
+            ),
+            isTokenAutoRefreshEnabled: true,
+        })
+        : null;
 
 export const auth = getAuth(app);
 
