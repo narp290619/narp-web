@@ -391,6 +391,7 @@ export default function AdvertisementRevisionsPage() {
                         advertisementId: string;
                         revisionId: string;
                         installationId: string;
+                        clientPlatform: "web";
                     },
                     {
                         success: boolean;
@@ -406,6 +407,7 @@ export default function AdvertisementRevisionsPage() {
                     advertisementId: selected.advertisementId,
                     revisionId: selected.id,
                     installationId: getInstallationId(),
+                    clientPlatform: "web",
                 });
 
                 if (!cancelled) {
@@ -524,6 +526,7 @@ export default function AdvertisementRevisionsPage() {
                 advertisementId: selected.advertisementId,
                 revisionId: selected.id,
                 installationId: getInstallationId(),
+                clientPlatform: "web",
             });
 
             setNotice(
@@ -575,6 +578,7 @@ export default function AdvertisementRevisionsPage() {
                 revisionId: selected.id,
                 rejectionReason: reason,
                 installationId: getInstallationId(),
+                clientPlatform: "web",
             });
 
             setNotice(

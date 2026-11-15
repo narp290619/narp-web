@@ -160,6 +160,7 @@ export function AuthProvider({
 
     const [isAdmin, setIsAdmin] = useState(false);
     const [adminLoading, setAdminLoading] = useState(true);
+    const [isOwner, setIsOwner] = useState(false);
 
     useEffect(() => {
         let sessionUnsubscribe: Unsubscribe | null = null;
@@ -221,6 +222,10 @@ export function AuthProvider({
                         : null;
 
                     const admin = userData?.isAdmin === true;
+                    const owner = userData?.isOwner === true;
+
+                    setIsOwner(owner);
+                    setIsAdmin(admin);
 
                     setName(
                         typeof userData?.name === "string"
@@ -268,6 +273,7 @@ export function AuthProvider({
                     setName(null);
                     setIsAdmin(false);
                     setAdminLoading(false);
+                    setIsOwner(false);
                     return;
                 }
 
@@ -282,19 +288,41 @@ export function AuthProvider({
 
                 // Browser refresh / restored authentication:
                 // verify the existing session without claiming it.
-                try {
-                    const installationId = getInstallationId();
+                void (async () => {
+                    try {
+                        const installationId = getInstallationId();
 
-                    startSessionMonitoring(
-                        currentUser.uid,
-                        installationId
-                    );
-                } catch (error) {
-                    console.error(
-                        "FAILED TO INITIALIZE SESSION MONITORING:",
-                        error
-                    );
-                }
+                        const { getDoc } = await import("firebase/firestore");
+
+                        const userSnapshot = await getDoc(
+                            doc(db, "Users", currentUser.uid)
+                        );
+
+                        if (auth.currentUser?.uid !== currentUser.uid) {
+                            return;
+                        }
+
+                        const owner = userSnapshot.exists() &&
+                            userSnapshot.data().isOwner === true;
+
+                        if (owner) {
+                            console.log(
+                                "OWNER WEB: SESSION MONITORING SKIPPED."
+                            );
+                            return;
+                        }
+
+                        startSessionMonitoring(
+                            currentUser.uid,
+                            installationId
+                        );
+                    } catch (error) {
+                        console.error(
+                            "FAILED TO INITIALIZE SESSION MONITORING:",
+                            error
+                        );
+                    }
+                })();
             }
         );
 
