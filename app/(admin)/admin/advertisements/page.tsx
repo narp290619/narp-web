@@ -60,6 +60,7 @@ type Advertisement = {
     durationDays?: number;
     status: AdvertisementStatus;
     paymentStatus: string;
+    pendingRevisionId?: string | null;
     startAt?: Timestamp | Date | null;
     endAt?: Timestamp | Date | null;
     createdAt?: Timestamp | Date | null;
@@ -182,6 +183,50 @@ function getStatusClasses(status: string): string {
     };
 
     return classes[status] ?? "bg-gray-100 text-gray-700";
+}
+
+function getPaymentStatusLabel(status?: string): string {
+    const labels: Record<string, string> = {
+        unpaid: "Unpaid",
+        pending: "Pending Verification",
+        verified: "Verified",
+        rejected: "Rejected",
+    };
+
+    return labels[status || "unpaid"] ?? (status || "Unpaid");
+}
+
+function getPaymentStatusClasses(status?: string): string {
+    const classes: Record<string, string> = {
+        unpaid: "bg-gray-100 text-gray-700",
+        pending: "bg-amber-100 text-amber-800",
+        verified: "bg-green-100 text-green-800",
+        rejected: "bg-red-100 text-red-800",
+    };
+
+    return classes[status || "unpaid"] ?? "bg-gray-100 text-gray-700";
+}
+
+function hasPendingRevision(ad: Advertisement): boolean {
+    return (
+        typeof ad.pendingRevisionId === "string" &&
+        ad.pendingRevisionId.trim().length > 0
+    );
+}
+
+function canApproveOrReject(ad: Advertisement): boolean {
+    return (
+        ad.status === "pending_review" &&
+        ad.paymentStatus === "unpaid"
+    );
+}
+
+function canActivate(ad: Advertisement): boolean {
+    return (
+        ad.status === "approved" &&
+        ad.paymentStatus === "verified" &&
+        !hasPendingRevision(ad)
+    );
 }
 
 function getErrorMessage(error: unknown): string {
@@ -380,18 +425,15 @@ export default function AdminAdvertisementsPage() {
     const handleApprove = async (ad: Advertisement) => {
         const advertisementId = ad.advertisementId || ad.id;
 
-        if (
-            ad.status !== "pending_review" ||
-            ad.paymentStatus !== "verified"
-        ) {
+        if (!canApproveOrReject(ad)) {
             setError(
-                "Only advertisements with verified payment and pending review can be approved."
+                "Only advertisements awaiting content review with unpaid status can be approved."
             );
             return;
         }
 
         const confirmed = window.confirm(
-            `Approve "${ad.title}"?\n\nThis will move the advertisement to Approved. It will not publish it yet.`
+            `Approve "${ad.title}"?\n\nThis approves the advertisement content only. The advertiser must submit payment afterward. The advertisement will not be published yet.`
         );
 
         if (!confirmed) return;
@@ -411,7 +453,7 @@ export default function AdminAdvertisementsPage() {
 
             setSuccess(
                 result.data.message ||
-                "Advertisement approved successfully."
+                "Advertisement content approved. Awaiting advertiser payment."
             );
 
             setSelectedAdvertisement(null);
@@ -443,12 +485,9 @@ export default function AdminAdvertisementsPage() {
             return;
         }
 
-        if (
-            ad.status !== "pending_review" ||
-            ad.paymentStatus !== "verified"
-        ) {
+        if (!canApproveOrReject(ad)) {
             setError(
-                "This advertisement is no longer eligible for review."
+                "This advertisement is no longer eligible for content review."
             );
             return;
         }
@@ -469,7 +508,7 @@ export default function AdminAdvertisementsPage() {
 
             setSuccess(
                 result.data.message ||
-                "Advertisement rejected successfully."
+                "Advertisement content rejected."
             );
 
             setRejectingAdvertisement(null);
@@ -492,12 +531,9 @@ export default function AdminAdvertisementsPage() {
     const handleActivate = async (ad: Advertisement) => {
         const advertisementId = ad.advertisementId || ad.id;
 
-        if (
-            ad.status !== "approved" ||
-            ad.paymentStatus !== "verified"
-        ) {
+        if (!canActivate(ad)) {
             setError(
-                "Only approved advertisements with verified payment can be activated."
+                "This advertisement must have approved content, verified payment, and no pending revision before activation."
             );
             return;
         }
@@ -552,32 +588,32 @@ export default function AdminAdvertisementsPage() {
         value: StatusFilter;
         count: number;
     }[] = [
-            {
-                label: "Pending Review",
-                value: "pending_review",
-                count: counts.pending_review,
-            },
-            {
-                label: "Approved",
-                value: "approved",
-                count: counts.approved,
-            },
-            {
-                label: "Active",
-                value: "active",
-                count: counts.active,
-            },
-            {
-                label: "Rejected",
-                value: "rejected",
-                count: counts.rejected,
-            },
-            {
-                label: "All",
-                value: "all",
-                count: counts.all,
-            },
-        ];
+        {
+            label: "Pending Review",
+            value: "pending_review",
+            count: counts.pending_review,
+        },
+        {
+            label: "Approved",
+            value: "approved",
+            count: counts.approved,
+        },
+        {
+            label: "Active",
+            value: "active",
+            count: counts.active,
+        },
+        {
+            label: "Rejected",
+            value: "rejected",
+            count: counts.rejected,
+        },
+        {
+            label: "All",
+            value: "all",
+            count: counts.all,
+        },
+    ];
 
     return (
         <div className="space-y-6 p-4 sm:p-6">
@@ -592,7 +628,7 @@ export default function AdminAdvertisementsPage() {
                     </div>
 
                     <p className="mt-1 text-sm text-gray-500">
-                        Review, approve, reject, and activate advertiser campaigns.
+                        Review advertisement content, verify payment, and activate advertiser campaigns.
                     </p>
                 </div>
 
@@ -603,8 +639,7 @@ export default function AdminAdvertisementsPage() {
                     className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
                 >
                     <RefreshCw
-                        className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""
-                            }`}
+                        className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
                     />
                     Refresh
                 </button>
@@ -679,10 +714,11 @@ export default function AdminAdvertisementsPage() {
                                 key={tab.value}
                                 type="button"
                                 onClick={() => setStatusFilter(tab.value)}
-                                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${statusFilter === tab.value
-                                    ? "bg-gray-900 text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
+                                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                                    statusFilter === tab.value
+                                        ? "bg-gray-900 text-white"
+                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
                             >
                                 {tab.label}
                                 <span className="ml-2 opacity-70">
@@ -761,6 +797,20 @@ export default function AdminAdvertisementsPage() {
                                             >
                                                 {getStatusLabel(ad.status)}
                                             </span>
+
+                                            <span
+                                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${getPaymentStatusClasses(
+                                                    ad.paymentStatus
+                                                )}`}
+                                            >
+                                                Payment: {getPaymentStatusLabel(ad.paymentStatus)}
+                                            </span>
+
+                                            {hasPendingRevision(ad) && (
+                                                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">
+                                                    Revision Pending
+                                                </span>
+                                            )}
                                         </div>
 
                                         <p className="line-clamp-2 text-sm text-gray-600">
@@ -814,7 +864,7 @@ export default function AdminAdvertisementsPage() {
                                             <>
                                                 <button
                                                     type="button"
-                                                    disabled={isProcessing}
+                                                    disabled={isProcessing || !canApproveOrReject(ad)}
                                                     onClick={() => handleApprove(ad)}
                                                     className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                                                 >
@@ -828,7 +878,7 @@ export default function AdminAdvertisementsPage() {
 
                                                 <button
                                                     type="button"
-                                                    disabled={isProcessing}
+                                                    disabled={isProcessing || !canApproveOrReject(ad)}
                                                     onClick={() => openRejectDialog(ad)}
                                                     className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
                                                 >
@@ -838,21 +888,23 @@ export default function AdminAdvertisementsPage() {
                                             </>
                                         )}
 
-                                        {ad.status === "approved" && (
-                                            <button
-                                                type="button"
-                                                disabled={isProcessing}
-                                                onClick={() => handleActivate(ad)}
-                                                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                                            >
-                                                {isProcessing ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Megaphone className="h-4 w-4" />
-                                                )}
-                                                Activate
-                                            </button>
-                                        )}
+                                        {ad.status === "approved" &&
+                                            ad.paymentStatus === "verified" &&
+                                            !hasPendingRevision(ad) && (
+                                                <button
+                                                    type="button"
+                                                    disabled={isProcessing}
+                                                    onClick={() => handleActivate(ad)}
+                                                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                                                >
+                                                    {isProcessing ? (
+                                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                                    ) : (
+                                                        <Megaphone className="h-4 w-4" />
+                                                    )}
+                                                    Activate
+                                                </button>
+                                            )}
                                     </div>
                                 </div>
                             );
@@ -898,38 +950,39 @@ export default function AdminAdvertisementsPage() {
                                 Close
                             </button>
 
-                            {selectedAdvertisement.status ===
-                                "pending_review" && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                processingId === selectedAdvertisement.id
-                                            }
-                                            onClick={() =>
-                                                openRejectDialog(selectedAdvertisement)
-                                            }
-                                            className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
-                                        >
-                                            Reject
-                                        </button>
+                            {selectedAdvertisement.status === "pending_review" && (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            processingId === selectedAdvertisement.id ||
+                                            !canApproveOrReject(selectedAdvertisement)
+                                        }
+                                        onClick={() =>
+                                            openRejectDialog(selectedAdvertisement)
+                                        }
+                                        className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                                    >
+                                        Reject
+                                    </button>
 
-                                        <button
-                                            type="button"
-                                            disabled={
-                                                processingId === selectedAdvertisement.id
-                                            }
-                                            onClick={() =>
-                                                handleApprove(selectedAdvertisement)
-                                            }
-                                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                                        >
-                                            Approve
-                                        </button>
-                                    </>
-                                )}
+                                    <button
+                                        type="button"
+                                        disabled={
+                                            processingId === selectedAdvertisement.id ||
+                                            !canApproveOrReject(selectedAdvertisement)
+                                        }
+                                        onClick={() =>
+                                            handleApprove(selectedAdvertisement)
+                                        }
+                                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                                    >
+                                        Approve
+                                    </button>
+                                </>
+                            )}
 
-                            {selectedAdvertisement.status === "approved" && (
+                            {canActivate(selectedAdvertisement) && (
                                 <button
                                     type="button"
                                     disabled={
@@ -1107,6 +1160,20 @@ function AdvertisementDetails({
                     >
                         {getStatusLabel(ad.status)}
                     </span>
+
+                    <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${getPaymentStatusClasses(
+                            ad.paymentStatus
+                        )}`}
+                    >
+                        Payment: {getPaymentStatusLabel(ad.paymentStatus)}
+                    </span>
+
+                    {hasPendingRevision(ad) && (
+                        <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">
+                            Revision Pending
+                        </span>
+                    )}
                 </div>
 
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-600">
@@ -1147,7 +1214,11 @@ function AdvertisementDetails({
                 />
                 <Detail
                     label="Payment Status"
-                    value={ad.paymentStatus}
+                    value={getPaymentStatusLabel(ad.paymentStatus)}
+                />
+                <Detail
+                    label="Pending Revision"
+                    value={hasPendingRevision(ad) ? "Yes" : "No"}
                 />
                 <Detail
                     label="Placement"
