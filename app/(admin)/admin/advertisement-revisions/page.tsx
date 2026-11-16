@@ -143,6 +143,66 @@ function DetailField({
     );
 }
 
+
+function WebsiteLinkField({
+    label,
+    value,
+}: {
+    label: string;
+    value: unknown;
+}) {
+    const url = getString(value).trim();
+
+    let safeUrl: string | null = null;
+
+    if (url && url.length <= 2048) {
+        try {
+            const parsedUrl = new URL(url);
+
+            if (
+                parsedUrl.protocol === "https:" &&
+                parsedUrl.hostname &&
+                !parsedUrl.username &&
+                !parsedUrl.password
+            ) {
+                safeUrl = parsedUrl.toString();
+            }
+        } catch {
+            // Display invalid URLs as plain text, never as clickable links.
+        }
+    }
+
+    return (
+        <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                {label}
+            </p>
+
+            {!url ? (
+                <p className="mt-1 text-sm text-slate-500">
+                    No website link provided
+                </p>
+            ) : safeUrl ? (
+                <a
+                    href={safeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-block break-all text-sm font-medium text-blue-600 underline hover:text-blue-800"
+                >
+                    {url}
+                </a>
+            ) : (
+                <p className="mt-1 break-all text-sm text-amber-600">
+                    {url}
+                    <span className="ml-2 text-xs">
+                        (Invalid or unsupported URL — not clickable)
+                    </span>
+                </p>
+            )}
+        </div>
+    );
+}
+
 function ImagePreview({
     src,
     label,
@@ -871,6 +931,11 @@ export default function AdvertisementRevisionsPage() {
                                                 value={currentDescription}
                                             />
 
+                                            <WebsiteLinkField
+                                                label="Website / Portfolio Link"
+                                                value={current?.websiteUrl}
+                                            />
+
                                             {selected.advertiserType === "business" && (
                                                 <>
                                                     <DetailField
@@ -910,6 +975,18 @@ export default function AdvertisementRevisionsPage() {
                                             <DetailField
                                                 label="Description"
                                                 value={selected.description}
+                                            />
+
+                                            <WebsiteLinkField
+                                                label="Proposed Website / Portfolio Link"
+                                                value={
+                                                    Object.prototype.hasOwnProperty.call(
+                                                        proposed ?? {},
+                                                        "websiteUrl"
+                                                    )
+                                                        ? proposed?.websiteUrl
+                                                        : current?.websiteUrl
+                                                }
                                             />
 
                                             {selected.advertiserType === "business" && (
