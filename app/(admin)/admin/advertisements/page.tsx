@@ -47,6 +47,7 @@ type Advertisement = {
     skillMemberId?: string;
     businessName?: string;
     businessDescription?: string;
+    websiteUrl?: string | null;
     title: string;
     description: string;
     imageUrl?: string | null;
@@ -205,6 +206,29 @@ function getPaymentStatusClasses(status?: string): string {
     };
 
     return classes[status || "unpaid"] ?? "bg-gray-100 text-gray-700";
+}
+
+function getValidWebsiteUrl(value?: string | null): string | null {
+    if (typeof value !== "string" || !value.trim()) {
+        return null;
+    }
+
+    try {
+        const url = new URL(value.trim());
+
+        if (
+            url.protocol !== "https:" ||
+            !url.hostname ||
+            url.username ||
+            url.password
+        ) {
+            return null;
+        }
+
+        return url.toString();
+    } catch {
+        return null;
+    }
 }
 
 function hasPendingRevision(ad: Advertisement): boolean {
@@ -588,32 +612,32 @@ export default function AdminAdvertisementsPage() {
         value: StatusFilter;
         count: number;
     }[] = [
-        {
-            label: "Pending Review",
-            value: "pending_review",
-            count: counts.pending_review,
-        },
-        {
-            label: "Approved",
-            value: "approved",
-            count: counts.approved,
-        },
-        {
-            label: "Active",
-            value: "active",
-            count: counts.active,
-        },
-        {
-            label: "Rejected",
-            value: "rejected",
-            count: counts.rejected,
-        },
-        {
-            label: "All",
-            value: "all",
-            count: counts.all,
-        },
-    ];
+            {
+                label: "Pending Review",
+                value: "pending_review",
+                count: counts.pending_review,
+            },
+            {
+                label: "Approved",
+                value: "approved",
+                count: counts.approved,
+            },
+            {
+                label: "Active",
+                value: "active",
+                count: counts.active,
+            },
+            {
+                label: "Rejected",
+                value: "rejected",
+                count: counts.rejected,
+            },
+            {
+                label: "All",
+                value: "all",
+                count: counts.all,
+            },
+        ];
 
     return (
         <div className="space-y-6 p-4 sm:p-6">
@@ -714,11 +738,10 @@ export default function AdminAdvertisementsPage() {
                                 key={tab.value}
                                 type="button"
                                 onClick={() => setStatusFilter(tab.value)}
-                                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-                                    statusFilter === tab.value
-                                        ? "bg-gray-900 text-white"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                }`}
+                                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${statusFilter === tab.value
+                                    ? "bg-gray-900 text-white"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
                             >
                                 {tab.label}
                                 <span className="ml-2 opacity-70">
@@ -1241,6 +1264,29 @@ function AdvertisementDetails({
                     value={formatDate(ad.endAt)}
                 />
             </div>
+
+            {(() => {
+                const websiteUrl = getValidWebsiteUrl(ad.websiteUrl);
+
+                if (!websiteUrl) return null;
+
+                return (
+                    <div>
+                        <h4 className="text-sm font-semibold text-gray-900">
+                            Website / Portfolio
+                        </h4>
+
+                        <a
+                            href={websiteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-flex items-center gap-1 break-all text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                            {websiteUrl}
+                        </a>
+                    </div>
+                );
+            })()}
 
             {ad.rejectionReason && (
                 <div className="rounded-lg border border-red-200 bg-red-50 p-4">
