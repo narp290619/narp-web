@@ -9,6 +9,7 @@ import {
 import {
     collection,
     doc,
+    getDoc,
     getDocs,
     orderBy,
     query,
@@ -227,68 +228,101 @@ export default function AdminReportsPage() {
      * =====================================================
      */
 
-    const loadReports =
-        async (
-            showRefresh = false
-        ) => {
-
-            try {
-
-                if (showRefresh) {
-                    setRefreshing(true);
-                } else {
-                    setLoading(true);
-                }
-
-                setError(null);
-
-                const reportsQuery =
-                    query(
-                        collection(
-                            db,
-                            "AdminReports"
-                        ),
-                        orderBy(
-                            "createdAt",
-                            "desc"
-                        )
-                    );
-
-                const snapshot =
-                    await getDocs(
-                        reportsQuery
-                    );
-
-                const loadedReports =
-                    snapshot.docs.map(
-                        (reportDoc) => ({
-                            id: reportDoc.id,
-                            ...reportDoc.data(),
-                        }) as AdminReport
-                    );
-
-                setReports(
-                    loadedReports
-                );
-
-            } catch (err) {
-
-                console.error(
-                    "Failed to load admin reports:",
-                    err
-                );
-
-                setError(
-                    "Unable to load reports. Please try again."
-                );
-
-            } finally {
-
-                setLoading(false);
-                setRefreshing(false);
-
+    const loadReports = async (showRefresh = false) => {
+        try {
+            if (showRefresh) {
+                setRefreshing(true);
+            } else {
+                setLoading(true);
             }
-        };
+
+            setError(null);
+
+            const reportsQuery = query(
+                collection(db, "AdminReports"),
+                orderBy("createdAt", "desc")
+            );
+
+            const snapshot = await getDocs(reportsQuery);
+
+            const rawReports = snapshot.docs.map((reportDoc) => ({
+                id: reportDoc.id,
+                ...reportDoc.data(),
+            }) as AdminReport);
+
+            // Collect unique user IDs from the reports.
+            const userIds = Array.from(
+                new Set(
+                    rawReports.flatMap((report) =>
+                        [
+                            report.reportedUserId,
+                            report.reporterUserId,
+                        ].filter((id): id is string => Boolean(id))
+                    )
+                )
+            );
+
+            // Read only the approved admin-facing profile projections.
+            const profileResults = await Promise.all(
+                userIds.map(async (userId) => {
+                    const profileDoc = await getDoc(
+                        doc(db, "AdminUserProfiles", userId)
+                    );
+
+                    return [
+                        userId,
+                        profileDoc.exists() ? profileDoc.data() : null,
+                    ] as const;
+                })
+            );
+
+            const profilesById = new Map(profileResults);
+
+            const loadedReports = rawReports.map((report) => {
+                const reportedProfile = report.reportedUserId
+                    ? profilesById.get(report.reportedUserId)
+                    : null;
+
+                const reporterProfile = report.reporterUserId
+                    ? profilesById.get(report.reporterUserId)
+                    : null;
+
+                return {
+                    ...report,
+
+                    reportedUserName:
+                        reportedProfile?.name ||
+                        report.reportedUserName,
+
+                    reportedUserPhoto:
+                        reportedProfile?.profileImageUrl ||
+                        report.reportedUserPhoto,
+
+                    reportedUserBanned:
+                        typeof reportedProfile?.banned === "boolean"
+                            ? reportedProfile.banned
+                            : report.reportedUserBanned,
+
+                    reporterUserName:
+                        reporterProfile?.name ||
+                        report.reporterUserName,
+                };
+            });
+
+            setReports(loadedReports);
+
+        } catch (err) {
+            console.error("Failed to load admin reports:", err);
+
+            setError(
+                "Unable to load reports. Please try again."
+            );
+
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    };
 
     useEffect(() => {
 
@@ -384,10 +418,8 @@ export default function AdminReportsPage() {
                     }
 
                     if (
-                        userStatusFilter ===
-                        "active" &&
-                        report.reportedUserBanned ===
-                        true
+                        userStatusFilter === "active" &&
+                        report.reportedUserBanned !== false
                     ) {
                         return false;
                     }
@@ -984,8 +1016,8 @@ export default function AdminReportsPage() {
 
                             <RefreshCw
                                 className={`h-4 w-4 ${refreshing
-                                        ? "animate-spin"
-                                        : ""
+                                    ? "animate-spin"
+                                    : ""
                                     }`}
                             />
 
@@ -1648,26 +1680,20 @@ export default function AdminReportsPage() {
 
                                                 <td className="px-6 py-4">
 
-                                                    {report.reportedUserBanned ? (
-
+                                                    {report.reportedUserBanned === true ? (
                                                         <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-600/20">
-
                                                             <Ban className="h-3.5 w-3.5" />
-
                                                             Banned
-
                                                         </span>
-
-                                                    ) : (
-
+                                                    ) : report.reportedUserBanned === false ? (
                                                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
-
                                                             <CheckCircle2 className="h-3.5 w-3.5" />
-
                                                             Active
-
                                                         </span>
-
+                                                    ) : (
+                                                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                                            Unknown
+                                                        </span>
                                                     )}
 
                                                 </td>
