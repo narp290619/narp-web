@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -36,44 +35,24 @@ import {
 import { db } from "@/lib/firebase";
 import { setUserBanStatus } from "@/lib/services/admin/adminModerationService";
 
-/*
- * =====================================================
- * TYPES
- * =====================================================
- */
-
 type AdminReport = {
     id: string;
-
     createdAt?: Timestamp | null;
-
     message?: string;
     reason?: string;
-
     reportedUserBanned?: boolean;
     reportedUserId?: string;
     reportedUserName?: string;
     reportedUserPhoto?: string;
-
     reporterUserId?: string;
     reporterUserName?: string;
-
     reviewedAt?: Timestamp | null;
     reviewedBy?: string;
-
     status?: string;
 };
 
-/*
- * =====================================================
- * HELPERS
- * =====================================================
- */
-
 function formatDate(timestamp?: Timestamp | null) {
-    if (!timestamp) {
-        return "—";
-    }
+    if (!timestamp) return "—";
 
     try {
         return timestamp.toDate().toLocaleString("en-SG", {
@@ -89,9 +68,7 @@ function formatDate(timestamp?: Timestamp | null) {
 }
 
 function formatStatus(status?: string) {
-    if (!status) {
-        return "Unknown";
-    }
+    if (!status) return "Unknown";
 
     return status
         .replace(/_/g, " ")
@@ -102,26 +79,16 @@ function getStatusClasses(status?: string) {
     switch (status?.toLowerCase()) {
         case "pending":
             return "bg-amber-50 text-amber-700 ring-amber-600/20";
-
         case "reviewed":
             return "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
-
         case "ignored":
             return "bg-slate-100 text-slate-600 ring-slate-500/20";
-
         case "rejected":
             return "bg-red-50 text-red-700 ring-red-600/20";
-
         default:
             return "bg-slate-100 text-slate-600 ring-slate-500/20";
     }
 }
-
-/*
- * =====================================================
- * PAGE
- * =====================================================
- */
 
 export default function AdminReportsPage() {
     const [reports, setReports] = useState<AdminReport[]>([]);
@@ -140,6 +107,8 @@ export default function AdminReportsPage() {
 
     const [selectedReport, setSelectedReport] =
         useState<AdminReport | null>(null);
+
+    const [moderationNote, setModerationNote] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -173,7 +142,6 @@ export default function AdminReportsPage() {
                 ...reportDoc.data(),
             }) as AdminReport);
 
-            // Collect unique user IDs from the reports.
             const userIds = Array.from(
                 new Set(
                     rawReports.flatMap((report) =>
@@ -234,11 +202,8 @@ export default function AdminReportsPage() {
 
             setReports(loadedReports);
 
-            // Keep the open detail panel synchronized with refreshed data.
             setSelectedReport((current) => {
-                if (!current) {
-                    return null;
-                }
+                if (!current) return null;
 
                 return (
                     loadedReports.find(
@@ -286,7 +251,6 @@ export default function AdminReportsPage() {
         const normalizedSearch = search.trim().toLowerCase();
 
         return reports.filter((report) => {
-            // STATUS
             if (
                 statusFilter !== "all" &&
                 report.status?.toLowerCase() !== statusFilter
@@ -294,7 +258,6 @@ export default function AdminReportsPage() {
                 return false;
             }
 
-            // REASON
             if (
                 reasonFilter !== "all" &&
                 report.reason !== reasonFilter
@@ -302,7 +265,6 @@ export default function AdminReportsPage() {
                 return false;
             }
 
-            // USER STATUS
             if (
                 userStatusFilter === "banned" &&
                 report.reportedUserBanned !== true
@@ -317,7 +279,6 @@ export default function AdminReportsPage() {
                 return false;
             }
 
-            // SEARCH
             if (normalizedSearch) {
                 const searchableText = [
                     report.reporterUserName,
@@ -408,12 +369,11 @@ export default function AdminReportsPage() {
      */
 
     const closeReport = () => {
-        if (actionLoading) {
-            return;
-        }
+        if (actionLoading) return;
 
         setSelectedReport(null);
         setActionError(null);
+        setModerationNote("");
     };
 
     /*
@@ -431,18 +391,33 @@ export default function AdminReportsPage() {
             return;
         }
 
+        const note = moderationNote.trim();
+
+        if (!note) {
+            setActionError(
+                "Please enter a moderation note before proceeding."
+            );
+            return;
+        }
+
+        if (note.length > 1000) {
+            setActionError(
+                "Moderation note cannot exceed 1000 characters."
+            );
+            return;
+        }
+
         try {
             setActionLoading(true);
             setActionError(null);
 
-            // Ban/unban must go through the trusted Cloud Function.
             await setUserBanStatus(
                 report.reportedUserId,
                 banned,
-                report.id
+                report.id,
+                note
             );
 
-            // Update the report list immediately.
             setReports((currentReports) =>
                 currentReports.map((item) =>
                     item.reportedUserId === report.reportedUserId
@@ -458,7 +433,6 @@ export default function AdminReportsPage() {
                 )
             );
 
-            // Update the open report detail panel immediately.
             setSelectedReport((current) =>
                 current && current.id === report.id
                     ? {
@@ -469,7 +443,8 @@ export default function AdminReportsPage() {
                     : current
             );
 
-            // Reload authoritative report and profile projection data.
+            setModerationNote("");
+
             await loadReports(true);
         } catch (err) {
             console.error("BAN ACTION ERROR:", err);
@@ -513,9 +488,7 @@ export default function AdminReportsPage() {
             "Are you sure you want to ignore this report?"
         );
 
-        if (!confirmed) {
-            return;
-        }
+        if (!confirmed) return;
 
         try {
             setActionLoading(true);
@@ -571,16 +544,13 @@ export default function AdminReportsPage() {
 
     return (
         <div className="min-h-[calc(100vh-7rem)] bg-slate-50">
-
             {/* HEADER */}
 
             <div className="border-b border-slate-200 bg-white">
                 <div className="px-6 py-6 lg:px-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
                         <div>
                             <div className="flex items-center gap-3">
-
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
                                     <AlertTriangle className="h-5 w-5" />
                                 </div>
@@ -594,7 +564,6 @@ export default function AdminReportsPage() {
                                         Review reports submitted by NARP users.
                                     </p>
                                 </div>
-
                             </div>
                         </div>
 
@@ -611,12 +580,10 @@ export default function AdminReportsPage() {
                             "
                         >
                             <RefreshCw
-                                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""
-                                    }`}
+                                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                             />
                             Refresh
                         </button>
-
                     </div>
                 </div>
             </div>
@@ -624,14 +591,10 @@ export default function AdminReportsPage() {
             {/* CONTENT */}
 
             <div className="px-6 py-6 lg:px-8">
-
-                {/* ERROR */}
-
                 {error && (
                     <div className="mb-6 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-3">
                         <div className="flex items-center gap-3">
                             <FileWarning className="h-5 w-5 text-red-600" />
-
                             <p className="text-sm font-medium text-red-700">
                                 {error}
                             </p>
@@ -650,120 +613,68 @@ export default function AdminReportsPage() {
                 {/* SUMMARY CARDS */}
 
                 <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                    {[
+                        {
+                            label: "Total Reports",
+                            value: totalReports,
+                            icon: <FileWarning className="h-5 w-5" />,
+                            iconClass: "bg-blue-50 text-blue-600",
+                        },
+                        {
+                            label: "Pending",
+                            value: pendingReports,
+                            icon: <Clock3 className="h-5 w-5" />,
+                            iconClass: "bg-amber-50 text-amber-600",
+                        },
+                        {
+                            label: "Reviewed",
+                            value: reviewedReports,
+                            icon: <CheckCircle2 className="h-5 w-5" />,
+                            iconClass: "bg-emerald-50 text-emerald-600",
+                        },
+                        {
+                            label: "Ignored",
+                            value: ignoredReports,
+                            icon: <ShieldAlert className="h-5 w-5" />,
+                            iconClass: "bg-slate-100 text-slate-500",
+                        },
+                        {
+                            label: "Users Banned",
+                            value: bannedUsers,
+                            icon: <Ban className="h-5 w-5" />,
+                            iconClass: "bg-red-50 text-red-600",
+                        },
+                    ].map((item) => (
+                        <div
+                            key={item.label}
+                            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                        >
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-slate-500">
+                                        {item.label}
+                                    </p>
 
-                    {/* TOTAL */}
+                                    <p className="mt-2 text-3xl font-bold text-slate-900">
+                                        {item.value}
+                                    </p>
+                                </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Total Reports
-                                </p>
-
-                                <p className="mt-2 text-3xl font-bold text-slate-900">
-                                    {totalReports}
-                                </p>
-                            </div>
-
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                                <FileWarning className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* PENDING */}
-
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Pending
-                                </p>
-
-                                <p className="mt-2 text-3xl font-bold text-slate-900">
-                                    {pendingReports}
-                                </p>
-                            </div>
-
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                                <Clock3 className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* REVIEWED */}
-
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Reviewed
-                                </p>
-
-                                <p className="mt-2 text-3xl font-bold text-slate-900">
-                                    {reviewedReports}
-                                </p>
-                            </div>
-
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                                <CheckCircle2 className="h-5 w-5" />
+                                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.iconClass}`}>
+                                    {item.icon}
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    {/* IGNORED */}
-
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Ignored
-                                </p>
-
-                                <p className="mt-2 text-3xl font-bold text-slate-900">
-                                    {ignoredReports}
-                                </p>
-                            </div>
-
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
-                                <ShieldAlert className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* BANNED */}
-
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">
-                                    Users Banned
-                                </p>
-
-                                <p className="mt-2 text-3xl font-bold text-slate-900">
-                                    {bannedUsers}
-                                </p>
-                            </div>
-
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
-                                <Ban className="h-5 w-5" />
-                            </div>
-                        </div>
-                    </div>
-
+                    ))}
                 </div>
 
                 {/* TABLE */}
 
                 <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
                     {/* FILTER BAR */}
 
                     <div className="border-b border-slate-200 p-4">
                         <div className="grid gap-3 lg:grid-cols-4">
-
-                            {/* SEARCH */}
-
                             <div className="relative lg:col-span-1">
                                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
@@ -783,8 +694,6 @@ export default function AdminReportsPage() {
                                 />
                             </div>
 
-                            {/* STATUS */}
-
                             <select
                                 value={statusFilter}
                                 onChange={(event) =>
@@ -802,8 +711,6 @@ export default function AdminReportsPage() {
                                 <option value="ignored">Ignored</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-
-                            {/* REASON */}
 
                             <select
                                 value={reasonFilter}
@@ -825,8 +732,6 @@ export default function AdminReportsPage() {
                                 ))}
                             </select>
 
-                            {/* USER STATUS */}
-
                             <select
                                 value={userStatusFilter}
                                 onChange={(event) =>
@@ -842,7 +747,6 @@ export default function AdminReportsPage() {
                                 <option value="active">Active Users</option>
                                 <option value="banned">Banned Users</option>
                             </select>
-
                         </div>
 
                         <div className="mt-3 flex items-center justify-between">
@@ -859,38 +763,34 @@ export default function AdminReportsPage() {
                                 statusFilter !== "all" ||
                                 reasonFilter !== "all" ||
                                 userStatusFilter !== "all") && (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSearch("");
-                                            setStatusFilter("all");
-                                            setReasonFilter("all");
-                                            setUserStatusFilter("all");
-                                        }}
-                                        className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-                                    >
-                                        Clear filters
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearch("");
+                                        setStatusFilter("all");
+                                        setReasonFilter("all");
+                                        setUserStatusFilter("all");
+                                    }}
+                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* LOADING */}
+                    {/* LOADING / EMPTY / TABLE */}
 
                     {loading ? (
                         <div className="flex min-h-[350px] items-center justify-center">
                             <div className="text-center">
                                 <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-
                                 <p className="mt-4 text-sm font-medium text-slate-500">
                                     Loading reports...
                                 </p>
                             </div>
                         </div>
                     ) : paginatedReports.length === 0 ? (
-
-                        /* EMPTY */
-
                         <div className="flex min-h-[350px] flex-col items-center justify-center px-6 text-center">
                             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                                 <ShieldAlert className="h-7 w-7" />
@@ -905,36 +805,25 @@ export default function AdminReportsPage() {
                             </p>
                         </div>
                     ) : (
-
-                        /* TABLE */
-
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-[1000px]">
                                 <thead className="bg-slate-50">
                                     <tr className="border-b border-slate-200">
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            Reporter
-                                        </th>
-
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            Reported User
-                                        </th>
-
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            Reason
-                                        </th>
-
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            Status
-                                        </th>
-
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            User
-                                        </th>
-
-                                        <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                            Submitted
-                                        </th>
+                                        {[
+                                            "Reporter",
+                                            "Reported User",
+                                            "Reason",
+                                            "Status",
+                                            "User",
+                                            "Submitted",
+                                        ].map((heading) => (
+                                            <th
+                                                key={heading}
+                                                className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500"
+                                            >
+                                                {heading}
+                                            </th>
+                                        ))}
 
                                         <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
                                             Action
@@ -948,33 +837,22 @@ export default function AdminReportsPage() {
                                             key={report.id}
                                             className="transition hover:bg-slate-50"
                                         >
-                                            {/* REPORTER */}
-
                                             <td className="px-6 py-4">
-                                                <div>
-                                                    <p className="text-sm font-semibold text-slate-900">
-                                                        {report.reporterUserName ||
-                                                            "Unknown user"}
-                                                    </p>
+                                                <p className="text-sm font-semibold text-slate-900">
+                                                    {report.reporterUserName || "Unknown user"}
+                                                </p>
 
-                                                    <p className="mt-1 max-w-[160px] truncate text-xs text-slate-400">
-                                                        {report.reporterUserId ||
-                                                            "No user ID"}
-                                                    </p>
-                                                </div>
+                                                <p className="mt-1 max-w-[160px] truncate text-xs text-slate-400">
+                                                    {report.reporterUserId || "No user ID"}
+                                                </p>
                                             </td>
-
-                                            {/* REPORTED USER */}
 
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     {report.reportedUserPhoto ? (
                                                         <img
                                                             src={report.reportedUserPhoto}
-                                                            alt={
-                                                                report.reportedUserName ||
-                                                                "Reported user"
-                                                            }
+                                                            alt={report.reportedUserName || "Reported user"}
                                                             className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100"
                                                         />
                                                     ) : (
@@ -985,19 +863,15 @@ export default function AdminReportsPage() {
 
                                                     <div>
                                                         <p className="text-sm font-semibold text-slate-900">
-                                                            {report.reportedUserName ||
-                                                                "Unknown user"}
+                                                            {report.reportedUserName || "Unknown user"}
                                                         </p>
 
                                                         <p className="mt-1 max-w-[160px] truncate text-xs text-slate-400">
-                                                            {report.reportedUserId ||
-                                                                "No user ID"}
+                                                            {report.reportedUserId || "No user ID"}
                                                         </p>
                                                     </div>
                                                 </div>
                                             </td>
-
-                                            {/* REASON */}
 
                                             <td className="px-6 py-4">
                                                 <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
@@ -1005,19 +879,13 @@ export default function AdminReportsPage() {
                                                 </span>
                                             </td>
 
-                                            {/* STATUS */}
-
                                             <td className="px-6 py-4">
                                                 <span
-                                                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(
-                                                        report.status
-                                                    )}`}
+                                                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${getStatusClasses(report.status)}`}
                                                 >
                                                     {formatStatus(report.status)}
                                                 </span>
                                             </td>
-
-                                            {/* USER STATUS */}
 
                                             <td className="px-6 py-4">
                                                 {report.reportedUserBanned === true ? (
@@ -1037,21 +905,18 @@ export default function AdminReportsPage() {
                                                 )}
                                             </td>
 
-                                            {/* DATE */}
-
                                             <td className="px-6 py-4">
                                                 <p className="whitespace-nowrap text-sm text-slate-600">
                                                     {formatDate(report.createdAt)}
                                                 </p>
                                             </td>
 
-                                            {/* ACTION */}
-
                                             <td className="px-6 py-4 text-right">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         setActionError(null);
+                                                        setModerationNote("");
                                                         setSelectedReport(report);
                                                     }}
                                                     className="
@@ -1134,7 +999,6 @@ export default function AdminReportsPage() {
 
             {selectedReport && (
                 <div className="fixed inset-0 z-[100]">
-
                     {/* BACKDROP */}
 
                     <button
@@ -1147,7 +1011,6 @@ export default function AdminReportsPage() {
                     {/* PANEL */}
 
                     <div className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-white shadow-2xl">
-
                         {/* PANEL HEADER */}
 
                         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
@@ -1179,9 +1042,6 @@ export default function AdminReportsPage() {
                         {/* PANEL CONTENT */}
 
                         <div className="flex-1 overflow-y-auto px-6 py-6">
-
-                            {/* ACTION ERROR */}
-
                             {actionError && (
                                 <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
                                     <div className="flex items-start gap-3">
@@ -1205,10 +1065,7 @@ export default function AdminReportsPage() {
                                     {selectedReport.reportedUserPhoto ? (
                                         <img
                                             src={selectedReport.reportedUserPhoto}
-                                            alt={
-                                                selectedReport.reportedUserName ||
-                                                "Reported user"
-                                            }
+                                            alt={selectedReport.reportedUserName || "Reported user"}
                                             className="h-16 w-16 rounded-full object-cover ring-4 ring-white"
                                         />
                                     ) : (
@@ -1220,8 +1077,7 @@ export default function AdminReportsPage() {
                                     <div className="min-w-0 flex-1">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <h3 className="truncate text-base font-bold text-slate-900">
-                                                {selectedReport.reportedUserName ||
-                                                    "Unknown user"}
+                                                {selectedReport.reportedUserName || "Unknown user"}
                                             </h3>
 
                                             {banStatus === "Banned" ? (
@@ -1241,8 +1097,7 @@ export default function AdminReportsPage() {
                                         </div>
 
                                         <p className="mt-1 break-all text-xs text-slate-400">
-                                            {selectedReport.reportedUserId ||
-                                                "No user ID"}
+                                            {selectedReport.reportedUserId || "No user ID"}
                                         </p>
                                     </div>
                                 </div>
@@ -1257,13 +1112,11 @@ export default function AdminReportsPage() {
 
                                 <div className="mt-2 rounded-xl border border-slate-200 px-4 py-3">
                                     <p className="text-sm font-semibold text-slate-900">
-                                        {selectedReport.reporterUserName ||
-                                            "Unknown user"}
+                                        {selectedReport.reporterUserName || "Unknown user"}
                                     </p>
 
                                     <p className="mt-1 break-all text-xs text-slate-400">
-                                        {selectedReport.reporterUserId ||
-                                            "No user ID"}
+                                        {selectedReport.reporterUserId || "No user ID"}
                                     </p>
                                 </div>
                             </div>
@@ -1277,13 +1130,12 @@ export default function AdminReportsPage() {
 
                                 <div className="mt-2">
                                     <span className="inline-flex rounded-lg bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700">
-                                        {selectedReport.reason ||
-                                            "Not specified"}
+                                        {selectedReport.reason || "Not specified"}
                                     </span>
                                 </div>
                             </div>
 
-                            {/* MESSAGE */}
+                            {/* ORIGINAL REPORT MESSAGE */}
 
                             <div className="mt-5">
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -1303,6 +1155,48 @@ export default function AdminReportsPage() {
                                 </div>
                             </div>
 
+                            {/* MODERATION NOTE */}
+
+                            <div className="mt-5">
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="moderationNote"
+                                        className="text-xs font-semibold uppercase tracking-wider text-slate-400"
+                                    >
+                                        Moderation Note <span className="text-red-500">*</span>
+                                    </label>
+
+                                    <span className="text-xs text-slate-400">
+                                        {moderationNote.length}/1000
+                                    </span>
+                                </div>
+
+                                <textarea
+                                    id="moderationNote"
+                                    value={moderationNote}
+                                    onChange={(event) => {
+                                        setModerationNote(event.target.value);
+                                        setActionError(null);
+                                    }}
+                                    maxLength={1000}
+                                    rows={4}
+                                    required
+                                    disabled={actionLoading}
+                                    placeholder="Explain why you are banning or unbanning this user..."
+                                    className="
+                                        mt-2 w-full rounded-xl border border-slate-200
+                                        bg-white px-4 py-3 text-sm text-slate-700
+                                        outline-none transition placeholder:text-slate-400
+                                        focus:border-blue-500 focus:ring-2 focus:ring-blue-100
+                                        disabled:cursor-not-allowed disabled:bg-slate-50
+                                    "
+                                />
+
+                                <p className="mt-1 text-xs text-slate-400">
+                                    Required before banning or removing a ban. This note will be saved in the moderation audit log.
+                                </p>
+                            </div>
+
                             {/* STATUS */}
 
                             <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -1313,9 +1207,7 @@ export default function AdminReportsPage() {
 
                                     <div className="mt-2">
                                         <span
-                                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ring-inset ${getStatusClasses(
-                                                selectedReport.status
-                                            )}`}
+                                            className={`inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ring-inset ${getStatusClasses(selectedReport.status)}`}
                                         >
                                             {formatStatus(selectedReport.status)}
                                         </span>
@@ -1378,8 +1270,7 @@ export default function AdminReportsPage() {
                                     </p>
 
                                     <p className="mt-2 break-all text-sm text-slate-700">
-                                        {selectedReport.reviewedBy ||
-                                            "Not reviewed yet"}
+                                        {selectedReport.reviewedBy || "Not reviewed yet"}
                                     </p>
                                 </div>
                             </div>
@@ -1401,14 +1292,12 @@ export default function AdminReportsPage() {
 
                         <div className="border-t border-slate-200 bg-white px-6 py-4">
                             <div className="grid gap-2 sm:grid-cols-2">
-
-                                {/* BAN / REMOVE BAN */}
-
                                 <button
                                     type="button"
                                     disabled={
                                         actionLoading ||
-                                        !selectedReport.reportedUserId
+                                        !selectedReport.reportedUserId ||
+                                        !moderationNote.trim()
                                     }
                                     onClick={() =>
                                         selectedReport.reportedUserBanned === true
@@ -1441,14 +1330,11 @@ export default function AdminReportsPage() {
                                             : "Ban User"}
                                 </button>
 
-                                {/* IGNORE */}
-
                                 <button
                                     type="button"
                                     disabled={
                                         actionLoading ||
-                                        selectedReport.status?.toLowerCase() ===
-                                        "ignored"
+                                        selectedReport.status?.toLowerCase() === "ignored"
                                     }
                                     onClick={() => ignoreReport(selectedReport)}
                                     className="
@@ -1461,8 +1347,7 @@ export default function AdminReportsPage() {
                                 >
                                     <ShieldAlert className="h-4 w-4" />
 
-                                    {selectedReport.status?.toLowerCase() ===
-                                        "ignored"
+                                    {selectedReport.status?.toLowerCase() === "ignored"
                                         ? "Report Ignored"
                                         : "Ignore Report"}
                                 </button>
