@@ -472,17 +472,22 @@ export default function AdminReportsPage() {
             // Reload authoritative report and profile projection data.
             await loadReports(true);
         } catch (err) {
+            console.error("BAN ACTION ERROR:", err);
+
+            if (err instanceof Error) {
+                console.error("ERROR NAME:", err.name);
+                console.error("ERROR MESSAGE:", err.message);
+            }
+
             console.error(
-                banned
-                    ? "Failed to ban user:"
-                    : "Failed to remove user ban:",
-                err
+                "ERROR CODE:",
+                (err as { code?: string }).code
             );
 
             setActionError(
-                banned
-                    ? "Failed to ban the user. Please try again."
-                    : "Failed to remove the user's ban. Please try again."
+                err instanceof Error
+                    ? err.message
+                    : "Failed to update user ban status."
             );
         } finally {
             setActionLoading(false);
@@ -606,9 +611,8 @@ export default function AdminReportsPage() {
                             "
                         >
                             <RefreshCw
-                                className={`h-4 w-4 ${
-                                    refreshing ? "animate-spin" : ""
-                                }`}
+                                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""
+                                    }`}
                             />
                             Refresh
                         </button>
@@ -855,19 +859,19 @@ export default function AdminReportsPage() {
                                 statusFilter !== "all" ||
                                 reasonFilter !== "all" ||
                                 userStatusFilter !== "all") && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSearch("");
-                                        setStatusFilter("all");
-                                        setReasonFilter("all");
-                                        setUserStatusFilter("all");
-                                    }}
-                                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
-                                >
-                                    Clear filters
-                                </button>
-                            )}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSearch("");
+                                            setStatusFilter("all");
+                                            setReasonFilter("all");
+                                            setUserStatusFilter("all");
+                                        }}
+                                        className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                                    >
+                                        Clear filters
+                                    </button>
+                                )}
                         </div>
                     </div>
 
@@ -1416,10 +1420,9 @@ export default function AdminReportsPage() {
                                         rounded-xl px-4 py-3 text-sm font-semibold
                                         transition disabled:cursor-not-allowed
                                         disabled:opacity-50
-                                        ${
-                                            selectedReport.reportedUserBanned === true
-                                                ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                                                : "bg-red-600 text-white hover:bg-red-700"
+                                        ${selectedReport.reportedUserBanned === true
+                                            ? "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                                            : "bg-red-600 text-white hover:bg-red-700"
                                         }
                                     `}
                                 >
@@ -1445,7 +1448,7 @@ export default function AdminReportsPage() {
                                     disabled={
                                         actionLoading ||
                                         selectedReport.status?.toLowerCase() ===
-                                            "ignored"
+                                        "ignored"
                                     }
                                     onClick={() => ignoreReport(selectedReport)}
                                     className="
@@ -1459,7 +1462,7 @@ export default function AdminReportsPage() {
                                     <ShieldAlert className="h-4 w-4" />
 
                                     {selectedReport.status?.toLowerCase() ===
-                                    "ignored"
+                                        "ignored"
                                         ? "Report Ignored"
                                         : "Ignore Report"}
                                 </button>
