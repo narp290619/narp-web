@@ -716,24 +716,23 @@ export default function AdminPaymentDetailPage() {
             setPayment(paymentData);
 
             /*
-             * 2. Client
-             */
+ * 2. Client
+ *
+ * Admins must use AdminUserProfiles.
+ * Full Users documents are private.
+ */
 
             if (paymentData.clientId) {
                 const clientRef = doc(
                     db,
-                    "Users",
+                    "AdminUserProfiles",
                     paymentData.clientId
                 );
 
                 const clientSnapshot =
-                    await getDoc(
-                        clientRef
-                    );
+                    await getDoc(clientRef);
 
-                if (
-                    clientSnapshot.exists()
-                ) {
+                if (clientSnapshot.exists()) {
                     setClient(
                         parseUser(
                             clientSnapshot.id,
@@ -743,6 +742,8 @@ export default function AdminPaymentDetailPage() {
                 } else {
                     setClient(null);
                 }
+            } else {
+                setClient(null);
             }
 
             /*
